@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - GGUF Guide
+# llamatelemetry v0.1.0 - GGUF Guide
 
 Complete guide to GGUF format and quantization for llamatelemetry.
 

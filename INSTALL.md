@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Installation Guide
+# llamatelemetry v0.1.0 - Installation Guide
 
 ## Requirements
 
@@ -12,7 +12,7 @@
 
 ### Method 1: From GitHub (Recommended)
 ```bash
-pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 ### Method 2: Latest Development
@@ -26,7 +26,7 @@ git clone https://github.com/llamatelemetry/llamatelemetry.git
 cd llamatelemetry
 pip install -e .
 ```
-**Note:** llamatelemetry v2.2.0 is not published to PyPI. GitHub is the primary distribution channel.
+**Note:** llamatelemetry v0.1.0 is not published to PyPI. GitHub is the primary distribution channel.
 
 ## Binary Download
 
@@ -38,16 +38,16 @@ import llamatelemetry  # Downloads binaries to ~/.cache/llamatelemetry/
 
 ### Manual Binary Download
 ```bash
-wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v2.2.0/llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v0.1.0/llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz
 mkdir -p ~/.cache/llamatelemetry
-tar -xzf llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llamatelemetry/
+tar -xzf llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llamatelemetry/
 ```
 
 ## Verification
 
 ```python
 import llamatelemetry
-print(f"Version: {llamatelemetry.__version__}")  # 2.2.0
+print(f"Version: {llamatelemetry.__version__}")  # 0.1.0
 
 from llamatelemetry.api import kaggle_t4_dual_config
 config = kaggle_t4_dual_config()
@@ -68,5 +68,5 @@ Check internet connection and try manual download above.
 ```bash
 pip uninstall llamatelemetry
 pip cache purge
-pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```

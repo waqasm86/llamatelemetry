@@ -1,4 +1,4 @@
-# 📑 Index: llamatelemetry v2.2.0 Advanced Kaggle Notebooks
+# 📑 Index: llamatelemetry v0.1.0 Advanced Kaggle Notebooks
 
 **Complementary Educational Tools for Transformers-Explainer**
 
@@ -427,5 +427,5 @@ IQ3_XS vs Q4_K_M: ~5-10% loss,   32% smaller
 
 ---
 
-**Created for llamatelemetry v2.2.0 | Kaggle Dual T4 GPUs**
+**Created for llamatelemetry v0.1.0 | Kaggle Dual T4 GPUs**
 **Based on Notebook 11: GGUF Neural Network Visualization**

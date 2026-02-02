@@ -1,4 +1,4 @@
-# 🚀 New llamatelemetry v2.2.0 Kaggle Notebooks
+# 🚀 New llamatelemetry v0.1.0 Kaggle Notebooks
 
 **Complementary Educational Tools for [Transformers-Explainer](https://poloclub.github.io/transformer-explainer/)**
 
@@ -348,7 +348,7 @@ All notebooks follow this structure:
 # 1. Environment Verification
 !nvidia-smi -L  # Dual T4 check
 
-# 2. Install llamatelemetry v2.2.0
+# 2. Install llamatelemetry v0.1.0
 !pip install git+https://github.com/llamatelemetry/llamatelemetry.git \
     graphistry[all] cudf-cu12 cugraph-cu12
 
@@ -377,7 +377,7 @@ g = graphistry.edges(edges_df).nodes(nodes_df).plot()
 
 ```python
 # Core
-llamatelemetry>=2.2.0
+llamatelemetry>=0.1.0
 huggingface_hub
 
 # Visualization
@@ -505,4 +505,4 @@ MIT License - Free for educational and commercial use
 
 ---
 
-**Created with ❤️ using llamatelemetry v2.2.0, Graphistry, and RAPIDS**
+**Created with ❤️ using llamatelemetry v0.1.0, Graphistry, and RAPIDS**

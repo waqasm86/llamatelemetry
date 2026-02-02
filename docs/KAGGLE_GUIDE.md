@@ -1,9 +1,9 @@
-# llamatelemetry v2.2.0 - Kaggle Guide
+# llamatelemetry v0.1.0 - Kaggle Guide
 
 Complete guide for using llamatelemetry on Kaggle's dual Tesla T4 GPU environment.
 
 **Build Info:**
-- Binary: `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz` (961 MB)
+- Binary: `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz` (961 MB)
 - CUDA 12.5, SM 7.5 (Turing), llama.cpp b7760 (388ce82)
 - Build Date: 2026-01-16
 
@@ -103,7 +103,7 @@ Configure your Kaggle notebook:
 
 ```python
 # Install llamatelemetry
-!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 
 # Verify installation
 import llamatelemetry
@@ -575,10 +575,10 @@ See the complete tutorial series in [`notebooks/`](../notebooks/):
 
 | # | Notebook | Focus |
 |---|----------|-------|
-| 01 | [Quick Start](../notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb) | 5-minute introduction |
-| 03 | [Multi-GPU](../notebooks/03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb) | Dual T4 configuration |
-| 06 | [Split-GPU](../notebooks/06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb) | LLM + RAPIDS |
-| 09 | [Large Models](../notebooks/09-large-models-kaggle-llamatelemetry-v2.2.0.ipynb) | 70B on Kaggle |
+| 01 | [Quick Start](../notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb) | 5-minute introduction |
+| 03 | [Multi-GPU](../notebooks/03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb) | Dual T4 configuration |
+| 06 | [Split-GPU](../notebooks/06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb) | LLM + RAPIDS |
+| 09 | [Large Models](../notebooks/09-large-models-kaggle-llamatelemetry-v0.1.0.ipynb) | 70B on Kaggle |
 
 ---
 

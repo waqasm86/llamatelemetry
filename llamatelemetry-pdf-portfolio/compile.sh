@@ -1,10 +1,10 @@
 #!/bin/bash
-# Compilation script for llamatelemetry v2.2.0 portfolio PDF
+# Compilation script for llamatelemetry v0.1.0 portfolio PDF
 
 set -e  # Exit on error
 
 echo "========================================"
-echo "llamatelemetry v2.2.0 Portfolio PDF Compilation"
+echo "llamatelemetry v0.1.0 Portfolio PDF Compilation"
 echo "========================================"
 echo ""
 
@@ -20,15 +20,15 @@ echo ""
 
 # Compile PDF (3 passes)
 echo "Compiling pass 1/3..."
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex > /dev/null 2>&1
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex > /dev/null 2>&1
 echo "✓ Pass 1 complete"
 
 echo "Compiling pass 2/3..."
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex > /dev/null 2>&1
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex > /dev/null 2>&1
 echo "✓ Pass 2 complete"
 
 echo "Compiling pass 3/3..."
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex > /dev/null 2>&1
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex > /dev/null 2>&1
 echo "✓ Pass 3 complete"
 
 echo ""

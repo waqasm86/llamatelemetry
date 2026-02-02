@@ -186,8 +186,8 @@ Output (to next layer)
 
 **2. Install Dependencies** (Cell 11)
 ```bash
-# Install llamatelemetry v2.2.0
-pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+# Install llamatelemetry v0.1.0
+pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 
 # Install RAPIDS cuGraph (GPU-accelerated graph analytics)
 pip install cugraph-cu12
@@ -608,7 +608,7 @@ File Size: 1.88 GB
 
 ### Technology Stack
 
-**llamatelemetry v2.2.0:**
+**llamatelemetry v0.1.0:**
 - **ServerManager**: Manages llama.cpp server lifecycle
 - **LlamaCppClient**: OpenAI-compatible API client
 - **Purpose**: Provides runtime access to GGUF model

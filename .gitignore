@@ -1,5 +1,5 @@
 # ============================================================================
-# llamatelemetry v2.2.0 .gitignore
+# llamatelemetry v0.1.0 .gitignore
 # ============================================================================
 # Keep repo lightweight - no binaries, large files, or build artifacts
 # ============================================================================
@@ -71,6 +71,7 @@ release-packages/
 # Release tarballs are uploaded to GitHub Releases, not committed
 releases/**/*.tar.gz
 releases/**/*.sha256
+releases/**/extracted/
 dist/
 *.egg-info/
 logs/
@@ -175,7 +176,7 @@ GOOGLE_COLAB_*.md
 # DISTRIBUTION STRATEGY
 # ============================================================================
 # GitHub Repo:     Code only (~2 MB)
-# GitHub Releases: Binary packages (~961 MB for v2.2.0) - download on first import
+# GitHub Releases: Binary packages (large) - download on first import
 # ============================================================================
 
 # llamatelemetry runtime directories (downloaded on first import)

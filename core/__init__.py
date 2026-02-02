@@ -16,12 +16,15 @@ Device = llamatelemetry_cpp.Device
 DeviceProperties = llamatelemetry_cpp.DeviceProperties
 
 
-from .server import InferenceEngine
-from . import core
-
 __all__ = [
-    "InferenceEngine",
-    "core",
+    "Tensor",
+    "DType",
+    "Device",
+    "DeviceProperties",
+    "matmul",
+    "get_device_count",
+    "get_device_properties",
+    "synchronize",
 ]
 
 class Tensor:
@@ -178,13 +181,4 @@ def synchronize(device_id: int = -1):
     Device.synchronize(device_id)
 
 
-__all__ = [
-    'Tensor',
-    'DType',
-    'Device',
-    'DeviceProperties',
-    'matmul',
-    'get_device_count',
-    'get_device_properties',
-    'synchronize',
-]
+# Keep __all__ defined once at module top.

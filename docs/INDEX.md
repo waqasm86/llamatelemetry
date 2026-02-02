@@ -1,8 +1,8 @@
-# llamatelemetry Project - Documentation Index (v2.2.0)
+# llamatelemetry Project - Documentation Index (v0.1.0)
 
 ## Overview
 
-llamatelemetry v2.2.0 is a CUDA 12-first inference stack for **Kaggle dual Tesla T4** (SM 7.5). It is optimized for **small GGUF models (1B-5B)** and a split-GPU workflow (GPU 0: LLM, GPU 1: Graphistry/RAPIDS).
+llamatelemetry v0.1.0 is a CUDA 12-first inference stack for **Kaggle dual Tesla T4** (SM 7.5). It is optimized for **small GGUF models (1B-5B)** and a split-GPU workflow (GPU 0: LLM, GPU 1: Graphistry/RAPIDS).
 
 **Target Platform:** Kaggle notebooks only (GPU T4 x2)
 
@@ -12,7 +12,7 @@ llamatelemetry v2.2.0 is a CUDA 12-first inference stack for **Kaggle dual Tesla
 
 1. Install llamatelemetry:
    ```python
-   !pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+   !pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
    ```
 2. Start inference:
    ```python
@@ -24,7 +24,7 @@ llamatelemetry v2.2.0 is a CUDA 12-first inference stack for **Kaggle dual Tesla
 
 ---
 
-## Core Guides (v2.2.0)
+## Core Guides (v0.1.0)
 
 - `docs/INSTALLATION.md` — Kaggle-only install guide
 - `docs/KAGGLE_GUIDE.md` — full Kaggle workflow
@@ -38,20 +38,20 @@ llamatelemetry v2.2.0 is a CUDA 12-first inference stack for **Kaggle dual Tesla
 ## Notebooks
 
 - `notebooks/README.md` — 13-notebook tutorial path
-- `notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb` → `notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb`
+- `notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb` → `notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb`
 
 ---
 
 ## Release / Distribution
 
-- `docs/GITHUB_RELEASE_GUIDE.md` — GitHub release steps (v2.2.0)
+- `docs/GITHUB_RELEASE_GUIDE.md` — GitHub release steps (v0.1.0)
 - `docs/RELEASE_FILES_OVERVIEW.txt` — binary bundle overview (note: file may be legacy in parts)
 
-**Distribution:** GitHub Releases (primary) + optional HuggingFace mirror. **No PyPI** for v2.2.0.
+**Distribution:** GitHub Releases (primary) + optional HuggingFace mirror. **No PyPI** for v0.1.0.
 
 ---
 
-## Legacy References (pre-2.2.0)
+## Legacy References (pre-0.1.0)
 
 These are kept for historical context:
 

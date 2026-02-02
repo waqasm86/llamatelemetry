@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Quick Start (Kaggle Dual T4)
+# llamatelemetry v0.1.0 - Quick Start (Kaggle Dual T4)
 
 Get running in 5 minutes on Kaggle dual Tesla T4 GPUs.
 
@@ -9,14 +9,14 @@ Get running in 5 minutes on Kaggle dual Tesla T4 GPUs.
 - **CUDA:** 12.x runtime (pre-installed on Kaggle)
 - **Internet:** Enabled
 
-**Note:** llamatelemetry v2.2.0 is distributed via GitHub (not PyPI).
+**Note:** llamatelemetry v0.1.0 is distributed via GitHub (not PyPI).
 
 ---
 
 ## Step 1: Install llamatelemetry
 
 ```bash
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 On first import, llamatelemetry auto-downloads the CUDA binaries (~961 MB) from GitHub Releases.

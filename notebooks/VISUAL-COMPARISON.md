@@ -391,4 +391,4 @@ Takeaway: "I can analyze production models!"
 
 ---
 
-**Created for llamatelemetry v2.2.0 | Kaggle Dual T4 GPUs** 🚀
+**Created for llamatelemetry v0.1.0 | Kaggle Dual T4 GPUs** 🚀

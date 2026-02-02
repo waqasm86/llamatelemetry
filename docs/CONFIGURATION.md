@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Configuration Guide
+# llamatelemetry v0.1.0 - Configuration Guide
 
 Complete reference for configuring llamatelemetry server and client components.
 

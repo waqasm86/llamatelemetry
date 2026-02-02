@@ -426,9 +426,9 @@ def kaggle_t4_dual_config(model_size_gb: float = 7.0) -> MultiGPUConfig:
 
 def colab_t4_single_config() -> MultiGPUConfig:
     """
-    Legacy single-T4 configuration (pre-2.2.0).
+    Legacy single-T4 configuration (pre-0.1.0).
 
-    llamatelemetry v2.2.0 targets Kaggle dual T4 only. This helper remains for
+    llamatelemetry v0.1.0 targets Kaggle dual T4 only. This helper remains for
     legacy compatibility with single-T4 environments.
 
     Returns:

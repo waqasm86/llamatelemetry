@@ -1,6 +1,6 @@
-# llamatelemetry v2.2.0 - Quick Reference Card
+# llamatelemetry v0.1.0 - Quick Reference Card
 
-**Version**: 2.2.0
+**Version**: 0.1.0
 **Target**: Kaggle 2× Tesla T4 (SM 7.5)
 **Build**: CUDA 12.5, llama.cpp b7760 (388ce82)
 **Date**: February 1, 2026
@@ -10,8 +10,8 @@
 ## 🚀 Quick Start (30 seconds on Kaggle)
 
 1. **Set accelerator**: Settings → Accelerator → GPU T4 × 2
-2. **Install**: `!pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0`
-3. **Run**: Open [Notebook 01](../notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb) and execute all cells
+2. **Install**: `!pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0`
+3. **Run**: Open [Notebook 01](../notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb) and execute all cells
 4. **Done!** First inference in under 5 minutes
 
 ---
@@ -41,7 +41,7 @@
 ### Installation
 ```python
 # Kaggle (recommended)
-!pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 ### Basic Inference

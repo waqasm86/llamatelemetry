@@ -33,14 +33,14 @@
     linkcolor=darkblue,
     filecolor=darkblue,
     urlcolor=primaryblue,
-    pdftitle={llamatelemetry v2.2.0 Portfolio - Waqas Muhammad},
+    pdftitle={llamatelemetry v0.1.0 Portfolio - Waqas Muhammad},
     pdfauthor={Waqas Muhammad}
 }
 
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0.4pt}
-\fancyhead[L]{\textcolor{primaryblue}{\small llamatelemetry v2.2.0 Portfolio}}
+\fancyhead[L]{\textcolor{primaryblue}{\small llamatelemetry v0.1.0 Portfolio}}
 \fancyhead[R]{\textcolor{darkblue}{\small Waqas Muhammad}}
 \fancyfoot[C]{\textcolor{gray}{\small Page \thepage}}
 \fancyfoot[R]{\textcolor{primaryblue}{\small llamatelemetry.github.io}}
@@ -63,7 +63,7 @@
     \centering
     \vspace*{1cm}
 
-    {\Huge\bfseries\textcolor{primaryblue}{llamatelemetry v2.2.0}\par}
+    {\Huge\bfseries\textcolor{primaryblue}{llamatelemetry v0.1.0}\par}
     \vspace{0.3cm}
     {\Large CUDA 12 Inference Backend for Unsloth\par}
     \vspace{0.2cm}
@@ -137,7 +137,7 @@
 % ============================================
 \section{Executive Summary}
 
-\textbf{llamatelemetry v2.2.0} is a production-ready CUDA 12 inference backend specifically engineered for deploying small GGUF models (1B-5B parameters) on \textbf{Kaggle's dual Tesla T4 GPUs} (30GB total VRAM). The project introduces an innovative \textbf{split-GPU architecture} where GPU 0 handles LLM inference via llama.cpp's llama-server, while GPU 1 powers RAPIDS cuGraph and Graphistry for real-time neural network visualization.
+\textbf{llamatelemetry v0.1.0} is a production-ready CUDA 12 inference backend specifically engineered for deploying small GGUF models (1B-5B parameters) on \textbf{Kaggle's dual Tesla T4 GPUs} (30GB total VRAM). The project introduces an innovative \textbf{split-GPU architecture} where GPU 0 handles LLM inference via llama.cpp's llama-server, while GPU 1 powers RAPIDS cuGraph and Graphistry for real-time neural network visualization.
 
 \subsection{Core Innovation}
 
@@ -210,7 +210,7 @@ The flagship achievement is \textbf{Notebook 11: GGUF Neural Network Visualizati
 
 \subsection{Split-GPU Design Philosophy}
 
-llamatelemetry v2.2.0 introduces a novel \textbf{split-GPU architecture pattern} optimized for Kaggle's dual T4 environment. This design enables simultaneous LLM inference and GPU-accelerated visualization without resource contention.
+llamatelemetry v0.1.0 introduces a novel \textbf{split-GPU architecture pattern} optimized for Kaggle's dual T4 environment. This design enables simultaneous LLM inference and GPU-accelerated visualization without resource contention.
 
 \begin{figure}[h]
 \centering
@@ -262,7 +262,7 @@ llamatelemetry v2.2.0 introduces a novel \textbf{split-GPU architecture pattern}
 \node[below, text width=3.5cm, align=center, font=\footnotesize] at (4.5,-0.7) {\textbf{929 nodes}\\981 edges};
 
 \end{tikzpicture}
-\caption{llamatelemetry v2.2.0 Split-GPU Architecture on Kaggle Dual T4}
+\caption{llamatelemetry v0.1.0 Split-GPU Architecture on Kaggle Dual T4}
 \end{figure}
 
 \newpage
@@ -272,7 +272,7 @@ llamatelemetry v2.2.0 introduces a novel \textbf{split-GPU architecture pattern}
 % ============================================
 \section{Tutorial Notebooks (01-10): Core Capabilities}
 
-llamatelemetry v2.2.0 includes 11 comprehensive Kaggle notebooks that progressively build expertise from beginner to advanced topics. Notebooks 01-10 establish foundational skills, while Notebook 11 (detailed in Section 4) demonstrates the flagship visualization capabilities.
+llamatelemetry v0.1.0 includes 11 comprehensive Kaggle notebooks that progressively build expertise from beginner to advanced topics. Notebooks 01-10 establish foundational skills, while Notebook 11 (detailed in Section 4) demonstrates the flagship visualization capabilities.
 
 \subsection{Learning Path Structure}
 
@@ -417,7 +417,7 @@ These notebooks prepare users for the advanced capabilities demonstrated in Note
 
 \vspace{0.3cm}
 \normalsize
-The culminating demonstration of llamatelemetry v2.2.0's capabilities, showcasing a groundbreaking approach to visualizing the internal architecture of GGUF quantized models through 8 interactive Graphistry dashboards.
+The culminating demonstration of llamatelemetry v0.1.0's capabilities, showcasing a groundbreaking approach to visualizing the internal architecture of GGUF quantized models through 8 interactive Graphistry dashboards.
 
 \vspace{0.3cm}
 \textbf{Key Achievement:} First tool to visualize GGUF quantization as interactive graphs with GPU-accelerated PageRank analysis, revealing the internal structure of transformer models in unprecedented detail.
@@ -930,7 +930,7 @@ Qwen-2.5-7B & Q4\_K\_M & 21 tok/s & 5.0 GB & 1× T4 \\
 \textbf{GitHub-First Distribution Strategy}
 
 \vspace{0.2cm}
-\textbf{Primary:} \texttt{pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0}\\
+\textbf{Primary:} \texttt{pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0}\\
 \textbf{Mirror:} HuggingFace at \texttt{waqasm86/llamatelemetry}\\
 \textbf{NOT on PyPI}: Intentional design decision to maintain control over binary distribution
 \end{tcolorbox}
@@ -965,7 +965,7 @@ Qwen-2.5-7B & Q4\_K\_M & 21 tok/s & 5.0 GB & 1× T4 \\
 \textbf{Async Support} & asyncio integration for concurrent requests \\
 \hline
 \end{tabularx}
-\caption{llamatelemetry v2.2.0 API Design Principles}
+\caption{llamatelemetry v0.1.0 API Design Principles}
 \end{table}
 
 \subsection{Documentation \& Learning Resources}
@@ -1086,7 +1086,7 @@ Qwen-2.5-7B & Q4\_K\_M & 21 tok/s & 5.0 GB & 1× T4 \\
 \textbf{Unsloth Users} & Seamless fine-tuning to deployment pipeline, GGUF export integration \\
 \hline
 \end{tabularx}
-\caption{llamatelemetry v2.2.0: Cross-Domain Impact}
+\caption{llamatelemetry v0.1.0: Cross-Domain Impact}
 \end{table}
 
 \subsection{Quantifiable Achievements}
@@ -1217,7 +1217,7 @@ Qwen-2.5-7B & Q4\_K\_M & 21 tok/s & 5.0 GB & 1× T4 \\
 \subsection{Official Resources}
 
 \begin{tcolorbox}[colback=primaryblue!10,colframe=primaryblue,width=\textwidth,arc=3mm]
-\Large\textbf{llamatelemetry v2.2.0 - Official Links}
+\Large\textbf{llamatelemetry v0.1.0 - Official Links}
 
 \vspace{0.3cm}
 \normalsize
@@ -1243,11 +1243,11 @@ All 11 notebooks available at: \href{https://llamatelemetry.github.io/tutorials/
 \begin{lstlisting}[language=bash]
 # Install from GitHub (Primary)
 !pip install -q --no-cache-dir --force-reinstall \
-    git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+    git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 
 # Verify installation
 import llamatelemetry
-print(f"llamatelemetry {llamatelemetry.__version__}")  # 2.2.0
+print(f"llamatelemetry {llamatelemetry.__version__}")  # 0.1.0
 \end{lstlisting}
 
 \newpage
@@ -1282,7 +1282,7 @@ Specialized in building high-performance multi-GPU LLM inference systems with CU
     \item \textbf{AI Explainability}: Neural network visualization, graph analytics, PageRank for transformers
 \end{itemize}
 
-\subsection{Why llamatelemetry v2.2.0 Matters}
+\subsection{Why llamatelemetry v0.1.0 Matters}
 
 This portfolio showcases more than just a software project—it demonstrates:
 
@@ -1299,7 +1299,7 @@ This portfolio showcases more than just a software project—it demonstrates:
 \begin{center}
 \begin{tcolorbox}[colback=white,colframe=accentblue,width=0.9\textwidth,arc=2mm]
 \centering
-\textit{llamatelemetry v2.2.0 represents the intersection of GPU systems engineering, ML infrastructure, and AI explainability—demonstrating both technical depth and practical impact on free, accessible compute infrastructure.}
+\textit{llamatelemetry v0.1.0 represents the intersection of GPU systems engineering, ML infrastructure, and AI explainability—demonstrating both technical depth and practical impact on free, accessible compute infrastructure.}
 
 \vspace{0.5cm}
 

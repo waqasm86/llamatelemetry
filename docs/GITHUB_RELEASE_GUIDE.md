@@ -1,15 +1,15 @@
-# GitHub Release Guide (v2.2.0)
+# GitHub Release Guide (v0.1.0)
 
-This guide covers publishing llamatelemetry v2.2.0 binaries to GitHub Releases.
+This guide covers publishing llamatelemetry v0.1.0 binaries to GitHub Releases.
 
-**Scope:** v2.2.0 is Kaggle-only (dual Tesla T4). Distribution is via GitHub Releases (primary) and optional HuggingFace mirror. PyPI is not used.
+**Scope:** v0.1.0 is Kaggle-only (dual Tesla T4). Distribution is via GitHub Releases (primary) and optional HuggingFace mirror. PyPI is not used.
 
 ---
 
 ## 1) Prepare the Binary Bundle
 
 **Expected bundle name:**
-- `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz`
+- `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz`
 
 **Expected contents:**
 - `bin/` (llama-server + tools)
@@ -21,10 +21,10 @@ This guide covers publishing llamatelemetry v2.2.0 binaries to GitHub Releases.
 
 1. Go to the releases page: `https://github.com/llamatelemetry/llamatelemetry/releases`
 2. Click **Draft a new release**
-3. **Tag:** `v2.2.0`
-4. **Title:** `llamatelemetry v2.2.0 - Kaggle Dual T4 CUDA 12 Binaries`
+3. **Tag:** `v0.1.0`
+4. **Title:** `llamatelemetry v0.1.0 - Kaggle Dual T4 CUDA 12 Binaries`
 5. **Description:** (example below)
-6. **Upload assets:** `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz`
+6. **Upload assets:** `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz`
 7. Publish the release
 
 **Suggested description (short):**
@@ -40,7 +40,7 @@ Optimized for 1B-5B GGUF models. Includes llama.cpp + NCCL.
 In a Kaggle notebook:
 
 ```python
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 import llamatelemetry
 print(llamatelemetry.__version__)
 ```
@@ -57,5 +57,5 @@ If mirroring the bundle to HF, ensure the same filename and checksum are used.
 
 ## Notes
 
-- GitHub Releases is the primary distribution channel for v2.2.0.
-- Do not publish to PyPI for v2.2.0.
+- GitHub Releases is the primary distribution channel for v0.1.0.
+- Do not publish to PyPI for v0.1.0.

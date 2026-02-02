@@ -48,6 +48,14 @@ class TestUnslothIntegrationAPI(unittest.TestCase):
 
     def test_unsloth_loader(self):
         """Test UnslothModelLoader creation"""
+        try:
+            import torch
+        except Exception:
+            raise unittest.SkipTest("torch not available")
+
+        if not torch.cuda.is_available():
+            raise unittest.SkipTest("CUDA not available for UnslothModelLoader")
+
         from unsloth.loader import UnslothModelLoader
 
         loader = UnslothModelLoader(max_seq_length=2048)

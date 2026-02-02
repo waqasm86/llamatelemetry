@@ -25,7 +25,8 @@ if(NOT pybind11_FOUND)
 endif()
 
 # ============================================================================
-# llamatelemetry v2.2.0 - Tesla T4 Only (SM 7.5) - CUDA 12 Optimized
+# llamatelemetry v0.1.0 - Tesla T4 Only (SM 7.5) - CUDA 12 Optimized
+# SDK version: 0.1.0 | Binary artifact: llama.cpp v0.1.0
 # Runtime target: Kaggle dual T4 environment (builds can be produced elsewhere)
 # ============================================================================
 

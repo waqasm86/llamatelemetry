@@ -1,4 +1,4 @@
-# 📊 llamatelemetry v2.2.0 Advanced Kaggle Notebooks - Summary
+# 📊 llamatelemetry v0.1.0 Advanced Kaggle Notebooks - Summary
 
 ## ✅ Completed Deliverables
 
@@ -202,7 +202,7 @@ g = graphistry.edges(edges_df).nodes(nodes_df)\
     .plot()  # Returns shareable URL
 ```
 
-### llamatelemetry v2.2.0 API
+### llamatelemetry v0.1.0 API
 ```python
 # Simple, PyTorch-style interface
 from llamatelemetry import InferenceEngine
@@ -327,4 +327,4 @@ Questions about implementation?
 
 ---
 
-**Created with llamatelemetry v2.2.0 for Kaggle Dual T4 GPUs** 🚀
+**Created with llamatelemetry v0.1.0 for Kaggle Dual T4 GPUs** 🚀

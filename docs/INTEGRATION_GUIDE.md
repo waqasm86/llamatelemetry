@@ -1,13 +1,13 @@
-# llamatelemetry v2.2.0 Integration Guide (Kaggle Dual T4)
+# llamatelemetry v0.1.0 Integration Guide (Kaggle Dual T4)
 
-This guide explains how llamatelemetry v2.2.0 finds and starts `llama-server` in **Kaggle dual T4** notebooks.
+This guide explains how llamatelemetry v0.1.0 finds and starts `llama-server` in **Kaggle dual T4** notebooks.
 
 ---
 
 ## 1) Where `llama-server` Comes From
 
 - On first import, llamatelemetry downloads the binary bundle:
-  - `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz`
+  - `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz`
 - It is extracted to `~/.cache/llamatelemetry`.
 
 ---

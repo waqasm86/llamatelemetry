@@ -1,11 +1,11 @@
-# llamatelemetry v2.2.0 Professional Portfolio
+# llamatelemetry v0.1.0 Professional Portfolio
 
-This folder contains the professional portfolio PDF and LaTeX source code for the llamatelemetry v2.2.0 project.
+This folder contains the professional portfolio PDF and LaTeX source code for the llamatelemetry v0.1.0 project.
 
 ## Contents
 
 - `llamatelemetry_v2_2_0_portfolio.pdf` - Compiled 20-page professional portfolio (506 KB)
-- `llamatelemetry_v2_2_0_portfolio.tex` - LaTeX source code
+- `llamatelemetry_v0_1_0_portfolio.tex` - LaTeX source code
 - `README.md` - This documentation file
 
 ## Portfolio Overview
@@ -13,7 +13,7 @@ This folder contains the professional portfolio PDF and LaTeX source code for th
 **Pages:** 20
 **Size:** 506 KB
 **Created:** January 25, 2026
-**Focus:** llamatelemetry v2.2.0 CUDA 12 inference backend for Unsloth on Kaggle
+**Focus:** llamatelemetry v0.1.0 CUDA 12 inference backend for Unsloth on Kaggle
 
 ### Structure
 
@@ -55,9 +55,9 @@ sudo apt-get install texlive-latex-extra texlive-fonts-recommended texlive-pictu
 cd /path/to/llamatelemetry/llamatelemetry-pdf-portfolio
 
 # Compile (requires 3 passes for proper references)
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
 ```
 
 ### Clean Build Artifacts
@@ -128,11 +128,11 @@ The flagship achievement section includes:
 
 https://www.kaggle.com/code/waqasm86/11-gguf-neural-network-graphistry-vis-executed-2
 
-## Version\n+\n+- **v2.2.0** (January 25, 2026) - Clean vertical diagram redesign matching website style
+## Version\n+\n+- **v0.1.0** (January 25, 2026) - Clean vertical diagram redesign matching website style
 
 ## Notes
 
-- Portfolio focuses exclusively on llamatelemetry v2.2.0 project
+- Portfolio focuses exclusively on llamatelemetry v0.1.0 project
 - Balanced technical depth suitable for recruiters and hiring managers
 - Professional, industry-focused tone
 - All diagrams match llamatelemetry.github.io website design language

@@ -1,6 +1,6 @@
-# llamatelemetry v2.2.0
+# llamatelemetry v0.1.0
 
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/llamatelemetry/llamatelemetry/releases/tag/v2.2.0)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/llamatelemetry/llamatelemetry/releases/tag/v0.1.0)
 [![Python](https://img.shields.io/badge/python-3.11+-brightgreen.svg)](https://python.org)
 [![CUDA](https://img.shields.io/badge/CUDA-12.x-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -43,7 +43,7 @@ Built to pair with CUDA inference backends and modern LLM stacks, llamatelemetry
 
 ### Quick Install (Kaggle Notebook)
 ```bash
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 **Distribution Strategy:**
@@ -58,7 +58,7 @@ Built to pair with CUDA inference backends and modern LLM stacks, llamatelemetry
 ### Verify Installation
 ```python
 import llamatelemetry
-print(f"llamatelemetry {llamatelemetry.__version__}")  # 2.2.0
+print(f"llamatelemetry {llamatelemetry.__version__}")  # 0.1.0
 ```
 
 📘 **[Full Installation Guide →](docs/INSTALLATION.md)** | 🎯 **Platform:** Kaggle only (2× Tesla T4)
@@ -92,6 +92,27 @@ result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
 ```
 
+### Optional: Enable OpenTelemetry
+```python
+import llamatelemetry
+
+engine = llamatelemetry.InferenceEngine(
+    enable_telemetry=True,
+    telemetry_config={
+        "service_name": "llamatelemetry-inference",
+        "otlp_endpoint": "http://localhost:4317",
+        "enable_graphistry": False,
+    },
+)
+```
+
+### Optional: Check for Updates
+```python
+from llamatelemetry import InferenceEngine
+
+InferenceEngine.check_for_updates()
+```
+
 ### Split-GPU Architecture (GPU 0: LLM, GPU 1: Graphistry)
 ```python
 from llamatelemetry.server import ServerManager
@@ -109,7 +130,7 @@ server.start_server(
 # See Notebook 11 for complete visualization workflow
 ```
 
-📘 **[Quick Start Guide →](QUICK_START.md)** | 📓 **[Notebook 01 →](notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb)**
+📘 **[Quick Start Guide →](QUICK_START.md)** | 📓 **[Notebook 01 →](notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb)**
 
 ---
 
@@ -247,7 +268,7 @@ server.start_with_config(ServerConfig(
 ))
 ```
 
-📘 **[Unsloth Integration Guide →](notebooks/05-unsloth-integration-llamatelemetry-v2.2.0.ipynb)**
+📘 **[Unsloth Integration Guide →](notebooks/05-unsloth-integration-llamatelemetry-v0.1.0.ipynb)**
 
 ---
 
@@ -273,7 +294,7 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 # GPU 1: RAPIDS cuGraph (graph visualization)
 ```
 
-📘 **[Split-GPU Tutorial →](notebooks/06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb)**
+📘 **[Split-GPU Tutorial →](notebooks/06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb)**
 
 ---
 
@@ -369,16 +390,16 @@ GPU 1 Available:
 
 | # | Notebook | Description |
 |---|----------|-------------|
-| 01 | [Quick Start](notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb) | 5-minute introduction |
-| 02 | [Server Setup](notebooks/02-llama-server-setup-llamatelemetry-v2.2.0.ipynb) | Advanced server configuration |
-| 03 | [Multi-GPU](notebooks/03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb) | Dual T4 tensor-split |
-| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llamatelemetry-v2.2.0.ipynb) | Complete quantization guide |
-| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llamatelemetry-v2.2.0.ipynb) | Train → Export → Deploy |
-| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb) | LLM + RAPIDS analytics |
-| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | LLM-powered entity extraction + Graphistry |
-| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb) | Document similarity + GPU analytics |
-| 09 | [Large Models](notebooks/09-large-models-kaggle-llamatelemetry-v2-2-0.ipynb) | Deploy 13B+ on dual T4 |
-| 10 | [Complete Workflow](notebooks/10-complete-workflow-llamatelemetry-v2-2-0.ipynb) | Production end-to-end pipeline |
+| 01 | [Quick Start](notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb) | 5-minute introduction |
+| 02 | [Server Setup](notebooks/02-llama-server-setup-llamatelemetry-v0.1.0.ipynb) | Advanced server configuration |
+| 03 | [Multi-GPU](notebooks/03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb) | Dual T4 tensor-split |
+| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llamatelemetry-v0.1.0.ipynb) | Complete quantization guide |
+| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llamatelemetry-v0.1.0.ipynb) | Train → Export → Deploy |
+| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb) | LLM + RAPIDS analytics |
+| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb) | LLM-powered entity extraction + Graphistry |
+| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb) | Document similarity + GPU analytics |
+| 09 | [Large Models](notebooks/09-large-models-kaggle-llamatelemetry-v0-1-0.ipynb) | Deploy 13B+ on dual T4 |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llamatelemetry-v0-1-0.ipynb) | Production end-to-end pipeline |
 | 11 | [**GGUF Visualization**](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | ⭐ Interactive architecture graphs |
 | 12 | [Attention Mechanism Explorer](notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | Q-K-V attention patterns + Graphistry |
 | 13 | [Token Embedding Visualizer](notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | 3D embedding space + Plotly UMAP |
@@ -433,7 +454,7 @@ GPU 1 Available:
 - **Quantization:** Q4_K_M (best quality/speed balance)
 - **Source:** Unsloth-compatible models preferred
 
-**Note:** llamatelemetry v2.2.0 is designed and tested exclusively for Kaggle dual T4 environment. Other platforms are not officially supported.
+**Note:** llamatelemetry v0.1.0 is designed and tested exclusively for Kaggle dual T4 environment. Other platforms are not officially supported.
 
 ---
 
@@ -441,7 +462,7 @@ GPU 1 Available:
 
 | File | Size | Platform |
 |------|------|----------|
-| `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | Kaggle 2× T4 |
+| `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | Kaggle 2× T4 |
 
 **Build Info:**
 - CUDA 12.5, SM 7.5 (Turing)
@@ -473,20 +494,20 @@ MIT — see [LICENSE](LICENSE)
 
 ## 📓 Tutorial Notebooks (13 notebooks)
 
-Complete tutorial series for llamatelemetry v2.2.0 on Kaggle dual T4 GPUs. Click the badges to open directly in Kaggle or view on GitHub.
+Complete tutorial series for llamatelemetry v0.1.0 on Kaggle dual T4 GPUs. Click the badges to open directly in Kaggle or view on GitHub.
 
 | # | Notebook | Open in Kaggle | Description |
 |---|----------|----------------|-------------|
-| 01 | [Quick Start](notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb) | 5-minute introduction to llamatelemetry |
-| 02 | [Llama Server Setup](notebooks/02-llama-server-setup-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/02-llama-server-setup-llamatelemetry-v2.2.0.ipynb) | Server configuration & lifecycle |
-| 03 | [Multi-GPU Inference](notebooks/03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb) | Dual T4 tensor-split configuration |
-| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/04-gguf-quantization-llamatelemetry-v2.2.0.ipynb) | K-quants, I-quants, GGUF parsing |
-| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/05-unsloth-integration-llamatelemetry-v2.2.0.ipynb) | Fine-tune → GGUF → Deploy |
-| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb) | LLM on GPU 0 + RAPIDS on GPU 1 |
-| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | LLM entity extraction + graph visualization |
-| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb) | Document similarity networks with GPU analytics |
-| 09 | [Large Models (13B+)](notebooks/09-large-models-kaggle-llamatelemetry-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/09-large-models-kaggle-llamatelemetry-v2-2-0.ipynb) | Deploy large models on dual T4 with tensor-split |
-| 10 | [Complete Workflow](notebooks/10-complete-workflow-llamatelemetry-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/10-complete-workflow-llamatelemetry-v2-2-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → API |
+| 01 | [Quick Start](notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb) | 5-minute introduction to llamatelemetry |
+| 02 | [Llama Server Setup](notebooks/02-llama-server-setup-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/02-llama-server-setup-llamatelemetry-v0.1.0.ipynb) | Server configuration & lifecycle |
+| 03 | [Multi-GPU Inference](notebooks/03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb) | Dual T4 tensor-split configuration |
+| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/04-gguf-quantization-llamatelemetry-v0.1.0.ipynb) | K-quants, I-quants, GGUF parsing |
+| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/05-unsloth-integration-llamatelemetry-v0.1.0.ipynb) | Fine-tune → GGUF → Deploy |
+| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb) | LLM on GPU 0 + RAPIDS on GPU 1 |
+| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb) | LLM entity extraction + graph visualization |
+| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb) | Document similarity networks with GPU analytics |
+| 09 | [Large Models (13B+)](notebooks/09-large-models-kaggle-llamatelemetry-v0-1-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/09-large-models-kaggle-llamatelemetry-v0-1-0.ipynb) | Deploy large models on dual T4 with tensor-split |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llamatelemetry-v0-1-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/10-complete-workflow-llamatelemetry-v0-1-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → API |
 | 11 | [**GGUF Visualization** ⭐](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | **MOST IMPORTANT**: Dual-GPU architecture visualization with 8 interactive dashboards |
 | 12 | [Attention Mechanism Explorer](notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | Q-K-V attention patterns across all heads with Graphistry dashboards |
 | 13 | [Token Embedding Visualizer](notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llamatelemetry/llamatelemetry/blob/main/notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | 3D embedding space exploration with GPU-accelerated UMAP + Plotly |

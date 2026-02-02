@@ -1,11 +1,11 @@
-# Makefile for llamatelemetry v2.2.0 Portfolio PDF Compilation
+# Makefile for llamatelemetry v0.1.0 Portfolio PDF Compilation
 
 # LaTeX compiler
 LATEX = pdflatex
 LATEX_FLAGS = -interaction=nonstopmode
 
 # Source and output files
-SOURCE = llamatelemetry_v2_2_0_portfolio.tex
+SOURCE = llamatelemetry_v0_1_0_portfolio.tex
 PDF = llamatelemetry_v2_2_0_portfolio.pdf
 
 # Auxiliary files to clean
@@ -49,7 +49,7 @@ info:
 
 # Show help
 help:
-	@echo "llamatelemetry v2.2.0 Portfolio Makefile"
+	@echo "llamatelemetry v0.1.0 Portfolio Makefile"
 	@echo "================================"
 	@echo ""
 	@echo "Targets:"

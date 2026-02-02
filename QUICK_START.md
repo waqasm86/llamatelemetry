@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Quick Start Guide (Kaggle Only)
+# llamatelemetry v0.1.0 - Quick Start Guide (Kaggle Only)
 
 Get started with llamatelemetry on Kaggle dual T4 in 5 minutes.
 
@@ -19,7 +19,30 @@ Get started with llamatelemetry on Kaggle dual T4 in 5 minutes.
 
 ```bash
 # In Kaggle notebook cell
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
+```
+
+## Optional: Enable OpenTelemetry
+
+```python
+import llamatelemetry
+
+engine = llamatelemetry.InferenceEngine(
+    enable_telemetry=True,
+    telemetry_config={
+        "service_name": "llamatelemetry-inference",
+        "otlp_endpoint": "http://localhost:4317",
+        "enable_graphistry": False,
+    },
+)
+```
+
+## Optional: Check for Updates
+
+```python
+from llamatelemetry import InferenceEngine
+
+InferenceEngine.check_for_updates()
 ```
 
 ## Split-GPU Usage (Recommended: GPU 0 for LLM, GPU 1 for Graphistry)
@@ -133,7 +156,7 @@ server.start_server(
 
 ## Next Steps
 
-- 📓 **[Notebook 01](notebooks/01-quickstart-llamatelemetry-v2.2.0.ipynb)** - Complete quickstart on Kaggle
+- 📓 **[Notebook 01](notebooks/01-quickstart-llamatelemetry-v0.1.0.ipynb)** - Complete quickstart on Kaggle
 - 📓 **[Notebook 11](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb)** - GGUF visualization
 - 📖 **[Full Documentation](README.md)** - All features and guides
 - 🔗 **[GitHub Releases](https://github.com/llamatelemetry/llamatelemetry/releases)** - Download binaries

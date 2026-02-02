@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - API Reference
+# llamatelemetry v0.1.0 - API Reference
 
 Complete Python API documentation for llamatelemetry.
 

@@ -7,7 +7,124 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.0-visualization-trilogy] - 2026-02-01
+## [0.1.0] - 2026-02-02
+
+### 🎉 Initial Release - llamatelemetry (renamed from llcuda)
+
+This is the first official release of **llamatelemetry**, created by renaming the `llcuda` project to better reflect its purpose: **CUDA-first OpenTelemetry Python SDK for LLM inference observability**.
+
+### Project Renamed
+- **Old name**: llcuda
+- **New name**: llamatelemetry
+- **Rationale**: The new name emphasizes the project's core mission—GPU-native telemetry and observability for LLM inference pipelines using OpenTelemetry standards.
+
+### What's Included (from llcuda v0.1.0)
+
+**Core Runtime:**
+- `InferenceEngine`: High-level LLM inference API with auto-download
+- `ServerManager`: llama-server lifecycle management
+- Split-GPU architecture for Kaggle dual Tesla T4 (GPU 0: LLM, GPU 1: Graphistry/RAPIDS)
+- Optimized for small GGUF models (1B-5B parameters)
+- Binary artifact: llama.cpp v0.1.0 (CUDA 12.5, SM 7.5, FlashAttention, 961 MB)
+
+**OpenTelemetry Integration (NEW):**
+- `telemetry.setup_telemetry()`: GPU-aware TracerProvider and MeterProvider
+- `telemetry.resource.build_gpu_resource()`: GPU resource attributes (compute capability, VRAM, NCCL)
+- `telemetry.metrics.GpuMetricsCollector`: Real-time GPU metrics (latency, tokens/sec, VRAM)
+- `telemetry.exporter.build_exporters()`: OTLP gRPC/HTTP export
+- `telemetry.graphistry_export.GraphistryTraceExporter`: Real-time trace graphs via pygraphistry
+
+**API Modules:**
+- `api.client.LlamaCppClient`: OpenAI-compatible + native llama.cpp endpoints
+- `api.multigpu`: Dual T4 configuration with tensor-split
+- `api.gguf`: GGUF parsing, quantization (29 types), HuggingFace conversion
+- `api.nccl`: NCCL multi-GPU communication primitives (optional)
+
+**Advanced Features:**
+- `quantization`: NF4, GGUF, dynamic quantization
+- `unsloth`: Load Unsloth models, export to GGUF, LoRA adapters
+- `cuda`: CUDA Graphs, Triton kernels, Tensor Core utilities
+- `inference`: FlashAttention v2, KV cache, batch inference
+
+**Documentation & Notebooks:**
+- 13 comprehensive Jupyter notebooks (5.5 hours learning path)
+- **Visualization Trilogy** (notebooks 11-13): GGUF neural network visualization, attention mechanism explorer, token embedding 3D visualizer
+- 19 documentation files covering installation, API, configuration, troubleshooting
+
+**Tests:**
+- 7 test files with full pytest coverage
+- All tests pass with graceful fallbacks for optional dependencies
+
+### Version Strategy
+
+**SDK Version: 0.1.0**
+- This is the initial release of the llamatelemetry SDK under its new name
+- Per [Semantic Versioning](https://semver.org/spec/v2.0.0.html), versions below 1.0.0 are for initial development
+- The OpenTelemetry integration layer is not yet production-ready (not fully wired into inference path)
+
+**Binary Artifact Version: 0.1.0**
+- The pre-built llama.cpp binaries are versioned separately as v0.1.0
+- This follows the common pattern of SDK version vs. runtime artifact version (e.g., PyTorch SDK vs. CUDA toolkit)
+- Binary bundle: `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz` (SHA256: `489f3df5...`)
+
+### Technical Details
+
+**Platform:**
+- Target: Kaggle notebooks (2× Tesla T4, SM 7.5)
+- Python: 3.11+ required
+- CUDA: 12.5
+- Build: CMake 3.24+, Ninja
+
+**Dependencies:**
+- Core: numpy, requests, huggingface_hub, tqdm, opentelemetry-api, opentelemetry-sdk
+- Optional: OTLP exporters, pygraphistry, RAPIDS cuGraph, Jupyter widgets
+
+**Package:**
+- Wheel size: ~62 KB (Python code only, binaries auto-downloaded)
+- Binary bundle: 961 MB (downloaded on first import)
+- Models: On-demand download from HuggingFace
+
+### Known Limitations
+
+1. **Kaggle-specific**: Optimized exclusively for Kaggle dual T4 environment
+2. **Small models focus**: Best for 1B-5B parameter GGUF models (Q4_K_M quantization)
+3. **Telemetry integration**: OpenTelemetry layer exists but not yet automatically integrated into `InferenceEngine.infer()` calls
+4. **No production deployments**: This is a development/research tool, not battle-tested in production
+
+### Migration from llcuda
+
+If you were using `llcuda`, the migration is straightforward:
+
+```python
+# Old (llcuda)
+import llcuda
+engine = llcuda.InferenceEngine()
+
+# New (llamatelemetry)
+import llamatelemetry
+engine = llamatelemetry.InferenceEngine()
+```
+
+All APIs remain unchanged. The rename is purely cosmetic to better reflect the project's observability focus.
+
+### What's Next
+
+Future releases will focus on:
+- Full integration of OpenTelemetry tracing into the inference pipeline
+- Automatic span creation around `InferenceEngine.infer()` calls
+- Production-ready telemetry exporters
+- Expanded platform support (beyond Kaggle)
+- v1.0.0 when the public API stabilizes and telemetry integration is complete
+
+---
+
+## Historical Context: llcuda Changelog (v1.1.5 → v0.1.0)
+
+**Note:** The entries below document the development history of the `llcuda` project (predecessor to llamatelemetry). They are preserved for reference but describe a project that existed under a different name.
+
+---
+
+## [0.1.0-visualization-trilogy] - 2026-02-01
 
 ### 📚 Visualization Trilogy + Documentation Sync
 
@@ -37,7 +154,7 @@ Extended notebook series from 11 to 13 notebooks with two new advanced visualiza
 **Documentation updates:**
 - `README.md`: Added notebooks 12–13 to both notebook tables, updated learning paths and counts (11 → 13)
 - `notebooks/README.md`: Added detailed descriptions, index entries, updated tutorial path diagram to show Visualization Trilogy, updated learning paths and version history
-- `docs/INDEX.md`: Modernized stale v1.2.2 build references to v2.2.0 Kaggle workflow, added visualization trilogy to learning path
+- `docs/INDEX.md`: Modernized stale v1.2.2 build references to v0.1.0 Kaggle workflow, added visualization trilogy to learning path
 - `docs/NOTEBOOKS_GUIDE.md`: Added notebooks 12–13 entries
 - `docs/QUICK_REFERENCE.md`: Added notebooks 12–13 to quick reference tables
 - `CHANGELOG.md`: This entry
@@ -48,7 +165,7 @@ Extended notebook series from 11 to 13 notebooks with two new advanced visualiza
 
 ---
 
-## [2.2.0-notebooks-update] - 2026-01-25
+## [0.1.0-notebooks-update] - 2026-01-25
 
 ### 📚 Notebook Series Completion + Documentation Synchronization
 
@@ -57,11 +174,11 @@ Complete update of all 11 notebooks with accurate filenames and comprehensive RE
 ### Changed
 
 **Notebook Filenames Corrected:**
-- Notebook 06: `06-split-gpu-graphistry-llamatelemetry-v2-2-0.ipynb` (hyphen consistency)
-- Notebook 07: `07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb` (updated from OpenAI API)
-- Notebook 08: `08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb` (updated from NCCL/PyTorch)
-- Notebook 09: `09-large-models-kaggle-llamatelemetry-v2-2-0.ipynb` (hyphen consistency)
-- Notebook 10: `10-complete-workflow-llamatelemetry-v2-2-0.ipynb` (hyphen consistency)
+- Notebook 06: `06-split-gpu-graphistry-llamatelemetry-v0-1-0.ipynb` (hyphen consistency)
+- Notebook 07: `07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb` (updated from OpenAI API)
+- Notebook 08: `08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb` (updated from NCCL/PyTorch)
+- Notebook 09: `09-large-models-kaggle-llamatelemetry-v0-1-0.ipynb` (hyphen consistency)
+- Notebook 10: `10-complete-workflow-llamatelemetry-v0-1-0.ipynb` (hyphen consistency)
 - Notebook 11: `11-gguf-neural-network-graphistry-vis-executed-2.ipynb` (executed version with outputs)
 
 **README.md Updates:**
@@ -83,7 +200,7 @@ Complete update of all 11 notebooks with accurate filenames and comprehensive RE
 - **Updated Notebook 10**: Production end-to-end workflow description
 - **Enhanced Tutorial Path**: Now shows 11 notebooks with flagship visualization highlighted
 - **New Learning Paths**: Added "Visualization Track" (Path 5) - 3 hours
-- **Version History**: Updated to v2.2.0 (2026-01-25) with complete 11-notebook series
+- **Version History**: Updated to v0.1.0 (2026-01-25) with complete 11-notebook series
 
 ### Added
 
@@ -94,7 +211,7 @@ Complete update of all 11 notebooks with accurate filenames and comprehensive RE
 - 🎨 8 Interactive Graphistry visualizations breakdown
 - 🔬 Technical workflow (6 phases from setup to dashboard)
 - 💡 What You'll Learn (7 key concepts)
-- 🎯 Key insights about llamatelemetry v2.2.0 capabilities
+- 🎯 Key insights about llamatelemetry v0.1.0 capabilities
 - 📦 Outputs section (URLs + downloadable files)
 - 🔬 Research applications (5 use cases)
 - 🛠️ Technical stack details (llamatelemetry, RAPIDS, Graphistry versions)
@@ -118,15 +235,15 @@ Complete update of all 11 notebooks with accurate filenames and comprehensive RE
 
 ---
 
-## [2.2.0-kaggle] - 2026-01-22
+## [0.1.0-kaggle] - 2026-01-22
 
 ### 🎯 Kaggle-Specific Positioning + Split-GPU Architecture Clarification
 
-**IMPORTANT:** llamatelemetry v2.2.0 is **Kaggle-specific only** and optimized for **small GGUF models (1B-5B parameters)**.
+**IMPORTANT:** llamatelemetry v0.1.0 is **Kaggle-specific only** and optimized for **small GGUF models (1B-5B parameters)**.
 
 ### Corrected Positioning
 
-**What llamatelemetry v2.2.0 Actually Is:**
+**What llamatelemetry v0.1.0 Actually Is:**
 - **Platform:** Kaggle notebooks exclusively (not Colab, not local)
 - **GPUs:** Dual Tesla T4 (15GB VRAM × 2, Compute Capability SM 7.5)
 - **Model Range:** 1B-5B parameters (GGUF Q4_K_M quantization)
@@ -193,7 +310,7 @@ GPU 1 (15GB Tesla T4):
 
 ---
 
-## [2.2.0-update] - 2026-01-22
+## [0.1.0-update] - 2026-01-22
 
 ### 📊 GGUF Architecture Visualization + Documentation Updates
 
@@ -252,7 +369,7 @@ Major documentation update featuring the **most comprehensive GGUF visualization
 - **Notebooks**: Now 11 total (was 10)
 - **New Category**: "Advanced Visualization" for notebook 11
 - **Learning Paths**: Updated to include visualization path (01 → 03 → 04 → 06 → 11)
-- **Version History**: Updated notebooks README to v2.2.0-update (2026-01-22)
+- **Version History**: Updated notebooks README to v0.1.0-update (2026-01-22)
 
 **Documentation Structure**:
 - **Index**: docs/ now contains 19 files (added GGUF_NEURAL_NETWORK_VISUALIZATION.md)
@@ -313,7 +430,7 @@ GPU 1 (Tesla T4):
 
 ---
 
-## [2.2.0] - 2026-01-17
+## [0.1.0] - 2026-01-17
 
 ### 🎯 Unsloth Inference Backend + Kaggle Dual T4 Multi-GPU
 
@@ -330,7 +447,7 @@ Unsloth handles training and fine-tuning, llamatelemetry handles quantization an
 #### 1. Kaggle Build Notebook (`notebooks/build_llamatelemetry_v2_2_0_kaggle_t4x2_complete.ipynb`)
 - **Complete build pipeline** for Kaggle's 2× Tesla T4 environment
 - GPU verification, CMake configuration, build, test, and packaging
-- Produces `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz` distribution
+- Produces `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz` distribution
 - Includes helper scripts: `start-server.sh`, `quantize.sh`
 - Full metadata with SHA256 checksums
 
@@ -348,15 +465,15 @@ Unsloth handles training and fine-tuning, llamatelemetry handles quantization an
 > integrate with PyTorch distributed or other NCCL-based workflows.
 
 ### Changed
-- **Version**: Updated to 2.2.0
+- **Version**: Updated to 0.1.0
 - **Description**: Updated to emphasize "Unsloth inference backend" positioning
 - **Build Targets**: Primary focus on Kaggle 2× T4 with SM 7.5 optimization
 
 ### Binary Package
 | Asset | Size | SHA256 (prefix) |
 |-------|------|-----------------|
-| `llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | `489f3df54...` |
-| `llamatelemetry-v2.2.0-source.tar.gz` | 203 KB | `e861eb9c2...` |
+| `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | `489f3df54...` |
+| `llamatelemetry-v0.1.0-source.tar.gz` | 203 KB | `e861eb9c2...` |
 
 ### Build Info
 - **CUDA**: 12.5

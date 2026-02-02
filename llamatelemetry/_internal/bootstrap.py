@@ -1,7 +1,7 @@
 """
-llamatelemetry v2.2.0 Bootstrap Module - Kaggle Dual T4 GPUs
+llamatelemetry v0.1.0 Bootstrap Module - Kaggle Dual T4 GPUs
 
-This module handles first-time setup for llamatelemetry v2.2.0:
+This module handles first-time setup for llamatelemetry v0.1.0:
 - Verifies GPU is Tesla T4 or compatible (SM 7.5+)
 - Downloads Kaggle dual T4 CUDA 12.5 binaries (~961 MB)
 - Downloads llamatelemetry native extension if needed
@@ -30,8 +30,8 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llamatelemetry v2.2.0 (Kaggle dual T4)
-BINARY_VERSION = "2.2.0"
+# Configuration for llamatelemetry v0.1.0 (Kaggle dual T4)
+BINARY_VERSION = "0.1.0"
 PRIMARY_BINARY_BUNDLE = f"llamatelemetry-v{BINARY_VERSION}-cuda12-kaggle-t4x2.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llamatelemetry/llamatelemetry/releases/download"
 
@@ -41,7 +41,7 @@ HF_MODELS_REPO = "waqasm86/llamatelemetry-models"      # GGUF models
 
 # SHA256 checksums for integrity verification
 BINARY_CHECKSUMS = {
-    "llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz": "489f3df54bac24d3801af3149c346402bea099d2bd8793897aa606c5c8af0025",
+    "llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz": "489f3df54bac24d3801af3149c346402bea099d2bd8793897aa606c5c8af0025",
 }
 
 # Binary bundle preference order (HuggingFace primary → GitHub fallback)
@@ -65,7 +65,7 @@ BINARY_BUNDLE_CANDIDATES = [
 T4_BINARY_BUNDLE = PRIMARY_BINARY_BUNDLE
 T4_NATIVE_BUNDLE = "llamatelemetry-v2-native-t4.tar.gz"        # ~100 MB
 
-# Minimum compute capability for llamatelemetry v2.2.0
+# Minimum compute capability for llamatelemetry v0.1.0
 MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
@@ -110,7 +110,7 @@ def detect_platform() -> str:
     Returns:
         Platform name: "colab", "kaggle", or "local"
     """
-    # Legacy environment check (not supported in v2.2.0 runtime)
+    # Legacy environment check (not supported in v0.1.0 runtime)
     try:
         import google.colab
 
@@ -127,7 +127,7 @@ def detect_platform() -> str:
 
 def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
     """
-    Verify GPU is compatible with llamatelemetry v2.2.0 (SM 7.5).
+    Verify GPU is compatible with llamatelemetry v0.1.0 (SM 7.5).
 
     Args:
         gpu_name: GPU name from nvidia-smi
@@ -156,25 +156,25 @@ def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
         print(f"  Your GPU: {gpu_name} (SM {compute_cap})")
         print(f"  Required: Tesla T4 (SM 7.5)")
         print()
-        print("  llamatelemetry v2.2.0 is designed exclusively for Tesla T4 (SM 7.5)")
+        print("  llamatelemetry v0.1.0 is designed exclusively for Tesla T4 (SM 7.5)")
         print()
         print("  Compatible environment:")
         print("    - Kaggle notebooks (dual Tesla T4)")
         print()
-        print("  llamatelemetry v2.2.0 requires Kaggle dual Tesla T4 (SM 7.5)")
+        print("  llamatelemetry v0.1.0 requires Kaggle dual Tesla T4 (SM 7.5)")
         print()
         print("=" * 70)
         raise RuntimeError(f"GPU compute capability {compute_cap} < {MIN_COMPUTE_CAPABILITY} (minimum required)")
 
     # Tesla T4 verification
     if cc_float == 7.5 and "t4" in gpu_lower:
-        print(f"  ✅ Tesla T4 detected - Perfect for llamatelemetry v2.2.0!")
+        print(f"  ✅ Tesla T4 detected - Perfect for llamatelemetry v0.1.0!")
     elif cc_float == 7.5:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - May work but not tested")
-        print(f"      llamatelemetry v2.2.0 is optimized exclusively for Tesla T4")
+        print(f"      llamatelemetry v0.1.0 is optimized exclusively for Tesla T4")
     else:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Not tested")
-        print(f"      llamatelemetry v2.2.0 is designed for Tesla T4 (SM 7.5)")
+        print(f"      llamatelemetry v0.1.0 is designed for Tesla T4 (SM 7.5)")
 
     return True
 
@@ -286,7 +286,7 @@ def download_from_huggingface(hf_path: str, dest_path: Path, desc: str = "Downlo
     Download file from HuggingFace Hub with resume support.
     
     Args:
-        hf_path: Path within the HuggingFace repo (e.g., "v2.2.0/file.tar.gz")
+        hf_path: Path within the HuggingFace repo (e.g., "v0.1.0/file.tar.gz")
         dest_path: Local destination path
         desc: Description for logging
         
@@ -323,13 +323,13 @@ def download_from_huggingface(hf_path: str, dest_path: Path, desc: str = "Downlo
 
 def download_t4_binaries() -> None:
     """
-    Download and install Kaggle 2× T4 optimized CUDA 12.5 binaries for llamatelemetry v2.2.0.
+    Download and install Kaggle 2× T4 optimized CUDA 12.5 binaries for llamatelemetry v0.1.0.
 
     Download sources (tried in order):
     1. HuggingFace Hub (waqasm86/llamatelemetry-binaries) - faster CDN, resume support
     2. GitHub Releases - fallback
     
-    This version uses the v2.2.0 binaries built for Kaggle dual T4.
+    This version uses the v0.1.0 binaries built for Kaggle dual T4.
     Includes:
     - llama-server with multi-GPU support
     - libggml-cuda.so with FlashAttention
@@ -345,7 +345,7 @@ def download_t4_binaries() -> None:
         return
 
     print("=" * 70)
-    print("🎯 llamatelemetry v2.2.0 First-Time Setup - Kaggle 2× T4 Multi-GPU")
+    print("🎯 llamatelemetry v0.1.0 First-Time Setup - Kaggle 2× T4 Multi-GPU")
     print("=" * 70)
     print()
 
@@ -366,7 +366,7 @@ def download_t4_binaries() -> None:
     else:
         print("❌ No NVIDIA GPU detected")
         print()
-        print("llamatelemetry v2.2.0 requires Tesla T4 (SM 7.5) on Kaggle dual-GPU")
+        print("llamatelemetry v0.1.0 requires Tesla T4 (SM 7.5) on Kaggle dual-GPU")
         raise RuntimeError("No compatible NVIDIA GPU found")
 
     print(f"🌐 Platform: {platform.capitalize()}")
@@ -533,10 +533,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llamatelemetry v2.2.0 - called on first import.
+    Main bootstrap function for llamatelemetry v0.1.0 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
-    Uses v2.2.0 binaries for Kaggle dual T4.
+    Uses v0.1.0 binaries for Kaggle dual T4.
     Models are downloaded on-demand when load_model() is called.
 
     Raises:

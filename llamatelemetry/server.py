@@ -43,7 +43,7 @@ class ServerManager:
     # Binary bundles used when bootstrap-installed binaries are missing
     _BINARY_RELEASE_BASE = "https://github.com/llamatelemetry/llamatelemetry/releases/download"
     _BINARY_BUNDLES = [
-        {"version": "2.2.0", "filename": "llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
+        {"version": "0.1.0", "filename": "llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
     ]
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
@@ -201,6 +201,14 @@ class ServerManager:
         Download and extract the pre-built llama-server binary.
         Returns the path to the downloaded binary.
         """
+        def _safe_extract(tar: tarfile.TarFile, path: Path) -> None:
+            base_path = path.resolve()
+            for member in tar.getmembers():
+                member_path = (path / member.name).resolve()
+                if not str(member_path).startswith(str(base_path)):
+                    raise RuntimeError("Unsafe tar entry detected during extraction")
+            tar.extractall(path)
+
         print("llama-server not found. Downloading pre-built CUDA binary...")
 
         # Determine cache directory based on platform
@@ -258,7 +266,7 @@ class ServerManager:
                 extract_dir.mkdir(exist_ok=True)
 
                 with tarfile.open(tar_path, "r:gz") as tar:
-                    tar.extractall(extract_dir)
+                    _safe_extract(tar, extract_dir)
 
                 possible_paths = list(extract_dir.rglob("llama-server"))
                 if not possible_paths:

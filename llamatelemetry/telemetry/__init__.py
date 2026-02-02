@@ -28,6 +28,7 @@ from typing import Optional, Tuple, Any
 # Lazy imports to avoid hard dependency on opentelemetry packages
 _OTEL_AVAILABLE = False
 _GRAPHISTRY_AVAILABLE = False
+_GPU_COLLECTOR = None
 
 try:
     from opentelemetry import trace, metrics
@@ -54,9 +55,14 @@ def is_graphistry_available() -> bool:
     return _GRAPHISTRY_AVAILABLE
 
 
+def get_metrics_collector() -> Any:
+    """Return the active GPU metrics collector if initialized."""
+    return _GPU_COLLECTOR
+
+
 def setup_telemetry(
     service_name: str = "llamatelemetry",
-    service_version: str = "2.2.0",
+    service_version: str = "0.1.0",
     otlp_endpoint: Optional[str] = None,
     enable_graphistry: bool = False,
     graphistry_server: Optional[str] = None,
@@ -118,8 +124,10 @@ def setup_telemetry(
     metrics.set_meter_provider(meter_provider)
 
     # Start GPU metrics collector
+    global _GPU_COLLECTOR
     gpu_collector = GpuMetricsCollector(meter_provider)
     gpu_collector.start()
+    _GPU_COLLECTOR = gpu_collector
 
     # Optionally set up pygraphistry export
     if enable_graphistry:
@@ -137,4 +145,5 @@ __all__ = [
     "setup_telemetry",
     "is_otel_available",
     "is_graphistry_available",
+    "get_metrics_collector",
 ]

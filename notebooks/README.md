@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Tutorial Notebooks
+# llamatelemetry v0.1.0 - Tutorial Notebooks
 
 Complete tutorial notebook series for llamatelemetry on Kaggle with dual Tesla T4 GPUs.
 
@@ -6,7 +6,7 @@ Complete tutorial notebook series for llamatelemetry on Kaggle with dual Tesla T
 
 ## Overview
 
-This directory contains **13 comprehensive tutorial notebooks** covering all aspects of llamatelemetry v2.2.0, culminating in the flagship **Neural Network Visualization** trilogy (notebooks 11–13) demonstrating cutting-edge GGUF architecture, attention, and embedding analysis:
+This directory contains **13 comprehensive tutorial notebooks** covering all aspects of llamatelemetry v0.1.0, culminating in the flagship **Neural Network Visualization** trilogy (notebooks 11–13) demonstrating cutting-edge GGUF architecture, attention, and embedding analysis:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -43,26 +43,26 @@ This directory contains **13 comprehensive tutorial notebooks** covering all asp
 
 | # | Notebook | Description | Time |
 |---|----------|-------------|------|
-| 01 | [Quick Start](01-quickstart-llamatelemetry-v2.2.0.ipynb) | Get started in 5 minutes with basic setup and first query | 5 min |
-| 02 | [Llama Server Setup](02-llama-server-setup-llamatelemetry-v2.2.0.ipynb) | Deep dive into server configuration and lifecycle management | 15 min |
-| 03 | [Multi-GPU Inference](03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb) | Use both T4 GPUs with tensor-split for larger models | 20 min |
+| 01 | [Quick Start](01-quickstart-llamatelemetry-v0.1.0.ipynb) | Get started in 5 minutes with basic setup and first query | 5 min |
+| 02 | [Llama Server Setup](02-llama-server-setup-llamatelemetry-v0.1.0.ipynb) | Deep dive into server configuration and lifecycle management | 15 min |
+| 03 | [Multi-GPU Inference](03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb) | Use both T4 GPUs with tensor-split for larger models | 20 min |
 
 ### Intermediate Level
 
 | # | Notebook | Description | Time |
 |---|----------|-------------|------|
-| 04 | [GGUF Quantization](04-gguf-quantization-llamatelemetry-v2.2.0.ipynb) | Understanding GGUF format, K-quants, I-quants, and parsing | 20 min |
-| 05 | [Unsloth Integration](05-unsloth-integration-llamatelemetry-v2.2.0.ipynb) | Fine-tune with Unsloth → export GGUF → deploy with llamatelemetry | 30 min |
-| 06 | [Split-GPU Graphistry](06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb) | LLM on GPU 0 + RAPIDS/Graphistry on GPU 1 | 30 min |
+| 04 | [GGUF Quantization](04-gguf-quantization-llamatelemetry-v0.1.0.ipynb) | Understanding GGUF format, K-quants, I-quants, and parsing | 20 min |
+| 05 | [Unsloth Integration](05-unsloth-integration-llamatelemetry-v0.1.0.ipynb) | Fine-tune with Unsloth → export GGUF → deploy with llamatelemetry | 30 min |
+| 06 | [Split-GPU Graphistry](06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb) | LLM on GPU 0 + RAPIDS/Graphistry on GPU 1 | 30 min |
 
 ### Advanced Level
 
 | # | Notebook | Description | Time |
 |---|----------|-------------|------|
-| 07 | [Knowledge Graph Extraction](07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | Extract knowledge graphs from text using LLM + Graphistry visualization | 30 min |
-| 08 | [Document Network Analysis](08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb) | Document similarity networks with GPU-accelerated graph analytics | 35 min |
-| 09 | [Large Models](09-large-models-kaggle-llamatelemetry-v2-2-0.ipynb) | Deploy large models (13B+) on dual T4 with tensor-split and performance optimization | 30 min |
-| 10 | [Complete Workflow](10-complete-workflow-llamatelemetry-v2-2-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → Visualization → API | 50 min |
+| 07 | [Knowledge Graph Extraction](07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb) | Extract knowledge graphs from text using LLM + Graphistry visualization | 30 min |
+| 08 | [Document Network Analysis](08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb) | Document similarity networks with GPU-accelerated graph analytics | 35 min |
+| 09 | [Large Models](09-large-models-kaggle-llamatelemetry-v0-1-0.ipynb) | Deploy large models (13B+) on dual T4 with tensor-split and performance optimization | 30 min |
+| 10 | [Complete Workflow](10-complete-workflow-llamatelemetry-v0-1-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → Visualization → API | 50 min |
 
 ### Advanced Visualization ⭐
 
@@ -78,7 +78,7 @@ This directory contains **13 comprehensive tutorial notebooks** covering all asp
 
 ### 01 - Quick Start
 
-**File:** `01-quickstart-llamatelemetry-v2.2.0.ipynb`
+**File:** `01-quickstart-llamatelemetry-v0.1.0.ipynb`
 
 Get started with llamatelemetry in just 5 minutes. This notebook covers:
 
@@ -104,7 +104,7 @@ server.start_with_config(config)
 
 ### 02 - Llama Server Setup
 
-**File:** `02-llama-server-setup-llamatelemetry-v2.2.0.ipynb`
+**File:** `02-llama-server-setup-llamatelemetry-v0.1.0.ipynb`
 
 Deep dive into server configuration and management:
 
@@ -121,7 +121,7 @@ Deep dive into server configuration and management:
 
 ### 03 - Multi-GPU Inference
 
-**File:** `03-multi-gpu-inference-llamatelemetry-v2.2.0.ipynb`
+**File:** `03-multi-gpu-inference-llamatelemetry-v0.1.0.ipynb`
 
 Harness both Kaggle T4 GPUs for larger models:
 
@@ -148,7 +148,7 @@ config = ServerConfig(
 
 ### 04 - GGUF Quantization
 
-**File:** `04-gguf-quantization-llamatelemetry-v2.2.0.ipynb`
+**File:** `04-gguf-quantization-llamatelemetry-v0.1.0.ipynb`
 
 Master the GGUF format and quantization:
 
@@ -166,7 +166,7 @@ Master the GGUF format and quantization:
 
 ### 05 - Unsloth Integration
 
-**File:** `05-unsloth-integration-llamatelemetry-v2.2.0.ipynb`
+**File:** `05-unsloth-integration-llamatelemetry-v0.1.0.ipynb`
 
 Complete Unsloth fine-tuning → llamatelemetry deployment workflow:
 
@@ -188,7 +188,7 @@ Unsloth (Train) → GGUF (Export) → llamatelemetry (Deploy)
 
 ### 06 - Split-GPU Graphistry
 
-**File:** `06-split-gpu-graphistry-llamatelemetry-v2.2.0.ipynb`
+**File:** `06-split-gpu-graphistry-llamatelemetry-v0.1.0.ipynb`
 
 Advanced architecture: LLM + RAPIDS on separate GPUs:
 
@@ -211,7 +211,7 @@ GPU 1: RAPIDS cuDF, cuGraph, Graphistry
 
 ### 07 - Knowledge Graph Extraction with Graphistry
 
-**File:** `07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb`
+**File:** `07-knowledge-graph-extraction-graphistry-v0.1.0.ipynb`
 
 Extract knowledge graphs from unstructured text using LLM-powered entity recognition and visualize with Graphistry:
 
@@ -251,7 +251,7 @@ g.edges(relationships_df).nodes(entities_df).plot()
 
 ### 08 - Document Network Analysis with Graphistry
 
-**File:** `08-document-network-analysis-graphistry-llamatelemetry-v2-2-0.ipynb`
+**File:** `08-document-network-analysis-graphistry-llamatelemetry-v0-1-0.ipynb`
 
 Analyze document similarity and topic clustering using GPU-accelerated graph analytics:
 
@@ -299,7 +299,7 @@ g.plot()
 
 ### 09 - Large Models on Kaggle
 
-**File:** `09-large-models-kaggle-llamatelemetry-v2.2.0.ipynb`
+**File:** `09-large-models-kaggle-llamatelemetry-v0.1.0.ipynb`
 
 Run 70B models on Kaggle's dual T4 setup:
 
@@ -327,7 +327,7 @@ config = ServerConfig(
 
 ### 10 - Complete Workflow
 
-**File:** `10-complete-workflow-llamatelemetry-v2.2.0.ipynb`
+**File:** `10-complete-workflow-llamatelemetry-v0.1.0.ipynb`
 
 End-to-end production workflow:
 
@@ -502,7 +502,7 @@ Want to improve these notebooks? See the [Contributing Guide](../CONTRIBUTING.md
 
 **File:** `11-gguf-neural-network-graphistry-vis-executed-2.ipynb`
 
-**THE flagship demonstration of llamatelemetry v2.2.0's cutting-edge visualization capabilities** - A tour de force showing how to visualize the internal architecture of GGUF quantized models running on dual Tesla T4 GPUs.
+**THE flagship demonstration of llamatelemetry v0.1.0's cutting-edge visualization capabilities** - A tour de force showing how to visualize the internal architecture of GGUF quantized models running on dual Tesla T4 GPUs.
 
 #### 🎯 Overview
 
@@ -581,7 +581,7 @@ GPU 0 (Nvidia T4 - 15GB)          GPU 1 (Nvidia T4 - 15GB)
 
 #### 🔬 Technical Workflow
 
-**Phase 1: Setup** → GPU detection, install llamatelemetry v2.2.0 + RAPIDS 25.6 + Graphistry
+**Phase 1: Setup** → GPU detection, install llamatelemetry v0.1.0 + RAPIDS 25.6 + Graphistry
 
 **Phase 2: Model Serving** → Download model, start llama-server on GPU 0 with `tensor_split="1.0,0.0"`
 
@@ -603,9 +603,9 @@ GPU 0 (Nvidia T4 - 15GB)          GPU 1 (Nvidia T4 - 15GB)
 6. **Quantization Analysis** - Understand Q4_K_M block structure and memory layout
 7. **Production Deployment** - Serve GGUF models via llama-server with health monitoring
 
-#### 🎯 Key Insights: llamatelemetry v2.2.0 Capabilities
+#### 🎯 Key Insights: llamatelemetry v0.1.0 Capabilities
 
-This notebook proves that **llamatelemetry v2.2.0** enables:
+This notebook proves that **llamatelemetry v0.1.0** enables:
 
 **Core Capabilities:**
 - ✅ Seamless GGUF integration via llama.cpp
@@ -649,7 +649,7 @@ This notebook proves that **llamatelemetry v2.2.0** enables:
 
 #### 🛠️ Technical Stack
 
-**llamatelemetry v2.2.0:**
+**llamatelemetry v0.1.0:**
 - `ServerManager` - llama-server lifecycle management
 - `LlamaCppClient` - API client for inference
 - Built-in CUDA binaries for T4 GPUs
@@ -731,7 +731,7 @@ HTML Dashboard (Local)
 
 | Version | Date | Changes |
 |---------|------|---------|
-| v2.2.0 | 2026-02-01 | Complete 13-notebook series with visualization trilogy |
+| v0.1.0 | 2026-02-01 | Complete 13-notebook series with visualization trilogy |
 | | | - Notebooks 01-06: Core fundamentals and split-GPU architecture |
 | | | - Notebooks 07-08: Knowledge graphs and document network analysis |
 | | | - Notebook 09: Large model deployment on dual T4 |

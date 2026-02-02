@@ -2,10 +2,10 @@
 
 This directory contains example scripts and notebooks for using llamatelemetry.
 
-## Kaggle Examples (v2.2.0)
+## Kaggle Examples (v0.1.0)
 
 ### Gemma 3-1B + Unsloth Tutorial
-Complete tutorial for using llamatelemetry v2.2.0 with Gemma 3-1B on Kaggle dual Tesla T4.
+Complete tutorial for using llamatelemetry v0.1.0 with Gemma 3-1B on Kaggle dual Tesla T4.
 
 **Features demonstrated:**
 - Binary auto-download on first import

@@ -1,4 +1,4 @@
-# llamatelemetry v2.2.0 - Troubleshooting Guide
+# llamatelemetry v0.1.0 - Troubleshooting Guide
 
 Common issues and solutions for llamatelemetry on Kaggle and other environments.
 
@@ -78,7 +78,7 @@ ModuleNotFoundError: No module named 'llamatelemetry'
 **Solution:**
 ```python
 # Install llamatelemetry
-!pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 
 # Restart kernel after installation
 import IPython

@@ -7,7 +7,7 @@ llamatelemetry-pdf-portfolio/
 ├── compile.sh                      # Automated compilation script
 ├── .gitignore                      # Git ignore rules for build artifacts
 ├── llamatelemetry_v2_2_0_portfolio.pdf     # Compiled portfolio (506 KB, 20 pages)
-├── llamatelemetry_v2_2_0_portfolio.tex     # LaTeX source code (47 KB)
+├── llamatelemetry_v0_1_0_portfolio.tex     # LaTeX source code (47 KB)
 ├── Makefile                        # Build automation
 ├── README.md                       # Comprehensive documentation
 └── QUICK_START.md                  # This file
@@ -25,9 +25,9 @@ make
 ./compile.sh
 
 # Option 3: Manual compilation
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
-pdflatex -interaction=nonstopmode llamatelemetry_v2_2_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
+pdflatex -interaction=nonstopmode llamatelemetry_v0_1_0_portfolio.tex
 ```
 
 ### Clean Build Artifacts
@@ -65,7 +65,7 @@ cd /media/waqasm86/External1/Project-Nvidia-Office/llamatelemetry
 git add llamatelemetry-pdf-portfolio/
 
 # Commit
-git commit -m "Add llamatelemetry v2.2.0 professional portfolio with LaTeX source"
+git commit -m "Add llamatelemetry v0.1.0 professional portfolio with LaTeX source"
 
 # Push to GitHub (when ready)
 git push origin main
@@ -77,7 +77,7 @@ The `.gitignore` file ensures only source files are tracked:
 
 **Tracked:**
 - `llamatelemetry_v2_2_0_portfolio.pdf` (compiled portfolio)
-- `llamatelemetry_v2_2_0_portfolio.tex` (LaTeX source)
+- `llamatelemetry_v0_1_0_portfolio.tex` (LaTeX source)
 - `Makefile` (build automation)
 - `compile.sh` (compilation script)
 - `README.md` (documentation)
@@ -93,10 +93,10 @@ The `.gitignore` file ensures only source files are tracked:
 ### `llamatelemetry_v2_2_0_portfolio.pdf`
 - **Size:** 506 KB
 - **Pages:** 20
-- **Content:** Professional portfolio showcasing llamatelemetry v2.2.0 project
+- **Content:** Professional portfolio showcasing llamatelemetry v0.1.0 project
 - **Highlights:** 5 TikZ diagrams, 14 tables, Notebook 11 flagship section
 
-### `llamatelemetry_v2_2_0_portfolio.tex`
+### `llamatelemetry_v0_1_0_portfolio.tex`
 - **Size:** 47 KB
 - **Lines:** ~1,350
 - **Sections:** 10 major sections
@@ -161,6 +161,6 @@ For issues or questions about the portfolio:
 
 ## Version
 
-**Portfolio Version:** 2.2.0
+**Portfolio Version:** 0.1.0
 **Created:** January 25, 2026
 **Last Updated:** January 25, 2026

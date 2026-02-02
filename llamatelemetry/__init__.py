@@ -5,7 +5,7 @@ Streamlined PyTorch-style package with hybrid bootstrap architecture.
 Lightweight Python package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-Version 2.2.0 - Kaggle dual Tesla T4 (SM 7.5) optimized release.
+Version 0.1.0 - Initial release (renamed from llcuda, built on llama.cpp binaries v0.1.0).
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -30,6 +30,7 @@ Key Features:
 """
 
 from typing import Optional, List, Dict, Any
+from contextlib import nullcontext
 import os
 import sys
 import subprocess
@@ -176,7 +177,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "2.2.0"  # Install from GitHub - binaries downloaded from GitHub Releases
+__version__ = "0.1.0"  # SDK version (binary artifact is llama.cpp v0.1.0)
 __all__ = [
     # Core classes
     "InferenceEngine",
@@ -234,7 +235,12 @@ class InferenceEngine:
         ...     result = engine.infer("Hello!")
     """
 
-    def __init__(self, server_url: str = "http://127.0.0.1:8090"):
+    def __init__(
+        self,
+        server_url: str = "http://127.0.0.1:8090",
+        enable_telemetry: bool = False,
+        telemetry_config: Optional[Dict[str, Any]] = None,
+    ):
         """
         Initialize the inference engine.
 
@@ -244,13 +250,51 @@ class InferenceEngine:
         self.server_url = server_url
         self._model_loaded = False
         self._server_manager: Optional[ServerManager] = None
+        self._model_path: Optional[Path] = None
+        self._model_name: Optional[str] = None
         self._metrics = {
             "requests": 0,
             "total_tokens": 0,
             "total_latency_ms": 0.0,
             "latencies": [],
         }
+        self._telemetry_enabled = enable_telemetry
+        self._telemetry_config = telemetry_config or {}
+        self._tracer = None
+        self._meter = None
+        self._metrics_collector = None
 
+        if self._telemetry_enabled:
+            self._init_telemetry()
+
+    def _init_telemetry(self) -> None:
+        """Initialize OpenTelemetry tracing and metrics if available."""
+        try:
+            from .telemetry import setup_telemetry, get_metrics_collector
+
+            tracer, meter = setup_telemetry(
+                service_name=self._telemetry_config.get(
+                    "service_name", "llamatelemetry"
+                ),
+                service_version=self._telemetry_config.get(
+                    "service_version", __version__
+                ),
+                otlp_endpoint=self._telemetry_config.get("otlp_endpoint"),
+                enable_graphistry=self._telemetry_config.get(
+                    "enable_graphistry", False
+                ),
+                graphistry_server=self._telemetry_config.get("graphistry_server"),
+            )
+            self._tracer = tracer
+            self._meter = meter
+            self._metrics_collector = get_metrics_collector()
+        except Exception:
+            # Telemetry is optional; fail silently if not available
+            self._tracer = None
+            self._meter = None
+            self._metrics_collector = None
+
+    @staticmethod
     def check_for_updates():
         try:
             response = requests.get("https://api.github.com/repos/llamatelemetry/llamatelemetry/releases/latest", timeout=2)
@@ -262,8 +306,7 @@ class InferenceEngine:
         except Exception:
             pass  # Silent fail
 
-    # Call once on import (optional)
-    check_for_updates()
+    # Update checks are opt-in; call InferenceEngine.check_for_updates() manually.
 
     def check_server(self) -> bool:
         """
@@ -290,7 +333,7 @@ class InferenceEngine:
         interactive_download: bool = True,
         silent: bool = False,
         **kwargs,
-    ) -> bool:
+    ) -> Optional[bool]:
         """
         Load a GGUF model for inference with smart loading and auto-configuration.
 
@@ -427,6 +470,8 @@ class InferenceEngine:
                 )
 
         self._model_loaded = True
+        self._model_path = model_path
+        self._model_name = model_path.name
 
         if verbose:
             print(f"\n✓ Model loaded and ready for inference")
@@ -462,74 +507,129 @@ class InferenceEngine:
             InferResult object with generated text and metrics
         """
         start_time = time.time()
+        prompt_tokens = len(prompt.split()) if prompt else 0
 
-        payload = {
-            "prompt": prompt,
-            "n_predict": max_tokens,
-            "temperature": temperature,
-            "top_p": top_p,
-            "top_k": top_k,
-            "stream": False,
-        }
+        span_cm = nullcontext()
+        if self._tracer:
+            span_cm = self._tracer.start_as_current_span("llm.inference")
 
-        if seed > 0:
-            payload["seed"] = seed
+        with span_cm as span:
+            payload = {
+                "prompt": prompt,
+                "n_predict": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+                "top_k": top_k,
+                "stream": False,
+            }
 
-        if stop_sequences:
-            payload["stop"] = stop_sequences
+            if seed > 0:
+                payload["seed"] = seed
 
-        try:
-            response = requests.post(
-                f"{self.server_url}/completion", json=payload, timeout=120
-            )
+            if stop_sequences:
+                payload["stop"] = stop_sequences
 
-            latency_ms = (time.time() - start_time) * 1000
-
-            if response.status_code == 200:
-                data = response.json()
-
-                text = data.get("content", "")
-                tokens_generated = data.get("tokens_predicted", len(text.split()))
-
-                # Update metrics
-                self._metrics["requests"] += 1
-                self._metrics["total_tokens"] += tokens_generated
-                self._metrics["total_latency_ms"] += latency_ms
-                self._metrics["latencies"].append(latency_ms)
-
-                result = InferResult()
-                result.success = True
-                result.text = text
-                result.tokens_generated = tokens_generated
-                result.latency_ms = latency_ms
-                result.tokens_per_sec = (
-                    tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0
+            try:
+                response = requests.post(
+                    f"{self.server_url}/completion", json=payload, timeout=120
                 )
 
-                return result
-            else:
+                latency_ms = (time.time() - start_time) * 1000
+
+                if response.status_code == 200:
+                    data = response.json()
+
+                    text = data.get("content", "")
+                    tokens_generated = data.get("tokens_predicted", len(text.split()))
+
+                    # Update metrics
+                    self._metrics["requests"] += 1
+                    self._metrics["total_tokens"] += tokens_generated
+                    self._metrics["total_latency_ms"] += latency_ms
+                    self._metrics["latencies"].append(latency_ms)
+
+                    if self._metrics_collector:
+                        try:
+                            self._metrics_collector.record_inference(
+                                latency_ms=latency_ms,
+                                tokens=tokens_generated,
+                                model=self._model_name or "",
+                            )
+                        except Exception:
+                            pass
+
+                    if span:
+                        try:
+                            from .telemetry.tracer import annotate_inference_span
+
+                            annotate_inference_span(
+                                span=span,
+                                model=self._model_name or "",
+                                prompt_tokens=prompt_tokens,
+                                output_tokens=tokens_generated,
+                                latency_ms=latency_ms,
+                                gpu_id=0,
+                                split_mode="none",
+                            )
+                        except Exception:
+                            pass
+
+                    result = InferResult()
+                    result.success = True
+                    result.text = text
+                    result.tokens_generated = tokens_generated
+                    result.latency_ms = latency_ms
+                    result.tokens_per_sec = (
+                        tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0
+                    )
+
+                    return result
+                else:
+                    result = InferResult()
+                    result.success = False
+                    result.error_message = (
+                        f"Server error: {response.status_code} - {response.text}"
+                    )
+                    if span:
+                        try:
+                            span.set_attribute("llm.error", result.error_message)
+                        except Exception:
+                            pass
+                    return result
+
+            except requests.exceptions.Timeout as e:
                 result = InferResult()
                 result.success = False
-                result.error_message = (
-                    f"Server error: {response.status_code} - {response.text}"
-                )
+                result.error_message = "Request timeout - server took too long to respond"
+                if span:
+                    try:
+                        span.record_exception(e)
+                        span.set_attribute("llm.error", result.error_message)
+                    except Exception:
+                        pass
                 return result
-
-        except requests.exceptions.Timeout:
-            result = InferResult()
-            result.success = False
-            result.error_message = "Request timeout - server took too long to respond"
-            return result
-        except requests.exceptions.RequestException as e:
-            result = InferResult()
-            result.success = False
-            result.error_message = f"Connection error: {str(e)}"
-            return result
-        except Exception as e:
-            result = InferResult()
-            result.success = False
-            result.error_message = f"Unexpected error: {str(e)}"
-            return result
+            except requests.exceptions.RequestException as e:
+                result = InferResult()
+                result.success = False
+                result.error_message = f"Connection error: {str(e)}"
+                if span:
+                    try:
+                        span.record_exception(e)
+                        span.set_attribute("llm.error", result.error_message)
+                    except Exception:
+                        pass
+                return result
+            except Exception as e:
+                result = InferResult()
+                result.success = False
+                result.error_message = f"Unexpected error: {str(e)}"
+                if span:
+                    try:
+                        span.record_exception(e)
+                        span.set_attribute("llm.error", result.error_message)
+                    except Exception:
+                        pass
+                return result
 
     def infer_stream(
         self,

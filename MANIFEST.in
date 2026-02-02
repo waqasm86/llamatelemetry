@@ -1,4 +1,4 @@
-# MANIFEST.in for llamatelemetry v2.2.0
+# MANIFEST.in for llamatelemetry v0.1.0
 
 # Documentation
 include README.md

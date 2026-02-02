@@ -1,8 +1,8 @@
-# llamatelemetry v2.2.0 - Installation Guide (Kaggle Only)
+# llamatelemetry v0.1.0 - Installation Guide (Kaggle Only)
 
-This guide covers installation for llamatelemetry v2.2.0, the CUDA 12-first backend for Unsloth on Kaggle.
+This guide covers installation for llamatelemetry v0.1.0, the CUDA 12-first backend for Unsloth on Kaggle.
 
-**IMPORTANT:** llamatelemetry v2.2.0 is **Kaggle-specific only**. It is optimized for dual Tesla T4 GPUs (15GB × 2, SM 7.5) and is not designed for other environments.
+**IMPORTANT:** llamatelemetry v0.1.0 is **Kaggle-specific only**. It is optimized for dual Tesla T4 GPUs (15GB × 2, SM 7.5) and is not designed for other environments.
 
 ---
 
@@ -52,7 +52,7 @@ This guide covers installation for llamatelemetry v2.2.0, the CUDA 12-first back
 
 ### One-Line Install (Recommended)
 ```bash
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 ### With Verification
@@ -68,10 +68,10 @@ print(f"✅ llamatelemetry {llamatelemetry.__version__} installed")
 
 ### Method 1: From GitHub (Recommended - Stable Release)
 
-Install the stable v2.2.0 release directly from GitHub:
+Install the stable v0.1.0 release directly from GitHub:
 
 ```bash
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 **Why This Method:**
@@ -100,19 +100,19 @@ Download pre-built wheel from HuggingFace:
 
 ```bash
 # Download wheel from HuggingFace
-!wget https://huggingface.co/waqasm86/llamatelemetry/resolve/main/llamatelemetry-2.2.0-py3-none-any.whl
+!wget https://huggingface.co/waqasm86/llamatelemetry/resolve/main/llamatelemetry-0.1.0-py3-none-any.whl
 
 # Install
-!pip install llamatelemetry-2.2.0-py3-none-any.whl
+!pip install llamatelemetry-0.1.0-py3-none-any.whl
 ```
 
 **Why This Method:**
 - ✅ Alternative if GitHub is blocked
-- ✅ Same stable v2.2.0 release
+- ✅ Same stable v0.1.0 release
 - ✅ Hosted on HuggingFace mirror
 
 **Note:** llamatelemetry is **NOT** available on PyPI. We distribute only via:
-1. **GitHub** (primary): `git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0`
+1. **GitHub** (primary): `git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0`
 2. **HuggingFace** (mirror): `https://huggingface.co/waqasm86/llamatelemetry`
 
 ---
@@ -125,7 +125,7 @@ Download pre-built wheel from HuggingFace:
 # Cell 1: Configure Kaggle (Accelerator: GPU T4 × 2, Internet: Enabled)
 
 # Cell 2: Install llamatelemetry
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 
 # Cell 3: Verify installation
 import llamatelemetry
@@ -139,7 +139,7 @@ print(f"llamatelemetry {llamatelemetry.__version__}")
 
 ```python
 # Cell 1: Install dependencies
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 !pip install -q huggingface_hub
 
 # Cell 2: Download small GGUF model (1B-5B)
@@ -167,7 +167,7 @@ server.start_server(
 
 | Setting | Value | Why |
 |---------|-------|-----|
-| **Accelerator** | GPU T4 × 2 | llamatelemetry v2.2.0 requires dual T4 |
+| **Accelerator** | GPU T4 × 2 | llamatelemetry v0.1.0 requires dual T4 |
 | **Internet** | Enabled | For pip install and binary download |
 | **Persistence** | Files only | Keep downloaded models |
 | **Python** | 3.11+ | Pre-installed on Kaggle |
@@ -186,13 +186,13 @@ GitHub Repository (Code Only):
 └─ Source code only
 
 GitHub Releases (Binary Package):
-├─ llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+├─ llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz
 ├─ Size: ~961 MB
 ├─ Contents: llama.cpp binaries + NCCL libraries
 └─ Downloaded automatically on first import
 
 HuggingFace Mirror (Alternative):
-├─ Wheel: llamatelemetry-2.2.0-py3-none-any.whl
+├─ Wheel: llamatelemetry-0.1.0-py3-none-any.whl
 └─ Same binaries downloaded from GitHub Releases
 ```
 
@@ -214,11 +214,11 @@ import llamatelemetry  # Downloads to /kaggle/working/.cache/llamatelemetry/ or 
 
 ```bash
 # Download from GitHub Releases
-!wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v2.2.0/llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+!wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v0.1.0/llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz
 
 # Extract to Kaggle cache directory
 !mkdir -p /kaggle/working/.cache/llamatelemetry
-!tar -xzf llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C /kaggle/working/.cache/llamatelemetry/
+!tar -xzf llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz -C /kaggle/working/.cache/llamatelemetry/
 
 # Verify binaries
 !ls /kaggle/working/.cache/llamatelemetry/bin/
@@ -352,7 +352,7 @@ for name, status, info in verify_llamatelemetry():
 ```bash
 pip uninstall llamatelemetry
 pip cache purge
-pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 #### 2. CUDA Not Found
@@ -374,9 +374,9 @@ nvidia-smi
 **Solution:**
 ```bash
 # Manual download
-wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v2.2.0/llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+wget https://github.com/llamatelemetry/llamatelemetry/releases/download/v0.1.0/llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz
 mkdir -p ~/.cache/llamatelemetry
-tar -xzf llamatelemetry-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llamatelemetry/
+tar -xzf llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llamatelemetry/
 ```
 
 #### 4. Permission Denied
@@ -398,7 +398,7 @@ chmod +x ~/.cache/llamatelemetry/bin/*
 python --version
 
 # Use Python 3.11+
-python3.11 -m pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+python3.11 -m pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 #### 6. Conflicting Packages
@@ -410,7 +410,7 @@ python3.11 -m pip install git+https://github.com/llamatelemetry/llamatelemetry.g
 # Create fresh environment
 python -m venv llamatelemetry-env
 source llamatelemetry-env/bin/activate
-pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0
+pip install git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
 ```
 
 ###Getting Help
@@ -428,7 +428,7 @@ If issues persist:
 ### Distribution Clarification
 
 **Where llamatelemetry is Available:**
-- ✅ GitHub: `git+https://github.com/llamatelemetry/llamatelemetry.git@v2.2.0` (Primary)
+- ✅ GitHub: `git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0` (Primary)
 - ✅ HuggingFace: `https://huggingface.co/waqasm86/llamatelemetry` (Mirror)
 
 **Where llamatelemetry is NOT Available:**
@@ -436,7 +436,7 @@ If issues persist:
 - ❌ piwheels (piwheels.org) - Not listed on piwheels
 
 **Why Not PyPI?**
-llamatelemetry v2.2.0 is Kaggle-specific with large binary dependencies (961 MB). GitHub Releases provides better distribution for large packages compared to PyPI's size limits.
+llamatelemetry v0.1.0 is Kaggle-specific with large binary dependencies (961 MB). GitHub Releases provides better distribution for large packages compared to PyPI's size limits.
 
 ---
 
