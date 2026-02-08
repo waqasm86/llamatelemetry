@@ -1,42 +1,10 @@
-# llamatelemetry v0.1.0 Build Guide (Kaggle Dual T4)
+# Build Guide
 
-This guide is scoped to **llamatelemetry v0.1.0** and the **Kaggle dual Tesla T4** target.
+This guide covers building CUDA binaries for llamatelemetry.
 
-**Runtime Target:** Kaggle notebooks only (GPU T4 x2)
+## Typical Flow
+- Build llama.cpp with CUDA 12
+- Bundle binaries for release distribution
+- Validate on Kaggle dual T4
 
----
-
-## When You Need This
-
-Only use this guide if you are **rebuilding binaries** for the v0.1.0 Kaggle target. Most users should rely on the prebuilt GitHub Release bundle.
-
----
-
-## Build Summary (High-Level)
-
-1. Build llama.cpp with CUDA 12.x for **SM 7.5 (T4)**.
-2. Package `bin/` and `lib/` into:
-   - `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz`
-3. Upload the bundle to GitHub Releases.
-
----
-
-## Recommended Build Environment
-
-- Kaggle notebook (GPU T4 x2)
-- CUDA 12.x
-- Python 3.11+
-
----
-
-## Verification (Kaggle)
-
-```python
-!pip install -q --no-cache-dir git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
-import llamatelemetry
-print(llamatelemetry.__version__)
-```
-
----
-
-For release steps, see `docs/GITHUB_RELEASE_GUIDE.md`.
+For scripts, see `scripts/` and the release workflow.

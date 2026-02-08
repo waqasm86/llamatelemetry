@@ -1,13 +1,3 @@
-# llamatelemetry v0.1.0 - Kaggle Dual T4 CUDA 12 Binaries
+# Release Notes (Simplified)
 
-**Target:** Kaggle notebooks only (dual Tesla T4, SM 7.5)
-
-**Highlights:**
-- CUDA 12-first inference bundle
-- Split-GPU workflow (GPU 0: LLM, GPU 1: Graphistry/RAPIDS)
-- Optimized for GGUF 1B–5B models
-- Distribution via GitHub Releases
-
-**Bundle:** `llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz`
-
-For the full release process, see `docs/GITHUB_RELEASE_GUIDE.md`.
+See `CHANGELOG.md` and `docs/GITHUB_RELEASE_GUIDE.md` for up-to-date release flow.

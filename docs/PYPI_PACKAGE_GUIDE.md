@@ -1,6 +1,3 @@
-# PyPI Packaging (Not Used for v0.1.0)
+# PyPI Package Guide (Legacy)
 
-llamatelemetry v0.1.0 is **not** published to PyPI. The v0.1.0 distribution is **GitHub Releases only** (with optional HuggingFace mirror).
-
-For release steps, see:
-- `docs/GITHUB_RELEASE_GUIDE.md`
+llamatelemetry v0.1.0 is not published on PyPI. Use GitHub releases and direct install.
