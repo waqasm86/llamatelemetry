@@ -416,7 +416,7 @@ print("Graphistry configured!")
 **Cell 17-18: Transform Spans to Graph Data**
 ```python
 # Cell 17: Extract span data
-import pandas as pd
+import cudf
 
 span_data = []
 for span in finished_spans:
@@ -432,21 +432,20 @@ for span in finished_spans:
         "attributes": dict(span.attributes) if span.attributes else {},
     })
 
-df_spans = pd.DataFrame(span_data)
+df_spans = cudf.DataFrame(span_data)
 print(f"Span DataFrame shape: {df_spans.shape}")
 print(df_spans.head())
 
 # Cell 18: Create edges (parent-child relationships)
-edges = []
-for _, span in df_spans.iterrows():
-    if span["parent_span_id"]:
-        edges.append({
-            "source": span["parent_span_id"],
-            "destination": span["span_id"],
-            "trace_id": span["trace_id"],
-        })
-
-df_edges = pd.DataFrame(edges) if edges else pd.DataFrame(columns=["source", "destination", "trace_id"])
+if len(df_spans) > 0:
+    df_edges = df_spans[df_spans["parent_span_id"].notnull()][
+        ["parent_span_id", "span_id", "trace_id"]
+    ].rename(columns={
+        "parent_span_id": "source",
+        "span_id": "destination",
+    })
+else:
+    df_edges = cudf.DataFrame(columns=["source", "destination", "trace_id"])
 print(f"Edges DataFrame shape: {df_edges.shape}")
 ```
 
