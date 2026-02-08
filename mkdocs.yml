@@ -1,0 +1,20 @@
+site_name: llamatelemetry
+site_url: https://llamatelemetry.readthedocs.io/
+repo_url: https://github.com/llamatelemetry/llamatelemetry
+edit_uri: blob/main/
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+  - Quick Start: QUICK_START_GUIDE.md
+  - Installation: INSTALLATION.md
+  - Architecture: ARCHITECTURE.md
+  - Integration: INTEGRATION_GUIDE.md
+  - Configuration: CONFIGURATION.md
+  - Troubleshooting: TROUBLESHOOTING.md
+  - API Reference: API_REFERENCE.md
+  - Quick Reference: QUICK_REFERENCE.md
+  - Kaggle Guide: KAGGLE_GUIDE.md
+  - GGUF Guide: GGUF_GUIDE.md
+  - Notebooks Guide: NOTEBOOKS_GUIDE.md
