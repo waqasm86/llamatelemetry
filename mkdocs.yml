@@ -12,6 +12,19 @@ copyright: Copyright &copy; 2026 Waqas Muhammad
 docs_dir: docs
 site_dir: site
 
+# Exclude files from build
+exclude_docs: |
+  huggingface/
+  reports/
+  guides/
+  reference/
+  FINAL_WORKFLOW_GUIDE.md
+  GITHUB_RELEASE_NOTES_SIMPLIFIED.md
+  INDEX.md
+  LINKEDIN_POST_V0.1.0.md
+  PYPI_PACKAGE_GUIDE.md
+  RELEASE_SUMMARY.md
+
 # Theme configuration
 theme:
   name: material
