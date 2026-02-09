@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-02-09
+
+### Added - Observability Trilogy Completion
+
+**New Notebooks:**
+- ⭐ **Notebook 15: Real-Time Performance Monitoring** (30 min)
+  - Live Plotly FigureWidget dashboards with auto-updating charts
+  - llama.cpp `/metrics` endpoint integration (Prometheus format)
+  - PyNVML GPU monitoring (utilization, memory, temperature, power draw)
+  - Request queue monitoring via `/slots` endpoint
+  - Background metrics collection with threading
+  - 6-panel real-time dashboard
+
+- ⭐ **Notebook 16: Production Observability Stack** (45 min) 🏆
+  - Complete multi-layer observability (OpenTelemetry + llama.cpp + GPU + model introspection)
+  - Unified visualization dashboard (Graphistry 2D + Plotly 2D/3D)
+  - Production-grade instrumentation patterns
+  - Real-time monitoring panels with gauges
+  - Flagship comprehensive notebook integrating all three core objectives
+
+**Documentation Updates:**
+- Updated `README.md` with new notebooks and enhanced feature descriptions
+- Updated `docs/NOTEBOOKS_GUIDE.md` with complete 16-notebook catalog and learning paths
+- Updated `notebooks/README.md` with detailed notebook descriptions and highlights
+- Added observability trilogy comparison table
+
+**Observability Trilogy Complete:**
+- Notebook 14: OpenTelemetry basics (OTLP export, semantic attributes)
+- Notebook 15: Real-time monitoring (live dashboards, llama.cpp metrics)
+- Notebook 16: Production stack (multi-source telemetry, unified visualization)
+
+**Total Notebooks:** 16 (5.5 hours learning path)
+
+---
+
 ## [0.1.0] - 2026-02-02
 
 ### 🎉 Initial Release - llamatelemetry (renamed from llcuda)

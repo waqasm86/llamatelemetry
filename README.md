@@ -1,20 +1,23 @@
 # llamatelemetry v0.1.0
 
-CUDA-first OpenTelemetry Python SDK for LLM inference observability and explainability.
+**CUDA-first OpenTelemetry Python SDK for LLM inference observability and explainability**
 
 llamatelemetry combines:
-- llama.cpp GGUF inference
-- NCCL-aware multi-GPU execution
-- OpenTelemetry traces + metrics
-- GPU analytics and visualization with RAPIDS + Graphistry
+- **llama.cpp GGUF inference** - High-performance quantized model inference
+- **NCCL-aware multi-GPU execution** - Dual T4 tensor parallelism and split-GPU workflows
+- **OpenTelemetry traces + metrics** - Production-grade observability with OTLP export
+- **GPU analytics and visualization** - RAPIDS cuGraph + Graphistry interactive dashboards
 
-This repository is optimized for Kaggle dual T4 notebooks and small GGUF models (1B-5B, Q4_K_M). It ships lightweight Python code and downloads large CUDA binaries on first import.
+This repository is optimized for **Kaggle dual Tesla T4 notebooks** and small GGUF models (1B-5B parameters, Q4_K_M quantization). It ships lightweight Python code and downloads large CUDA binaries on first import.
 
 ## What You Get
-- LLM request tracing with semantic attributes
-- GPU-aware metrics (latency, tokens, utilization)
-- Split-GPU workflow (GPU0 inference, GPU1 analytics)
-- Graph-based trace visualization
+- **LLM request tracing** with semantic attributes and distributed context propagation
+- **GPU-aware metrics** (latency, tokens/sec, VRAM usage, temperature, power draw)
+- **Split-GPU workflow** (GPU 0: inference, GPU 1: analytics/visualization)
+- **Graph-based trace visualization** with Graphistry interactive dashboards
+- **Real-time performance monitoring** with live Plotly dashboards
+- **Production observability stack** with multi-layer telemetry collection
+- **16 comprehensive tutorials** covering foundation → advanced → production workflows
 
 ## Quick Start (Kaggle Dual T4)
 ```python
@@ -50,9 +53,13 @@ Common entry points:
 - `docs/NOTEBOOKS_GUIDE.md`
 - `docs/TROUBLESHOOTING.md`
 
-Notebooks:
-- `notebooks/README.md`
-- `notebooks/14-15-16-INDEX.md`
+Notebooks (16 comprehensive tutorials):
+- `notebooks/README.md` - Notebooks overview
+- Foundation: Notebooks 01-04 (Quick start, server setup, multi-GPU, quantization)
+- Integration: Notebooks 05-06 (Unsloth, Graphistry split-GPU)
+- Advanced: Notebooks 07-10 (Knowledge graphs, workflows)
+- Deep Dive: Notebooks 11-13 (Neural network viz, attention, embeddings)
+- **Observability Trilogy**: Notebooks 14-16 (OpenTelemetry, real-time monitoring, production stack) ⭐ **NEW**
 
 ## Project Layout (High Level)
 - `llamatelemetry/` Python SDK

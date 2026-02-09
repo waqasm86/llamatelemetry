@@ -196,6 +196,17 @@ llamatelemetry-other-notebooks-practice/
 # Kaggle execution outputs
 llamatelemetry-kaggle-executions/
 
+# Downloaded models directory
+models/
+
+# Working directory artifacts
+working/
+
+# Cache directories
+.cache/
+__pycache__/
+*.pyc
+
 # ============================================================================
 # PORTFOLIO FOLDER - LaTeX build artifacts
 # ============================================================================
