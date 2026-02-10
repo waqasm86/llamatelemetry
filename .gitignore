@@ -233,9 +233,39 @@ llamatelemetry-pdf-portfolio/*.run.xml
 # ============================================================================
 # Keep local chat history private (not for GitHub)
 claude-chat-history/
+.claude/
+
 # Local HF auth usage (avoid accidental commits)
 scripts/huggingface/create_org_binaries_repo.py
 scripts/huggingface/upload_to_huggingface.py
 scripts/huggingface/upload_to_llamatelemetry_org.py
 scripts/huggingface/upload_to_org_huggingface.py
 docs/huggingface/add_admin_to_org.md
+
+# ============================================================================
+# NOTEBOOK OUTPUTS - Keep executed notebooks clean
+# ============================================================================
+# Notebook execution outputs and checkpoints
+*.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Executed notebook variants (keep only clean versions)
+*-e[0-9].ipynb
+*-e[0-9][0-9].ipynb
+*-executed*.ipynb
+
+# ============================================================================
+# SECRETS & CREDENTIALS
+# ============================================================================
+# Never commit secrets or tokens
+*.key
+*.pem
+*.p12
+.env.local
+.env.*.local
+secrets.json
+credentials.json
+token.txt
+*_TOKEN*
+*_SECRET*
+HF_TOKEN*
