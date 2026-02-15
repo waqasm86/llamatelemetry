@@ -42,8 +42,7 @@ HF_MODELS_REPO = "waqasm86/llamatelemetry-models"      # GGUF models
 # SHA256 checksums for integrity verification
 BINARY_CHECKSUMS = {
     "llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz": "31889a86116818be5a42a7bd4a20fde14be25f27348cabf2644259625374b355",
-    # v1.0.0 checksum will be populated after first build
-    "llamatelemetry-v1.0.0-cuda12-kaggle-t4x2.tar.gz": "",
+    "llamatelemetry-v1.0.0-cuda12-kaggle-t4x2.tar.gz": "89b5b7db849f704e8d7514fa5b1e7f83dda0c53fc8eb7b71801e031520301332",
 }
 
 # Binary bundle preference order (HuggingFace primary -> GitHub fallback)
