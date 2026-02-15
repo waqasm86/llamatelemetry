@@ -56,9 +56,9 @@ def test_platform_detection():
 
 def test_gpu_compatibility_check():
     """Test GPU compatibility checking"""
-    import llamatelemetry
-    
-    compat = llamatelemetry.check_gpu_compatibility()
+    from llamatelemetry.utils import check_gpu_compatibility
+
+    compat = check_gpu_compatibility()
     
     print(f"\nGPU Compatibility Check:")
     print(f"  Platform: {compat['platform']}")

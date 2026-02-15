@@ -317,9 +317,41 @@ def setup_graphistry_auth() -> bool:
         return False
 
 
+def load_secrets(mapping: Dict[str, str]) -> Dict[str, Optional[str]]:
+    """
+    Generic Kaggle secret loader (v1.0.0 simplified API).
+
+    The caller provides a mapping of ``{env_var_name: kaggle_secret_name}``
+    and gets back the resolved values.  Each resolved value is also set
+    in ``os.environ``.
+
+    Args:
+        mapping: ``{env_var: secret_name}``
+
+    Returns:
+        ``{env_var: value_or_None}``
+
+    Example::
+
+        vals = load_secrets({
+            "HF_TOKEN": "HF_TOKEN",
+            "GRAPHISTRY_KEY": "Graphistry_Personal_Key_ID",
+        })
+    """
+    ks = KaggleSecrets(auto_load=False)
+    result: Dict[str, Optional[str]] = {}
+    for env_var, secret_name in mapping.items():
+        value = ks.get(secret_name)
+        result[env_var] = value
+        if value:
+            os.environ[env_var] = value
+    return result
+
+
 __all__ = [
     "KaggleSecrets",
     "auto_load_secrets",
+    "load_secrets",
     "setup_huggingface_auth",
     "setup_graphistry_auth",
 ]

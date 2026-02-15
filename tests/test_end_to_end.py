@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 import llamatelemetry
+from llamatelemetry.utils import check_gpu_compatibility
 
 
 def _find_test_model() -> str | None:
@@ -30,7 +31,7 @@ def test_end_to_end_inference():
     print("=" * 60)
 
     print("\n1. GPU Compatibility Check:")
-    compat = llamatelemetry.check_gpu_compatibility()
+    compat = check_gpu_compatibility()
     print(f"   GPU: {compat['gpu_name']}")
     print(f"   Compute Capability: {compat['compute_capability']}")
     print(f"   Compatible: {compat['compatible']}")
@@ -40,7 +41,7 @@ def test_end_to_end_inference():
 
     print("\n2. Creating Inference Engine...")
     engine = llamatelemetry.InferenceEngine()
-    print("   ✓ Engine created")
+    print("   Engine created")
 
     print("\n3. Looking for test model...")
     model_path = _find_test_model()
@@ -51,7 +52,7 @@ def test_end_to_end_inference():
             "Download one to run the end-to-end inference test."
         )
 
-    print(f"   ✓ Found model: {model_path}")
+    print(f"   Found model: {model_path}")
 
     print("\n4. Loading model...")
     # For low VRAM, use conservative settings
@@ -64,7 +65,7 @@ def test_end_to_end_inference():
         verbose=True,
         auto_start=True,
     )
-    print("   ✓ Model loaded successfully!")
+    print("   Model loaded successfully!")
 
     print("\n5. Running inference test...")
     test_prompts = [
@@ -95,6 +96,6 @@ def test_end_to_end_inference():
         print(f"   Avg tokens/sec: {metrics['throughput']['tokens_per_sec']:.1f}")
 
     print("\n" + "=" * 60)
-    print("🎉 END-TO-END TEST COMPLETE!")
+    print("END-TO-END TEST COMPLETE!")
     print("llamatelemetry is fully functional!")
     print("=" * 60)

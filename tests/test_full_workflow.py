@@ -1,36 +1,54 @@
-import llamatelemetry
+"""Integration test for the full llamatelemetry v1.0.0 workflow."""
+
 import os
+import pytest
+import llamatelemetry
 
-print("Testing full llamatelemetry workflow...")
 
-# 1. Check GPU
-compat = llamatelemetry.check_gpu_compatibility()
-print(f"GPU: {compat['gpu_name']}")
-print(f"Compute: {compat['compute_capability']}")
-print(f"Compatible: {compat['compatible']}")
+def test_sdk_version():
+    """Verify SDK reports v1.0.0."""
+    assert llamatelemetry.version() == "1.0.0"
+    assert llamatelemetry.__version__ == "1.0.0"
 
-# 2. Create engine
-engine = llamatelemetry.InferenceEngine()
-print("✓ Engine created")
 
-# 3. Test with a small model (optional - requires model file)
-test_model = "/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/gemma-3-1b-it-Q4_K_M.gguf"
-if os.path.exists(test_model):
-    print(f"\nFound model: {test_model}")
-    print("Testing model loading...")
-    try:
-        engine.load_model(test_model, gpu_layers=8, verbose=True)
-        print("✓ Model loaded successfully!")
-        
-        # Test inference
-        result = engine.infer("What is AI?", max_tokens=50)
-        print(f"\nGenerated: {result.text[:100]}...")
-        print(f"Speed: {result.tokens_per_sec:.1f} tok/s")
-    except Exception as e:
-        print(f"⚠ Model test skipped: {e}")
-else:
-    print("\nNo test model found - download one to complete end-to-end test")
-    print("You can download with:")
-    print("wget https://huggingface.co/google/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf")
+def test_engine_creation():
+    """InferenceEngine can be instantiated (backward compat)."""
+    engine = llamatelemetry.InferenceEngine()
+    assert engine is not None
 
-print("\n✅ llamatelemetry is working correctly!")
+
+def test_gpu_detection():
+    """GPU detection via the gpu submodule works."""
+    devices = llamatelemetry.gpu.list_devices()
+    assert isinstance(devices, list)
+    if devices:
+        assert devices[0].name  # GPUDevice has a name attribute
+
+
+def test_init_and_shutdown():
+    """Full init -> shutdown lifecycle completes without error."""
+    llamatelemetry.init(service_name="test-workflow")
+    assert llamatelemetry.is_initialized()
+    llamatelemetry.shutdown()
+
+
+@pytest.mark.skipif(
+    not os.path.exists(
+        "/media/waqasm86/External1/Project-Nvidia/"
+        "Ubuntu-Cuda-Llama.cpp-Executable/bin/"
+        "gemma-3-1b-it-Q4_K_M.gguf"
+    ),
+    reason="Test model not found",
+)
+def test_model_inference():
+    """End-to-end model loading and inference (requires local model)."""
+    model_path = (
+        "/media/waqasm86/External1/Project-Nvidia/"
+        "Ubuntu-Cuda-Llama.cpp-Executable/bin/"
+        "gemma-3-1b-it-Q4_K_M.gguf"
+    )
+    engine = llamatelemetry.InferenceEngine()
+    engine.load_model(model_path, gpu_layers=8, verbose=True)
+    result = engine.infer("What is AI?", max_tokens=50)
+    assert result.text
+    assert result.tokens_per_sec > 0

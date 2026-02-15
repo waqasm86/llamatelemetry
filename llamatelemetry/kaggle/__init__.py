@@ -45,6 +45,7 @@ from .presets import (
 from .secrets import (
     KaggleSecrets,
     auto_load_secrets,
+    load_secrets,
     setup_huggingface_auth,
     setup_graphistry_auth,
 )
@@ -57,6 +58,8 @@ from .gpu_context import (
     set_gpu_for_rapids,
     reset_gpu_context,
 )
+from .grafana import auto_configure_grafana_cloud
+from .graphistry import auto_register_graphistry
 
 __all__ = [
     # Main entry point
@@ -70,11 +73,18 @@ __all__ = [
     "get_preset_config",
     "PRESET_CONFIGS",
 
-    # Secrets
+    # Secrets (v1.0.0: load_secrets added)
     "KaggleSecrets",
     "auto_load_secrets",
+    "load_secrets",
     "setup_huggingface_auth",
     "setup_graphistry_auth",
+
+    # Grafana Cloud auto-config (v1.0.0)
+    "auto_configure_grafana_cloud",
+
+    # Graphistry auto-register (v1.0.0)
+    "auto_register_graphistry",
 
     # GPU Context
     "GPUContext",

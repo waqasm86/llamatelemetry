@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0] - 2026-02-15
+
+### Production-Grade Release - CUDA-first OpenTelemetry SDK
+
+This is the first stable release of llamatelemetry with a clean, production-ready API.
+The v1.0.0 SDK provides decorator-based tracing, GPU-native observability, and
+vendor-neutral OTLP export for LLM inference pipelines on Kaggle dual Tesla T4.
+
+### Added
+
+**New Public API:**
+- `llamatelemetry.init()` / `flush()` / `shutdown()` / `configure()` - SDK lifecycle
+- `@llamatelemetry.trace()` / `@workflow()` / `@task()` / `@tool()` - Decorator-based tracing
+- `llamatelemetry.span()` / `session()` / `suppress_tracing()` - Context managers
+
+**New Modules:**
+- `semconv/` - Centralized semantic convention key constants (LLM, GPU, NCCL, service)
+- `otel/` - TracerProvider + MeterProvider management with OTLP HTTP/gRPC exporters
+- `otel/sampling.py` - Sampling strategies: always_on, ratio, only_errors, only_slow
+- `otel/redaction.py` - SpanProcessor for prompt and custom key redaction
+- `llama/` - LlamaCppClient wrapper, ServerManager, trace_request() with prefill/decode span hierarchy
+- `llama/phases.py` - `trace_request()` context manager creating `llm.request` -> `llm.phase.prefill` + `llm.phase.decode` spans
+- `llama/gguf.py` - GGUF parsing + `compute_sha256()` for model identification
+- `gpu/` - GPUDevice/GPUSnapshot dataclasses, list_devices(), snapshot(), start_sampler()
+- `nccl/` - Simplified NCCL tracing: enable() + annotate_collective()
+- `artifacts/` - Trace graph export with ArtifactRef, CSV/Parquet output, optional pygraphistry
+- `kaggle/grafana.py` - auto_configure_grafana_cloud() from Kaggle secrets
+- `kaggle/graphistry.py` - auto_register_graphistry() with credential fallback
+- `kaggle/secrets.py` - load_secrets(mapping) simplified API
+- `config.py` - Thread-safe singleton LlamaTelemetryConfig
+- `_internal/decorators.py` - Sync+async-aware decorator factory
+- `_internal/_setup_paths.py` - LD_LIBRARY_PATH + binary discovery (extracted from old __init__)
+- `compat.py` - InferenceEngine + InferResult with deprecation warnings
+- `extras/` - Proxy modules preserving v0.1.0 non-core imports
+
+**Build & Test:**
+- 12 new test files (test_init, test_config, test_semconv, test_decorators, test_otel_provider, test_otel_redaction, test_gpu_schemas, test_nccl_api, test_llama_phases, test_llama_gguf, test_kaggle_secrets, test_artifacts)
+- `scripts/build_v1.0.0_cuda_binary.sh` - CUDA binary build script for Kaggle T4
+- `scripts/create_v1.0.0_source_release.sh` - Source archive creation
+
+### Changed
+- **Package structure**: Refactored from monolithic 898-line __init__.py to modular subpackages
+- **pyproject.toml**: Version 1.0.0, streamlined core dependencies (opentelemetry-api/sdk, otlp-proto-http, requests), new optional groups [gpu], [kaggle], [graphistry], [extras], [dev]
+- **CMakeLists.txt**: Updated version references to v1.0.0
+- **_internal/bootstrap.py**: Updated to v1.0.0 binary bundle with v0.1.0 fallback
+- **Development Status classifier**: Changed from "4 - Beta" to "5 - Production/Stable"
+
+### Backward Compatibility
+- `llamatelemetry.InferenceEngine` still works with deprecation warning
+- `llamatelemetry.InferResult` still works with deprecation warning
+- `llamatelemetry.ServerManager` still works (re-exported from server.py)
+- All v0.1.0 imports from `extras/` proxy modules continue to work
+- Original modules (api/, telemetry/, server.py) preserved in-place
+
+### Technical Details
+- **SDK Version**: 1.0.0
+- **Binary Version**: 1.0.0 (compatible with v0.1.0 binaries)
+- **Python**: 3.11+
+- **CUDA**: 12.x
+- **Target**: Kaggle dual Tesla T4 (SM 7.5)
+- **New/Modified Files**: ~73
+
+---
+
 ## [0.1.1] - 2026-02-09
 
 ### Added - Observability Trilogy Completion

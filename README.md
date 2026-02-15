@@ -1,6 +1,6 @@
-# llamatelemetry v0.1.0
+# llamatelemetry v1.0.0
 
-**CUDA-first OpenTelemetry Python SDK for LLM inference observability and explainability**
+**CUDA-first OpenTelemetry Python SDK for LLM inference observability**
 
 llamatelemetry combines:
 - **llama.cpp GGUF inference** - High-performance quantized model inference
@@ -11,35 +11,81 @@ llamatelemetry combines:
 This repository is optimized for **Kaggle dual Tesla T4 notebooks** and small GGUF models (1B-5B parameters, Q4_K_M quantization). It ships lightweight Python code and downloads large CUDA binaries on first import.
 
 ## What You Get
-- **LLM request tracing** with semantic attributes and distributed context propagation
+- **Decorator-based tracing** (`@trace`, `@workflow`, `@task`, `@tool`) with OpenTelemetry spans
+- **LLM request tracing** with prefill/decode span hierarchy and semantic attributes
 - **GPU-aware metrics** (latency, tokens/sec, VRAM usage, temperature, power draw)
+- **Prompt redaction** for privacy-sensitive deployments
 - **Split-GPU workflow** (GPU 0: inference, GPU 1: analytics/visualization)
 - **Graph-based trace visualization** with Graphistry interactive dashboards
-- **Real-time performance monitoring** with live Plotly dashboards
-- **Production observability stack** with multi-layer telemetry collection
-- **16 comprehensive tutorials** covering foundation → advanced → production workflows
+- **Kaggle auto-configuration** for Grafana Cloud and Graphistry
+- **16 comprehensive tutorials** covering foundation to production workflows
 
-## Quick Start (Kaggle Dual T4)
+## Quick Start
+
 ```python
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
+import llamatelemetry
 
-from huggingface_hub import hf_hub_download
-from llamatelemetry.server import ServerManager
-
-model_path = hf_hub_download(
-    repo_id="unsloth/gemma-3-1b-it-GGUF",
-    filename="gemma-3-1b-it-Q4_K_M.gguf",
-    local_dir="/kaggle/working/models",
+# Initialize the SDK
+llamatelemetry.init(
+    service_name="my-llm-app",
+    otlp_endpoint="https://otlp.example.com/v1/traces",
 )
 
-server = ServerManager()
-server.start_server(
-    model_path=model_path,
-    gpu_layers=99,
-    tensor_split="1.0,0.0",
-    flash_attn=1,
-)
+# Trace functions with decorators
+@llamatelemetry.trace()
+def generate(prompt: str) -> str:
+    client = llamatelemetry.llama.LlamaCppClient("http://127.0.0.1:8090")
+    resp = client.chat.create(messages=[{"role": "user", "content": prompt}])
+    return resp.choices[0].message["content"]
+
+result = generate("Hello, world!")
+
+# Clean shutdown
+llamatelemetry.shutdown()
 ```
+
+### Kaggle Quick Start (Dual T4)
+
+```python
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.0.0
+
+import llamatelemetry
+
+# Auto-configure from Kaggle secrets
+llamatelemetry.kaggle.auto_configure_grafana_cloud()
+
+# Initialize with tracing
+llamatelemetry.init(service_name="kaggle-llm")
+
+# Start server with one-liner
+llamatelemetry.llama.quick_start(
+    model_path="/kaggle/working/models/gemma-3-1b-it-Q4_K_M.gguf",
+    preset="kaggle_t4_dual",
+)
+
+# Trace inference requests
+with llamatelemetry.llama.trace_request(model="gemma-3-1b", request_id="r1") as req:
+    client = llamatelemetry.llama.LlamaCppClient("http://127.0.0.1:8090")
+    resp = client.chat.create(messages=[{"role": "user", "content": "Hello!"}])
+    req.set_completion_tokens(resp.usage.completion_tokens)
+
+llamatelemetry.shutdown()
+```
+
+## v1.0.0 API Overview
+
+| Module | Purpose |
+|--------|---------|
+| `llamatelemetry.init()` / `.shutdown()` | SDK lifecycle |
+| `llamatelemetry.trace()` / `.workflow()` / `.task()` / `.tool()` | Decorators |
+| `llamatelemetry.span()` / `.session()` | Context managers |
+| `llamatelemetry.llama` | LlamaCppClient, ServerManager, trace_request, GGUF |
+| `llamatelemetry.gpu` | GPU device listing, snapshots, background sampler |
+| `llamatelemetry.nccl` | NCCL collective tracing |
+| `llamatelemetry.otel` | Provider, exporters, sampling, redaction |
+| `llamatelemetry.semconv` | Attribute key constants |
+| `llamatelemetry.artifacts` | Trace graph export |
+| `llamatelemetry.kaggle` | Secret loading, Grafana/Graphistry auto-config |
 
 ## Documentation Map
 Start here:

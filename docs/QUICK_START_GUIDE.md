@@ -1,6 +1,6 @@
 # Quick Start (Kaggle Dual T4)
 
-This guide gets you running in minutes on Kaggle dual T4.
+This guide gets you running with llamatelemetry v1.0.0 in minutes on Kaggle dual T4.
 
 ## Requirements
 - Kaggle notebook
@@ -9,7 +9,17 @@ This guide gets you running in minutes on Kaggle dual T4.
 
 ## Install
 ```python
-!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llamatelemetry/llamatelemetry.git@v0.1.0
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.0.0
+```
+
+## Initialize the SDK
+```python
+import llamatelemetry
+
+llamatelemetry.init(
+    service_name="kaggle-llm",
+    otlp_endpoint="https://otlp.example.com/v1/traces",  # optional
+)
 ```
 
 ## Download GGUF Model
@@ -25,7 +35,11 @@ model_path = hf_hub_download(
 
 ## Start Server (GPU0)
 ```python
-from llamatelemetry.server import ServerManager
+# One-liner with preset
+llamatelemetry.llama.quick_start(model_path=model_path, preset="kaggle_t4_dual")
+
+# Or manual control
+from llamatelemetry.llama import ServerManager
 
 server = ServerManager()
 server.start_server(
@@ -36,16 +50,38 @@ server.start_server(
 )
 ```
 
-## Run Inference
+## Run Traced Inference
 ```python
-from llamatelemetry.api import LlamaCppClient
+from llamatelemetry.llama import LlamaCppClient, trace_request
 
 client = LlamaCppClient("http://127.0.0.1:8090")
-resp = client.chat.completions.create(
-    messages=[{"role": "user", "content": "What is CUDA?"}],
-    max_tokens=80,
-)
-print(resp.choices[0].message.content)
+
+with trace_request(model="gemma-3-1b", request_id="r1") as req:
+    resp = client.chat.create(
+        messages=[{"role": "user", "content": "What is CUDA?"}],
+        max_tokens=80,
+    )
+    req.set_completion_tokens(resp.usage.completion_tokens)
+
+print(resp.choices[0].message["content"])
+```
+
+## Use Decorators
+```python
+@llamatelemetry.trace()
+def ask(question: str) -> str:
+    resp = client.chat.create(
+        messages=[{"role": "user", "content": question}],
+        max_tokens=100,
+    )
+    return resp.choices[0].message["content"]
+
+answer = ask("Explain GPU tensor cores.")
+```
+
+## Shutdown
+```python
+llamatelemetry.shutdown()
 ```
 
 ## Next
