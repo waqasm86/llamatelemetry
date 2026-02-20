@@ -88,6 +88,25 @@ def record_spans(spans: List[Any]) -> None:
         _span_buffer = _span_buffer[-_MAX_BUFFER:]
 
 
+class TraceGraphSpanProcessor:
+    """SpanProcessor that records spans for trace graph export."""
+
+    def on_start(self, span: Any, parent_context: Any = None) -> None:
+        pass
+
+    def on_end(self, span: Any) -> None:
+        try:
+            record_spans([span])
+        except Exception:
+            pass
+
+    def shutdown(self) -> None:
+        pass
+
+    def force_flush(self, timeout_millis: int = 0) -> bool:
+        return True
+
+
 def _build_dataframes(
     raw: List[dict],
     trace_id_filter: Optional[str] = None,

@@ -156,113 +156,164 @@ class TorchEngine:
         if self._model is None:
             self.warmup()
 
-        events = InferenceEvents()
+        def _run() -> InferenceResult:
+            events = InferenceEvents()
 
-        # Get VRAM before
-        vram_before = self._get_vram_mb()
-        events.set_vram(before_mb=vram_before)
+            # Get VRAM before
+            vram_before = self._get_vram_mb()
+            events.set_vram(before_mb=vram_before)
 
-        events.mark_start()
+            events.mark_start()
 
-        # Prepare input
-        if request.messages:
-            if hasattr(self._tokenizer, "apply_chat_template"):
-                prompt_text = self._tokenizer.apply_chat_template(
-                    request.messages, tokenize=False, add_generation_prompt=True
-                )
+            # Prepare input
+            if request.messages:
+                if hasattr(self._tokenizer, "apply_chat_template"):
+                    prompt_text = self._tokenizer.apply_chat_template(
+                        request.messages, tokenize=False, add_generation_prompt=True
+                    )
+                else:
+                    prompt_text = "\n".join(
+                        f"{m.get('role', 'user')}: {m.get('content', '')}"
+                        for m in request.messages
+                    ) + "\nassistant:"
             else:
-                prompt_text = "\n".join(
-                    f"{m.get('role', 'user')}: {m.get('content', '')}"
-                    for m in request.messages
-                ) + "\nassistant:"
-        else:
-            prompt_text = request.prompt or ""
+                prompt_text = request.prompt or ""
 
-        inputs = self._tokenizer(prompt_text, return_tensors="pt")
-        input_device = self._input_device or self._device
-        inputs = inputs.to(input_device)
-        input_token_count = inputs["input_ids"].shape[-1]
+            inputs = self._tokenizer(prompt_text, return_tensors="pt")
+            input_device = self._input_device or self._device
+            inputs = inputs.to(input_device)
+            input_token_count = inputs["input_ids"].shape[-1]
 
-        # Build generate kwargs
-        gen_kwargs: Dict[str, Any] = {"max_new_tokens": request.max_tokens}
-        if request.sampling:
-            if request.sampling.temperature > 0:
-                gen_kwargs["temperature"] = request.sampling.temperature
-                gen_kwargs["do_sample"] = True
-            if request.sampling.top_p < 1.0:
-                gen_kwargs["top_p"] = request.sampling.top_p
-            if request.sampling.top_k > 0:
-                gen_kwargs["top_k"] = request.sampling.top_k
-            if request.sampling.repetition_penalty != 1.0:
-                gen_kwargs["repetition_penalty"] = request.sampling.repetition_penalty
-            if request.sampling.seed is not None:
-                torch.manual_seed(request.sampling.seed)
-            if request.sampling.stop_sequences:
-                try:
-                    from transformers import StoppingCriteria, StoppingCriteriaList
+            # Build generate kwargs
+            gen_kwargs: Dict[str, Any] = {"max_new_tokens": request.max_tokens}
+            if request.sampling:
+                if request.sampling.temperature > 0:
+                    gen_kwargs["temperature"] = request.sampling.temperature
+                    gen_kwargs["do_sample"] = True
+                if request.sampling.top_p < 1.0:
+                    gen_kwargs["top_p"] = request.sampling.top_p
+                if request.sampling.top_k > 0:
+                    gen_kwargs["top_k"] = request.sampling.top_k
+                if request.sampling.repetition_penalty != 1.0:
+                    gen_kwargs["repetition_penalty"] = request.sampling.repetition_penalty
+                if request.sampling.seed is not None:
+                    torch.manual_seed(request.sampling.seed)
+                if request.sampling.stop_sequences:
+                    try:
+                        from transformers import StoppingCriteria, StoppingCriteriaList
 
-                    stop_ids = [
-                        self._tokenizer.encode(s, add_special_tokens=False)
-                        for s in request.sampling.stop_sequences
-                    ]
-                    stop_ids = [s for s in stop_ids if s]
+                        stop_ids = [
+                            self._tokenizer.encode(s, add_special_tokens=False)
+                            for s in request.sampling.stop_sequences
+                        ]
+                        stop_ids = [s for s in stop_ids if s]
 
-                    if stop_ids:
-                        class _StopOnSequences(StoppingCriteria):
-                            def __init__(self, sequences):
-                                self._sequences = sequences
+                        if stop_ids:
+                            class _StopOnSequences(StoppingCriteria):
+                                def __init__(self, sequences):
+                                    self._sequences = sequences
 
-                            def __call__(self, input_ids, scores, **kwargs):
-                                for seq in self._sequences:
-                                    if input_ids.shape[-1] >= len(seq):
-                                        if input_ids[0, -len(seq):].tolist() == seq:
-                                            return True
-                                return False
+                                def __call__(self, input_ids, scores, **kwargs):
+                                    for seq in self._sequences:
+                                        if input_ids.shape[-1] >= len(seq):
+                                            if input_ids[0, -len(seq):].tolist() == seq:
+                                                return True
+                                    return False
 
-                        gen_kwargs["stopping_criteria"] = StoppingCriteriaList(
-                            [_StopOnSequences(stop_ids)]
-                        )
-                except Exception:
-                    pass
+                            gen_kwargs["stopping_criteria"] = StoppingCriteriaList(
+                                [_StopOnSequences(stop_ids)]
+                            )
+                    except Exception:
+                        pass
 
-        # Generate
-        with torch.no_grad():
-            output_ids = self._model.generate(**inputs, **gen_kwargs)
+            # Generate
+            with torch.no_grad():
+                output_ids = self._model.generate(**inputs, **gen_kwargs)
 
-        # Decode
-        new_tokens = output_ids[0][input_token_count:]
-        output_text = self._tokenizer.decode(new_tokens, skip_special_tokens=True)
-        output_token_count = len(new_tokens)
+            # Decode
+            new_tokens = output_ids[0][input_token_count:]
+            output_text = self._tokenizer.decode(new_tokens, skip_special_tokens=True)
+            output_token_count = len(new_tokens)
 
-        if events.start_ts is not None and output_token_count > 0:
-            # Without streaming, TTFT is unknown; use start_ts to avoid overstating it.
-            events.first_token_ts = events.start_ts
+            if events.start_ts is not None and output_token_count > 0:
+                # Without streaming, TTFT is unknown; use start_ts to avoid overstating it.
+                events.first_token_ts = events.start_ts
 
-        events.mark_last_token()
-        events.mark_complete()
-        events.set_token_counts(input_token_count, output_token_count)
+            events.mark_last_token()
+            events.mark_complete()
+            events.set_token_counts(input_token_count, output_token_count)
 
-        # Get VRAM after
-        vram_after = self._get_vram_mb()
-        events.set_vram(after_mb=vram_after)
+            # Get VRAM after
+            vram_after = self._get_vram_mb()
+            events.set_vram(after_mb=vram_after)
 
-        # Compute metrics
-        all_metrics = compute_all_metrics(events)
+            # Compute metrics
+            all_metrics = compute_all_metrics(events)
 
-        return InferenceResult(
-            output_text=output_text,
-            input_tokens=input_token_count,
-            output_tokens=output_token_count,
-            ttft_ms=all_metrics["ttft_ms"],
-            tpot_ms=all_metrics["tpot_ms"],
-            tps=all_metrics["tps"],
-            prefill_tps=all_metrics["prefill_tps"],
-            total_latency_ms=all_metrics["total_latency_ms"],
-            vram_peak_mb=max(vram_before or 0, vram_after or 0),
-            vram_delta_mb=(vram_after or 0) - (vram_before or 0),
-            finish_reason="stop",
-            request_id=request.request_id,
-        )
+            return InferenceResult(
+                output_text=output_text,
+                input_tokens=input_token_count,
+                output_tokens=output_token_count,
+                ttft_ms=all_metrics["ttft_ms"],
+                tpot_ms=all_metrics["tpot_ms"],
+                tps=all_metrics["tps"],
+                prefill_tps=all_metrics["prefill_tps"],
+                total_latency_ms=all_metrics["total_latency_ms"],
+                vram_peak_mb=max(vram_before or 0, vram_after or 0),
+                vram_delta_mb=(vram_after or 0) - (vram_before or 0),
+                finish_reason="stop",
+                request_id=request.request_id,
+            )
+
+        if self._config and self._config.telemetry:
+            try:
+                from ...otel.provider import get_tracer
+                from ...otel.gen_ai_utils import build_gen_ai_span_attrs, build_span_name
+                from ...semconv.gen_ai_builder import (
+                    build_gen_ai_attrs_from_request,
+                    build_gen_ai_attrs_from_response,
+                )
+                from ...semconv import gen_ai as gen_ai_keys
+                from opentelemetry.trace import SpanKind
+
+                operation = gen_ai_keys.OP_CHAT if request.messages else gen_ai_keys.OP_TEXT_COMPLETION
+                model_name = self._config.model_path or "transformers"
+                tracer = get_tracer("llamatelemetry.transformers")
+                span_name = build_span_name(operation, model_name)
+                span_attrs = build_gen_ai_span_attrs(
+                    operation=operation,
+                    provider=gen_ai_keys.PROVIDER_TRANSFORMERS,
+                    model=model_name,
+                )
+
+                with tracer.start_as_current_span(
+                    span_name,
+                    kind=SpanKind.CLIENT,
+                    attributes=span_attrs,
+                ) as span:
+                    req_attrs = build_gen_ai_attrs_from_request(
+                        model=model_name,
+                        operation=operation,
+                        provider=gen_ai_keys.PROVIDER_TRANSFORMERS,
+                        temperature=request.sampling.temperature if request.sampling else None,
+                        top_p=request.sampling.top_p if request.sampling else None,
+                        top_k=request.sampling.top_k if request.sampling else None,
+                        max_tokens=request.max_tokens,
+                    )
+                    for k, v in req_attrs.items():
+                        span.set_attribute(k, v)
+                    result = _run()
+                    resp_attrs = build_gen_ai_attrs_from_response(
+                        input_tokens=result.input_tokens,
+                        output_tokens=result.output_tokens,
+                    )
+                    for k, v in resp_attrs.items():
+                        span.set_attribute(k, v)
+                    return result
+            except Exception:
+                return _run()
+
+        return _run()
 
     def stream_generate(self, request: InferenceRequest) -> Iterator[str]:
         """Execute streaming inference (basic implementation)."""

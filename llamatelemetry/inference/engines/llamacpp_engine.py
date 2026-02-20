@@ -84,97 +84,127 @@ class LlamaCppEngine:
         if self._client is None:
             self.warmup()
 
-        events = InferenceEvents()
-        events.mark_start()
+        def _run() -> InferenceResult:
+            events = InferenceEvents()
+            events.mark_start()
 
-        # Build request kwargs
-        kwargs: Dict[str, Any] = {}
-        if request.sampling:
-            if request.sampling.temperature != 0.7:
-                kwargs["temperature"] = request.sampling.temperature
-            if request.sampling.top_p != 1.0:
-                kwargs["top_p"] = request.sampling.top_p
-            if request.sampling.top_k > 0:
-                kwargs["top_k"] = request.sampling.top_k
-            if request.sampling.frequency_penalty != 0.0:
-                kwargs["frequency_penalty"] = request.sampling.frequency_penalty
-            if request.sampling.presence_penalty != 0.0:
-                kwargs["presence_penalty"] = request.sampling.presence_penalty
-            if request.sampling.repetition_penalty != 1.0:
-                kwargs["repeat_penalty"] = request.sampling.repetition_penalty
-            if request.sampling.seed is not None:
-                kwargs["seed"] = request.sampling.seed
-            if request.sampling.stop_sequences:
-                kwargs["stop"] = request.sampling.stop_sequences
-        kwargs["max_tokens"] = request.max_tokens
+            # Build request kwargs
+            kwargs: Dict[str, Any] = {}
+            if request.sampling:
+                if request.sampling.temperature != 0.7:
+                    kwargs["temperature"] = request.sampling.temperature
+                if request.sampling.top_p != 1.0:
+                    kwargs["top_p"] = request.sampling.top_p
+                if request.sampling.top_k > 0:
+                    kwargs["top_k"] = request.sampling.top_k
+                if request.sampling.frequency_penalty != 0.0:
+                    kwargs["frequency_penalty"] = request.sampling.frequency_penalty
+                if request.sampling.presence_penalty != 0.0:
+                    kwargs["presence_penalty"] = request.sampling.presence_penalty
+                if request.sampling.repetition_penalty != 1.0:
+                    kwargs["repeat_penalty"] = request.sampling.repetition_penalty
+                if request.sampling.seed is not None:
+                    kwargs["seed"] = request.sampling.seed
+                if request.sampling.stop_sequences:
+                    kwargs["stop"] = request.sampling.stop_sequences
+            kwargs["max_tokens"] = request.max_tokens
 
-        # Execute
-        messages = request.messages or []
-        if not messages and request.prompt:
-            messages = [{"role": "user", "content": request.prompt}]
+            # Execute
+            messages = request.messages or []
+            if not messages and request.prompt:
+                messages = [{"role": "user", "content": request.prompt}]
 
-        result = self._client.chat.create(messages=messages, **kwargs)
+            result = self._client.chat.create(messages=messages, **kwargs)
 
-        events.mark_first_token()
+            events.mark_first_token()
 
-        # Extract response data
-        output_text = ""
-        finish_reason = "stop"
-        if hasattr(result, "choices") and result.choices:
-            choice = result.choices[0]
-            msg = getattr(choice, "message", None)
-            if msg:
-                output_text = msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
-            finish_reason = getattr(choice, "finish_reason", "stop") or "stop"
+            # Extract response data
+            output_text = ""
+            finish_reason = "stop"
+            if hasattr(result, "choices") and result.choices:
+                choice = result.choices[0]
+                msg = getattr(choice, "message", None)
+                if msg:
+                    output_text = msg.get("content", "") if isinstance(msg, dict) else getattr(msg, "content", "")
+                finish_reason = getattr(choice, "finish_reason", "stop") or "stop"
 
-        input_tokens = 0
-        output_tokens = 0
-        if hasattr(result, "usage") and result.usage:
-            input_tokens = getattr(result.usage, "prompt_tokens", 0)
-            output_tokens = getattr(result.usage, "completion_tokens", 0)
-        if hasattr(result, "timings") and result.timings:
-            input_tokens = input_tokens or getattr(result.timings, "prompt_n", 0)
-            output_tokens = output_tokens or getattr(result.timings, "predicted_n", 0)
+            input_tokens = 0
+            output_tokens = 0
+            if hasattr(result, "usage") and result.usage:
+                input_tokens = getattr(result.usage, "prompt_tokens", 0)
+                output_tokens = getattr(result.usage, "completion_tokens", 0)
+            if hasattr(result, "timings") and result.timings:
+                input_tokens = input_tokens or getattr(result.timings, "prompt_n", 0)
+                output_tokens = output_tokens or getattr(result.timings, "predicted_n", 0)
 
-        events.mark_last_token()
-        events.mark_complete()
-        events.set_token_counts(input_tokens, output_tokens)
+            events.mark_last_token()
+            events.mark_complete()
+            events.set_token_counts(input_tokens, output_tokens)
 
-        # Compute metrics
-        all_metrics = compute_all_metrics(events)
+            # Compute metrics
+            all_metrics = compute_all_metrics(events)
 
-        # Prefer server-reported timings if available
-        if hasattr(result, "timings") and result.timings:
-            prompt_ms = getattr(result.timings, "prompt_ms", 0.0) or 0.0
-            predicted_ms = getattr(result.timings, "predicted_ms", 0.0) or 0.0
-            total_ms = prompt_ms + predicted_ms if (prompt_ms or predicted_ms) else all_metrics["total_latency_ms"]
+            # Prefer server-reported timings if available
+            if hasattr(result, "timings") and result.timings:
+                prompt_ms = getattr(result.timings, "prompt_ms", 0.0) or 0.0
+                predicted_ms = getattr(result.timings, "predicted_ms", 0.0) or 0.0
+                total_ms = prompt_ms + predicted_ms if (prompt_ms or predicted_ms) else all_metrics["total_latency_ms"]
 
-            if prompt_ms > 0:
-                all_metrics["ttft_ms"] = prompt_ms
-                if input_tokens > 0:
-                    all_metrics["prefill_tps"] = input_tokens / (prompt_ms / 1000.0)
+                if prompt_ms > 0:
+                    all_metrics["ttft_ms"] = prompt_ms
+                    if input_tokens > 0:
+                        all_metrics["prefill_tps"] = input_tokens / (prompt_ms / 1000.0)
 
-            if predicted_ms > 0 and output_tokens > 0:
-                all_metrics["tps"] = output_tokens / (predicted_ms / 1000.0)
-                denom = max(output_tokens - 1, 1)
-                all_metrics["tpot_ms"] = (predicted_ms / denom)
+                if predicted_ms > 0 and output_tokens > 0:
+                    all_metrics["tps"] = output_tokens / (predicted_ms / 1000.0)
+                    denom = max(output_tokens - 1, 1)
+                    all_metrics["tpot_ms"] = (predicted_ms / denom)
 
-            all_metrics["total_latency_ms"] = total_ms
+                all_metrics["total_latency_ms"] = total_ms
 
-        return InferenceResult(
-            output_text=output_text,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            ttft_ms=all_metrics["ttft_ms"],
-            tpot_ms=all_metrics["tpot_ms"],
-            tps=all_metrics["tps"],
-            prefill_tps=all_metrics["prefill_tps"],
-            total_latency_ms=all_metrics["total_latency_ms"],
-            queue_delay_ms=all_metrics["queue_delay_ms"],
-            finish_reason=finish_reason,
-            request_id=request.request_id,
-            raw=result,
-        )
+            return InferenceResult(
+                output_text=output_text,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                ttft_ms=all_metrics["ttft_ms"],
+                tpot_ms=all_metrics["tpot_ms"],
+                tps=all_metrics["tps"],
+                prefill_tps=all_metrics["prefill_tps"],
+                total_latency_ms=all_metrics["total_latency_ms"],
+                queue_delay_ms=all_metrics["queue_delay_ms"],
+                finish_reason=finish_reason,
+                request_id=request.request_id,
+                raw=result,
+            )
+
+        if self._config and self._config.telemetry:
+            try:
+                from ...llama.phases import trace_request
+                from ...semconv import gen_ai as gen_ai_keys
+                operation = gen_ai_keys.OP_CHAT if request.messages else gen_ai_keys.OP_TEXT_COMPLETION
+                with trace_request(
+                    request_id=request.request_id or "",
+                    model=self._config.model_path or "",
+                    operation=operation,
+                ) as handle:
+                    result = _run()
+                    handle.set_prompt_tokens(result.input_tokens or 0)
+                    handle.set_completion_tokens(result.output_tokens or 0)
+                    handle.set_timings(
+                        prefill_ms=result.ttft_ms,
+                        ttft_ms=result.ttft_ms,
+                        decode_ms=(
+                            result.tpot_ms * max((result.output_tokens or 0) - 1, 1)
+                            if result.tpot_ms
+                            else None
+                        ),
+                        tpot_ms=result.tpot_ms,
+                    )
+                    return result
+            except Exception:
+                return _run()
+
+        return _run()
 
     def stream_generate(self, request: InferenceRequest) -> Iterator[str]:
         """Execute streaming inference (yields token chunks)."""

@@ -65,6 +65,7 @@ def init(
     enable_gpu: bool = True,
     enable_llama_cpp: bool = True,
     enable_nccl: bool = False,
+    enable_trace_graphs: bool = False,
 ) -> None:
     """
     Initialise the llamatelemetry SDK.
@@ -87,6 +88,7 @@ def init(
         enable_gpu=enable_gpu,
         enable_llama_cpp=enable_llama_cpp,
         enable_nccl=enable_nccl,
+        enable_trace_graphs=enable_trace_graphs,
         _initialized=True,
     )
     set_config(cfg)
