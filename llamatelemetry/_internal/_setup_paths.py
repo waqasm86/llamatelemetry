@@ -2,7 +2,7 @@
 llamatelemetry._internal._setup_paths - LD_LIBRARY_PATH + binary discovery.
 
 This module is imported for its side-effects at package load time.
-Extracted from the v0.1.0 __init__.py bootstrap block.
+Extracted from the legacy __init__.py bootstrap block.
 """
 
 import logging

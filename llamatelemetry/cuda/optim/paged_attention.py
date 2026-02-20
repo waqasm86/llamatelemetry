@@ -13,7 +13,7 @@ class PagedAttentionManager:
     """Manages paged attention for memory-efficient KV cache.
 
     This is a stub for future integration with paged attention kernels.
-    For v1.0.0, the standard attention + KV cache allocator is sufficient.
+    For v1.2.0, the standard attention + KV cache allocator is sufficient.
 
     Example:
         >>> manager = PagedAttentionManager()
@@ -31,7 +31,7 @@ class PagedAttentionManager:
 
     def is_available(self) -> bool:
         """Check if paged attention is available."""
-        return False  # Stub for v1.0.0
+        return False  # Stub for v1.2.0
 
     def forward(self, q: Any, k: Any, v: Any, block_table: Any = None, **kwargs: Any) -> Any:
         """Run paged attention forward pass.
@@ -45,4 +45,4 @@ class PagedAttentionManager:
         Returns:
             Attention output tensor.
         """
-        raise NotImplementedError("Paged attention not yet implemented in v1.0.0")
+        raise NotImplementedError("Paged attention not yet implemented in v1.2.0")

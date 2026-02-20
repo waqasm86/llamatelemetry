@@ -46,6 +46,9 @@ class LlamaCppBackend:
             timeout_s: Request timeout in seconds.
         """
         from ..api.client import LlamaCppClient
+        from ..utils import require_cuda
+
+        require_cuda()
 
         self._client = LlamaCppClient(
             base_url=base_url,

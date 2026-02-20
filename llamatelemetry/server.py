@@ -43,7 +43,7 @@ class ServerManager:
     # Binary bundles used when bootstrap-installed binaries are missing
     _BINARY_RELEASE_BASE = "https://github.com/llamatelemetry/llamatelemetry/releases/download"
     _BINARY_BUNDLES = [
-        {"version": "0.1.0", "filename": "llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
+        {"version": "1.2.0", "filename": "llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
     ]
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
@@ -343,6 +343,9 @@ class ServerManager:
             FileNotFoundError: If llama-server executable not found
             RuntimeError: If server fails to start or GPU is incompatible
         """
+        if gpu_layers <= 0:
+            raise ValueError("CPU-only mode is not supported. Set gpu_layers > 0.")
+
         # Check GPU compatibility (only if using GPU layers)
         if gpu_layers > 0 and not skip_gpu_check:
             from .utils import check_gpu_compatibility
@@ -365,9 +368,8 @@ class ServerManager:
                         f"llamatelemetry requires NVIDIA GPU with compute capability 5.0 or higher.\n"
                         f"Supported GPUs: Maxwell, Pascal, Volta, Turing, Ampere, Ada Lovelace.\n\n"
                         f"Options:\n"
-                        f"1. Use CPU-only mode: engine.load_model(model_path, gpu_layers=0)\n"
-                        f"2. Upgrade to a newer GPU\n"
-                        f"3. Use skip_gpu_check=True to override (may cause runtime errors)"
+                        f"1. Upgrade to a newer GPU\n"
+                        f"2. Use skip_gpu_check=True to override (may cause runtime errors)"
                     )
                 else:
                     error_msg += "\nTo skip this check, use skip_gpu_check=True"

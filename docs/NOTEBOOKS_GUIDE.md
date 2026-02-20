@@ -1,4 +1,4 @@
-# Notebooks Guide (v1.1.0)
+# Notebooks Guide (v1.2.0)
 
 The `notebooks/` directory contains 16 comprehensive Jupyter notebooks covering foundation-to-production observability workflows for Kaggle dual Tesla T4.
 
@@ -111,7 +111,7 @@ The `notebooks/` directory contains 16 comprehensive Jupyter notebooks covering 
 1. Set Kaggle accelerator to **GPU T4 × 2**.
 2. Install the SDK in notebook cell 1:
    ```python
-   !pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.1.0
+   !pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.2.0
    ```
 3. Start with **notebook 01** for a 10-minute quickstart.
 4. Follow the **Observability Focus** path (01 → 03 → 14 → 15 → 16) for production workflows.
@@ -124,4 +124,4 @@ The `notebooks/` directory contains 16 comprehensive Jupyter notebooks covering 
 - `docs/KAGGLE_GUIDE.md` — Kaggle-specific optimization tips
 - `docs/GGUF_GUIDE.md` — GGUF model selection and quantization
 - `docs/TROUBLESHOOTING.md` — Common issues and solutions
-- `docs/API_REFERENCE.md` — Full v1.1.0 API reference
+- `docs/API_REFERENCE.md` — Full v1.2.0 API reference

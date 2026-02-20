@@ -69,6 +69,9 @@ class LlamaCppEngine:
     def warmup(self) -> None:
         """Initialize the llama.cpp client and verify server connectivity."""
         from ...api.client import LlamaCppClient
+        from ...utils import require_cuda
+
+        require_cuda()
 
         self._client = LlamaCppClient(
             base_url=self._server_url,
@@ -91,8 +94,18 @@ class LlamaCppEngine:
                 kwargs["temperature"] = request.sampling.temperature
             if request.sampling.top_p != 1.0:
                 kwargs["top_p"] = request.sampling.top_p
+            if request.sampling.top_k > 0:
+                kwargs["top_k"] = request.sampling.top_k
+            if request.sampling.frequency_penalty != 0.0:
+                kwargs["frequency_penalty"] = request.sampling.frequency_penalty
+            if request.sampling.presence_penalty != 0.0:
+                kwargs["presence_penalty"] = request.sampling.presence_penalty
+            if request.sampling.repetition_penalty != 1.0:
+                kwargs["repeat_penalty"] = request.sampling.repetition_penalty
             if request.sampling.seed is not None:
                 kwargs["seed"] = request.sampling.seed
+            if request.sampling.stop_sequences:
+                kwargs["stop"] = request.sampling.stop_sequences
         kwargs["max_tokens"] = request.max_tokens
 
         # Execute
@@ -119,6 +132,9 @@ class LlamaCppEngine:
         if hasattr(result, "usage") and result.usage:
             input_tokens = getattr(result.usage, "prompt_tokens", 0)
             output_tokens = getattr(result.usage, "completion_tokens", 0)
+        if hasattr(result, "timings") and result.timings:
+            input_tokens = input_tokens or getattr(result.timings, "prompt_n", 0)
+            output_tokens = output_tokens or getattr(result.timings, "predicted_n", 0)
 
         events.mark_last_token()
         events.mark_complete()
@@ -126,6 +142,24 @@ class LlamaCppEngine:
 
         # Compute metrics
         all_metrics = compute_all_metrics(events)
+
+        # Prefer server-reported timings if available
+        if hasattr(result, "timings") and result.timings:
+            prompt_ms = getattr(result.timings, "prompt_ms", 0.0) or 0.0
+            predicted_ms = getattr(result.timings, "predicted_ms", 0.0) or 0.0
+            total_ms = prompt_ms + predicted_ms if (prompt_ms or predicted_ms) else all_metrics["total_latency_ms"]
+
+            if prompt_ms > 0:
+                all_metrics["ttft_ms"] = prompt_ms
+                if input_tokens > 0:
+                    all_metrics["prefill_tps"] = input_tokens / (prompt_ms / 1000.0)
+
+            if predicted_ms > 0 and output_tokens > 0:
+                all_metrics["tps"] = output_tokens / (predicted_ms / 1000.0)
+                denom = max(output_tokens - 1, 1)
+                all_metrics["tpot_ms"] = (predicted_ms / denom)
+
+            all_metrics["total_latency_ms"] = total_ms
 
         return InferenceResult(
             output_text=output_text,
@@ -152,13 +186,45 @@ class LlamaCppEngine:
             messages = [{"role": "user", "content": request.prompt}]
 
         kwargs: Dict[str, Any] = {"stream": True, "max_tokens": request.max_tokens}
+        if request.sampling:
+            if request.sampling.temperature != 0.7:
+                kwargs["temperature"] = request.sampling.temperature
+            if request.sampling.top_p != 1.0:
+                kwargs["top_p"] = request.sampling.top_p
+            if request.sampling.top_k > 0:
+                kwargs["top_k"] = request.sampling.top_k
+            if request.sampling.frequency_penalty != 0.0:
+                kwargs["frequency_penalty"] = request.sampling.frequency_penalty
+            if request.sampling.presence_penalty != 0.0:
+                kwargs["presence_penalty"] = request.sampling.presence_penalty
+            if request.sampling.repetition_penalty != 1.0:
+                kwargs["repeat_penalty"] = request.sampling.repetition_penalty
+            if request.sampling.seed is not None:
+                kwargs["seed"] = request.sampling.seed
+            if request.sampling.stop_sequences:
+                kwargs["stop"] = request.sampling.stop_sequences
 
         result = self._client.chat.create(messages=messages, **kwargs)
 
         # If result is iterable (streaming), yield chunks
         if hasattr(result, "__iter__"):
             for chunk in result:
-                if hasattr(chunk, "choices") and chunk.choices:
+                if isinstance(chunk, dict):
+                    choices = chunk.get("choices", [])
+                    if choices:
+                        delta = choices[0].get("delta") or choices[0].get("message")
+                        if isinstance(delta, dict):
+                            content = delta.get("content")
+                            if content:
+                                yield content
+                        else:
+                            content = getattr(delta, "content", None)
+                            if content:
+                                yield content
+                        text = choices[0].get("text")
+                        if text:
+                            yield text
+                elif hasattr(chunk, "choices") and chunk.choices:
                     delta = getattr(chunk.choices[0], "delta", None)
                     if delta and hasattr(delta, "content") and delta.content:
                         yield delta.content

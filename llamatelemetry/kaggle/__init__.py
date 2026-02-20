@@ -73,17 +73,17 @@ __all__ = [
     "get_preset_config",
     "PRESET_CONFIGS",
 
-    # Secrets (v1.0.0: load_secrets added)
+    # Secrets
     "KaggleSecrets",
     "auto_load_secrets",
     "load_secrets",
     "setup_huggingface_auth",
     "setup_graphistry_auth",
 
-    # Grafana Cloud auto-config (v1.0.0)
+    # Grafana Cloud auto-config
     "auto_configure_grafana_cloud",
 
-    # Graphistry auto-register (v1.0.0)
+    # Graphistry auto-register
     "auto_register_graphistry",
 
     # GPU Context

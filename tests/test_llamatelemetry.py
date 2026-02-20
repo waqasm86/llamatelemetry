@@ -14,6 +14,10 @@ import time
 # Add parent directory to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+def _cuda_available() -> bool:
+    from llamatelemetry.utils import detect_cuda
+    return detect_cuda().get("available", False)
+
 def test_import_and_version():
     """Test that the package can be imported and has version"""
     import llamatelemetry
@@ -152,7 +156,9 @@ def test_server_manager_creation():
 def test_inference_engine_workflow():
     """Test the main InferenceEngine workflow without actual server"""
     import llamatelemetry
-    
+    if not _cuda_available():
+        pytest.skip("CUDA not available")
+
     engine = llamatelemetry.InferenceEngine()
     
     # Verify engine has expected methods
@@ -203,7 +209,7 @@ def test_error_handling():
     
     # Test 1: Non-existent model file
     with pytest.raises(FileNotFoundError) as exc_info:
-        manager.start_server("/non/existent/model.gguf", gpu_layers=0)
+        manager.start_server("/non/existent/model.gguf", gpu_layers=1, skip_gpu_check=True)
     assert "Model file not found" in str(exc_info.value)
     
     print("\n✓ Error handling tests passed")
@@ -212,7 +218,9 @@ def test_error_handling():
 def test_metrics_structure():
     """Test metrics structure and initialization"""
     import llamatelemetry
-    
+    if not _cuda_available():
+        pytest.skip("CUDA not available")
+
     engine = llamatelemetry.InferenceEngine()
     metrics = engine.get_metrics()
     

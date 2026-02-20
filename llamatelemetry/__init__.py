@@ -1,7 +1,7 @@
 """
 llamatelemetry - CUDA-first OpenTelemetry Python SDK for LLM inference.
 
-v1.1.0 - Production inference subsystem, GenAI semantic conventions, and benchmark harness.
+v1.2.0 - Production inference subsystem, GenAI semantic conventions, and benchmark harness.
 
 Quick start::
 
@@ -35,6 +35,7 @@ from ._version import __version__, __binary_version__
 # Config
 # ---------------------------------------------------------------------------
 from .config import LlamaTelemetryConfig, get_config, set_config, is_initialized
+from .utils import require_cuda
 
 # ---------------------------------------------------------------------------
 # Submodule re-exports (lazy-friendly)
@@ -70,6 +71,10 @@ def init(
 
     Call this once at application startup before creating spans.
     """
+    if not enable_gpu:
+        raise ValueError("CPU-only mode is not supported. CUDA is required.")
+    require_cuda()
+
     cfg = LlamaTelemetryConfig(
         service_name=service_name,
         otlp_endpoint=otlp_endpoint,
@@ -138,7 +143,7 @@ from ._internal.decorators import (
 )
 
 # ---------------------------------------------------------------------------
-# Backward compatibility (v0.1.0)
+# Backward compatibility (legacy API)
 # ---------------------------------------------------------------------------
 from .compat import InferenceEngine, InferResult  # noqa: F401
 

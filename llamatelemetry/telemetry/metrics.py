@@ -4,14 +4,13 @@ llamatelemetry.telemetry.metrics - GPU Metrics Collector
 Continuously collects and exports fine-grained GPU metrics via OTel instruments:
 
 Instruments:
-    llamatelemetry.gpu.memory.used          (Gauge, bytes)
-    llamatelemetry.gpu.memory.total         (Gauge, bytes)
-    llamatelemetry.gpu.utilization          (Gauge, percent)
-    llamatelemetry.gpu.temperature          (Gauge, celsius)
-    llamatelemetry.llm.inference.latency    (Histogram, ms)
-    llamatelemetry.llm.inference.tokens     (Counter, tokens)
-    llamatelemetry.llm.inference.requests   (Counter, requests)
-    llamatelemetry.nccl.bytes_transferred   (Counter, bytes)
+    llamatelemetry.gpu.memory.used           (Gauge, bytes)
+    llamatelemetry.gpu.memory.total          (Gauge, bytes)
+    llamatelemetry.gpu.utilization           (Gauge, percent)
+    llamatelemetry.gpu.temperature           (Gauge, celsius)
+    gen_ai.client.operation.duration         (Histogram, s)
+    gen_ai.client.token.usage                (Histogram, {token})
+    llamatelemetry.nccl.bytes_transferred    (Counter, bytes)
 """
 
 import subprocess
@@ -71,23 +70,16 @@ class GpuMetricsCollector:
                 callbacks=[self._observe_gpu_utilization],
             )
 
-            # Counters (incremented by inference engine)
-            self._inference_tokens = meter.create_counter(
-                name="llamatelemetry.llm.inference.tokens",
-                description="Total tokens generated",
-                unit="tokens",
+            # GenAI metrics
+            self._genai_operation_duration = meter.create_histogram(
+                name="gen_ai.client.operation.duration",
+                description="GenAI client operation duration.",
+                unit="s",
             )
-            self._inference_requests = meter.create_counter(
-                name="llamatelemetry.llm.inference.requests",
-                description="Total inference requests",
-                unit="requests",
-            )
-
-            # Histogram
-            self._inference_latency = meter.create_histogram(
-                name="llamatelemetry.llm.inference.latency",
-                description="Inference request latency",
-                unit="ms",
+            self._genai_token_usage = meter.create_histogram(
+                name="gen_ai.client.token.usage",
+                description="GenAI client token usage.",
+                unit="{token}",
             )
 
             self._instruments_ready = True
@@ -162,25 +154,51 @@ class GpuMetricsCollector:
         except Exception:
             return []
 
-    def record_inference(self, latency_ms: float, tokens: int, model: str = "") -> None:
+    def record_inference(
+        self,
+        latency_ms: float,
+        input_tokens: int,
+        output_tokens: int,
+        operation: str,
+        provider: str,
+        model: str = "",
+        response_model: str = "",
+    ) -> None:
         """
         Record an inference event. Called by InferenceEngine after each request.
 
         Args:
             latency_ms: Request latency in milliseconds
-            tokens: Tokens generated
-            model: Model name for attributes
+            input_tokens: Input token count
+            output_tokens: Output token count
+            operation: GenAI operation name
+            provider: GenAI provider name
+            model: Requested model name
+            response_model: Response model name
         """
         if not self._instruments_ready:
             return
 
-        attrs = {"llm.model": model} if model else {}
+        attrs = {
+            "gen_ai.operation.name": operation,
+            "gen_ai.provider.name": provider,
+        }
+        if model:
+            attrs["gen_ai.request.model"] = model
+        if response_model:
+            attrs["gen_ai.response.model"] = response_model
 
-        self._inference_latency.record(latency_ms, attrs)
-        self._inference_tokens.add(tokens, attrs)
-        self._inference_requests.add(1, attrs)
+        self._genai_operation_duration.record(latency_ms / 1000.0, attrs)
+        if input_tokens:
+            in_attrs = dict(attrs)
+            in_attrs["gen_ai.token.type"] = "input"
+            self._genai_token_usage.record(input_tokens, in_attrs)
+        if output_tokens:
+            out_attrs = dict(attrs)
+            out_attrs["gen_ai.token.type"] = "output"
+            self._genai_token_usage.record(output_tokens, out_attrs)
 
-        self._total_tokens += tokens
+        self._total_tokens += output_tokens
         self._total_requests += 1
 
     def record_nccl_transfer(self, bytes_transferred: int) -> None:

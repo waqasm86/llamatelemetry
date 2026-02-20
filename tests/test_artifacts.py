@@ -50,7 +50,7 @@ def test_record_spans_mock():
         start_time = 1000000000
         end_time = 2000000000
         parent = None
-        attributes = {"llm.model": "test"}
+        attributes = {"gen_ai.request.model": "test"}
         status = "OK"
         def get_span_context(self):
             ctx = type("Ctx", (), {"span_id": 12345, "trace_id": 67890})()
@@ -89,9 +89,9 @@ def test_export_to_directory():
         start_time = 1000000000
         end_time = 2000000000
         parent = None
-        attributes = {"llm.model": "test", "gpu.id": "0", "nccl.split_mode": "none",
-                       "llm.input.tokens": 10, "llm.output.tokens": 20,
-                       "llm.latency_ms": 100, "llm.tokens_per_sec": 5.0}
+        attributes = {"gen_ai.request.model": "test", "gpu.id": "0", "nccl.split_mode": "none",
+                       "gen_ai.usage.input_tokens": 10, "gen_ai.usage.output_tokens": 20,
+                       "llamatelemetry.latency_ms": 100, "llamatelemetry.tokens_per_sec": 5.0}
         status = "OK"
         def get_span_context(self):
             return type("Ctx", (), {"span_id": 0xABCD, "trace_id": 0x12345})()

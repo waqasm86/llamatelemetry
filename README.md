@@ -1,4 +1,4 @@
-# llamatelemetry v1.1.0
+# llamatelemetry v1.2.0
 
 **CUDA-first OpenTelemetry Python SDK for LLM inference observability.**
 
@@ -6,15 +6,15 @@ GPU-native telemetry for quantized LLM inference pipelines — dual Tesla T4 on 
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](CHANGELOG.md)
 
 ---
 
-## What's in v1.1.0
+## What's in v1.2.0
 
 | Subsystem | Description |
 |---|---|
-| **GenAI Semantic Conventions** | Full `gen_ai.*` OTel attribute registry, dual-emit with legacy `llm.*` |
+| **GenAI Semantic Conventions** | Full `gen_ai.*` OTel attribute registry (no legacy LLM attributes) |
 | **Unified Inference Contract** | `InferenceEngine` protocol for llama.cpp + Transformers backends |
 | **Performance Primitives** | TTFT, TPOT, TPS, prefill TPS, VRAM peak, queue delay |
 | **Benchmark Harness** | `BenchmarkRunner`, `BenchmarkReport`, `compare_reports()` with regression detection |
@@ -50,7 +50,7 @@ llamatelemetry.shutdown()
 ### Kaggle Dual T4 (recommended)
 
 ```python
-!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.1.0
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.2.0
 
 import llamatelemetry
 from llamatelemetry.kaggle import auto_configure
@@ -93,11 +93,17 @@ engine.shutdown()
 ### GenAI semantic conventions (OTel-standard)
 
 ```python
-from llamatelemetry.semconv.gen_ai import GenAI
-from llamatelemetry.semconv.mapping import set_dual_attrs
+from llamatelemetry.semconv import gen_ai
+from llamatelemetry.semconv.mapping import set_gen_ai_attrs
 
-with tracer.start_as_current_span("llm.inference") as span:
-    set_dual_attrs(span, request, response)  # emits gen_ai.* + legacy llm.*
+with tracer.start_as_current_span("chat gemma-3-1b") as span:
+    set_gen_ai_attrs(span, {
+        "provider": gen_ai.PROVIDER_LLAMA_CPP,
+        "operation": gen_ai.OP_CHAT,
+        "model": "gemma-3-1b",
+        "input_tokens": 42,
+        "output_tokens": 128,
+    })
 ```
 
 ### Pipeline observability (finetune → deploy)
@@ -174,7 +180,7 @@ pip install "llamatelemetry[all]"          # everything
 | `llamatelemetry.inference.metrics` | `compute_ttft()`, `compute_tps()`, `compute_all_metrics()` |
 | `llamatelemetry.bench` | `BenchmarkRunner`, `BenchmarkReport`, `compare_reports()` |
 | `llamatelemetry.pipeline` | `PipelineTracer`, `PipelineContext` — ML lifecycle OTel spans |
-| `llamatelemetry.semconv` | `keys`, `gen_ai`, `GenAIAttrs`, `set_dual_attrs()` |
+| `llamatelemetry.semconv` | `keys`, `gen_ai`, `GenAIAttrs`, `set_gen_ai_attrs()` |
 | `llamatelemetry.semconv.gen_ai` | Full OTel `gen_ai.*` attribute registry |
 | `llamatelemetry.backends` | `LLMBackend` protocol, `LlamaCppBackend`, `TransformersBackend` |
 | `llamatelemetry.gpu` | GPU device listing, snapshots, `GPUSpanEnricher` |
@@ -223,11 +229,11 @@ pip install "llamatelemetry[all]"          # everything
 ## Project Layout
 
 ```
-llamatelemetry/          Python SDK package (v1.1.0)
+llamatelemetry/          Python SDK package (v1.2.0)
   inference/             Production inference subsystem (engine, scheduler, KV cache)
   bench/                 Benchmark harness (runner, report, regression detection)
   pipeline/              ML pipeline OTel spans (finetune → merge → export → quantize → deploy)
-  semconv/               Semantic conventions (gen_ai.* OTel standard + legacy llm.*)
+  semconv/               Semantic conventions (gen_ai.* OTel standard)
   backends/              Unified LLM backend protocol (LlamaCppBackend, TransformersBackend)
   llama/                 llama.cpp integration (client, server, phases, autotune)
   gpu/                   GPU metrics, snapshots, GPUSpanEnricher
@@ -244,8 +250,7 @@ docs/                    Documentation (guides, reference, architecture)
 notebooks/               16 Kaggle Jupyter notebooks (foundation → production)
 tests/                   Test suite (244 pass, 24 skip)
 releases/
-  v1.1.0/                Current release (source + CUDA binary)
-  v1.0.0/                Previous release
+  v1.2.0/                Current release (source + CUDA binary)
 scripts/                 Build and release utilities
 ```
 
@@ -255,8 +260,7 @@ scripts/                 Build and release utilities
 
 | Version | Source | CUDA Binary | SHA256 |
 |---|---|---|---|
-| **v1.1.0** (current) | [source.tar.gz](releases/v1.1.0/llamatelemetry-v1.1.0-source.tar.gz) | [cuda12-kaggle-t4x2.tar.gz](releases/v1.1.0/llamatelemetry-v1.1.0-cuda12-kaggle-t4x2.tar.gz) (1.4 GB) | `89b5b7db...` |
-| v1.0.0 | [source.tar.gz](releases/v1.0.0/llamatelemetry-v1.0.0-source.tar.gz) | [cuda12-kaggle-t4x2.tar.gz](releases/v1.0.0/llamatelemetry-v1.0.0-cuda12-kaggle-t4x2.tar.gz) (1.4 GB) | `89b5b7db...` |
+| **v1.2.0** (current) | [source.tar.gz](releases/v1.2.0/llamatelemetry-v1.2.0-source.tar.gz) | [cuda12-kaggle-t4x2.tar.gz](releases/v1.2.0/llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz) (1.4 GB) | `89b5b7db...` |
 
 The CUDA binary ships pre-built llama.cpp + NCCL for **CUDA 12 / Tesla T4 (SM 7.5)**. Downloaded automatically on first import in Kaggle.
 

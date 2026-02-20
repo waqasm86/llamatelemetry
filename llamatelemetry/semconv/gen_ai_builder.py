@@ -7,7 +7,6 @@ Supports both llama.cpp (OpenAI-compatible) and Transformers backends.
 
 from __future__ import annotations
 
-import hashlib
 import json
 from typing import Any, Dict, List, Optional
 
@@ -29,6 +28,7 @@ def build_gen_ai_attrs_from_request(
     choice_count: Optional[int] = None,
     stream: Optional[bool] = None,
     conversation_id: Optional[str] = None,
+    encoding_formats: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Build gen_ai.* request attributes.
@@ -48,6 +48,7 @@ def build_gen_ai_attrs_from_request(
         choice_count: Number of choices requested.
         stream: Whether streaming is enabled.
         conversation_id: Conversation/session ID.
+        encoding_formats: Preferred encoding formats (e.g. ["float", "base64"]).
 
     Returns:
         Dictionary of gen_ai.* request attributes.
@@ -68,6 +69,7 @@ def build_gen_ai_attrs_from_request(
     _set_if_not_none(attrs, gen_ai.GEN_AI_REQUEST_STOP_SEQUENCES, stop_sequences)
     _set_if_not_none(attrs, gen_ai.GEN_AI_REQUEST_CHOICE_COUNT, choice_count)
     _set_if_not_none(attrs, gen_ai.GEN_AI_CONVERSATION_ID, conversation_id)
+    _set_if_not_none(attrs, gen_ai.GEN_AI_REQUEST_ENCODING_FORMATS, encoding_formats)
 
     return attrs
 
@@ -125,17 +127,34 @@ def build_gen_ai_attrs_from_tools(
         attrs[gen_ai.GEN_AI_TOOL_DEFINITIONS] = json.dumps(tool_definitions)
 
     if tool_calls and record_content:
+        call_ids: List[Any] = []
+        call_names: List[Any] = []
+        call_types: List[Any] = []
+        call_args: List[Any] = []
+        call_results: List[Any] = []
+
         for call in tool_calls:
             if "id" in call:
-                attrs[gen_ai.GEN_AI_TOOL_CALL_ID] = call["id"]
+                call_ids.append(call["id"])
             if "name" in call:
-                attrs[gen_ai.GEN_AI_TOOL_NAME] = call["name"]
+                call_names.append(call["name"])
             if "type" in call:
-                attrs[gen_ai.GEN_AI_TOOL_TYPE] = call["type"]
+                call_types.append(call["type"])
             if "arguments" in call:
-                attrs[gen_ai.GEN_AI_TOOL_CALL_ARGUMENTS] = json.dumps(call["arguments"])
+                call_args.append(json.dumps(call["arguments"]))
             if "result" in call:
-                attrs[gen_ai.GEN_AI_TOOL_CALL_RESULT] = json.dumps(call["result"])
+                call_results.append(json.dumps(call["result"]))
+
+        if call_ids:
+            attrs[gen_ai.GEN_AI_TOOL_CALL_ID] = call_ids
+        if call_names:
+            attrs[gen_ai.GEN_AI_TOOL_NAME] = call_names
+        if call_types:
+            attrs[gen_ai.GEN_AI_TOOL_TYPE] = call_types
+        if call_args:
+            attrs[gen_ai.GEN_AI_TOOL_CALL_ARGUMENTS] = call_args
+        if call_results:
+            attrs[gen_ai.GEN_AI_TOOL_CALL_RESULT] = call_results
 
     return attrs
 
@@ -158,7 +177,7 @@ def build_content_attrs(
         record_content_max_chars: Maximum characters to record.
 
     Returns:
-        Dictionary of gen_ai.* content attributes, or hashes if content recording is off.
+        Dictionary of gen_ai.* content attributes.
     """
     attrs: Dict[str, Any] = {}
 
@@ -172,13 +191,6 @@ def build_content_attrs(
         if system_instructions:
             content = json.dumps(system_instructions)[:record_content_max_chars]
             attrs[gen_ai.GEN_AI_SYSTEM_INSTRUCTIONS] = content
-    else:
-        # Record SHA-256 hashes instead of content for debuggability without PII
-        if input_messages:
-            attrs["llamatelemetry.prompt.sha256"] = _sha256(json.dumps(input_messages))
-        if output_messages:
-            attrs["llamatelemetry.output.sha256"] = _sha256(json.dumps(output_messages))
-
     return attrs
 
 
@@ -187,7 +199,3 @@ def _set_if_not_none(attrs: Dict[str, Any], key: str, value: Any) -> None:
     if value is not None:
         attrs[key] = value
 
-
-def _sha256(text: str) -> str:
-    """Compute SHA-256 hex digest of a string."""
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()

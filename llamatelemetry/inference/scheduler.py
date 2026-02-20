@@ -137,7 +137,7 @@ class Scheduler:
                 self._queue.append(scheduled)
             self._stats.total_submitted += 1
 
-    def poll(self) -> Optional[Batch]:
+    def poll(self, force: bool = False) -> Optional[Batch]:
         """Poll for a ready batch.
 
         Returns a batch if enough requests are queued or max_wait_ms has elapsed.
@@ -148,6 +148,9 @@ class Scheduler:
         with self._lock:
             if not self._queue:
                 return None
+
+            if force:
+                return self._form_batch()
 
             # Check if we have enough requests or waited long enough
             oldest = self._queue[0]
@@ -174,6 +177,13 @@ class Scheduler:
             )
 
             if token_estimate + est_tokens > self._constraints.max_batch_tokens:
+                # Avoid deadlock: if the oldest request alone exceeds the limit,
+                # emit it as a single-item batch.
+                if not batch.requests:
+                    self._queue.popleft()
+                    req.events.mark_start()
+                    batch.requests.append(req)
+                    token_estimate += est_tokens
                 break
 
             self._queue.popleft()

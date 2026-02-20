@@ -18,8 +18,8 @@ Usage:
     ...     service_name="llamatelemetry-inference",
     ...     otlp_endpoint="http://localhost:4317"
     ... )
-    >>> with tracer.start_as_current_span("llm.inference") as span:
-    ...     span.set_attribute("llm.model", "gemma-3-1b")
+    >>> with tracer.start_as_current_span("gen_ai.inference") as span:
+    ...     span.set_attribute("gen_ai.request.model", "gemma-3-1b")
     ...     result = engine.infer("Hello")
 """
 
@@ -62,7 +62,7 @@ def get_metrics_collector() -> Any:
 
 def setup_telemetry(
     service_name: str = "llamatelemetry",
-    service_version: str = "0.1.0",
+    service_version: str = "1.2.0",
     otlp_endpoint: Optional[str] = None,
     enable_graphistry: bool = False,
     graphistry_server: Optional[str] = None,
@@ -141,16 +141,17 @@ def setup_telemetry(
     return tracer, meter
 
 
-# New v0.2.0+ modules
+# Telemetry modules
 from .auto_instrument import (
     instrument_inference,
     inference_span,
     batch_inference_span,
-    create_llm_attributes,
+    create_gen_ai_attributes,
     annotate_span_from_result,
 )
 
 from .instrumentor import (
+    LlamaCppClientInstrumentorConfig,
     LlamaCppClientInstrumentor,
     instrument_llamacpp_client,
     uninstrument_llamacpp_client,
@@ -169,19 +170,20 @@ __all__ = [
     "is_graphistry_available",
     "get_metrics_collector",
 
-    # Auto-instrumentation (v0.2.0+)
+    # Auto-instrumentation
     "instrument_inference",
     "inference_span",
     "batch_inference_span",
-    "create_llm_attributes",
+    "create_gen_ai_attributes",
     "annotate_span_from_result",
 
-    # Client instrumentor (v0.2.0+)
+    # Client instrumentor
+    "LlamaCppClientInstrumentorConfig",
     "LlamaCppClientInstrumentor",
     "instrument_llamacpp_client",
     "uninstrument_llamacpp_client",
 
-    # Performance monitor (v0.2.0+)
+    # Performance monitor
     "PerformanceSnapshot",
     "InferenceRecord",
     "PerformanceMonitor",

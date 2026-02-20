@@ -1,21 +1,13 @@
 """
 llamatelemetry.telemetry.tracer - Inference-aware TracerProvider
 
-Wraps the OpenTelemetry TracerProvider with LLM-specific span attributes
+Wraps the OpenTelemetry TracerProvider with GenAI span attributes
 and semantic conventions for inference tracing.
-
-Span semantic conventions used:
-    llm.system          - Inference backend (llamatelemetry/llama.cpp)
-    llm.model           - GGUF model name
-    llm.input.tokens    - Prompt token count
-    llm.output.tokens   - Generated token count
-    llm.latency_ms      - End-to-end inference latency
-    llm.tokens_per_sec  - Generation throughput
-    gpu.device_id       - GPU device used
-    nccl.split_mode     - Multi-GPU split strategy
 """
 
 from typing import Any, List, Optional
+
+from ..semconv import gen_ai
 
 
 class InferenceTracerProvider:
@@ -99,7 +91,7 @@ def annotate_inference_span(span: Any, model: str, prompt_tokens: int,
                             output_tokens: int, latency_ms: float,
                             gpu_id: int = 0, split_mode: str = "none") -> None:
     """
-    Attach standard LLM inference attributes to an active span.
+    Attach standard GenAI inference attributes to an active span.
 
     Args:
         span: Active OTel Span
@@ -110,13 +102,10 @@ def annotate_inference_span(span: Any, model: str, prompt_tokens: int,
         gpu_id: Primary GPU device ID
         split_mode: NCCL split mode (none, layer, row)
     """
-    tokens_per_sec = (output_tokens / (latency_ms / 1000.0)) if latency_ms > 0 else 0.0
-
-    span.set_attribute("llm.system", "llamatelemetry")
-    span.set_attribute("llm.model", model)
-    span.set_attribute("llm.input.tokens", prompt_tokens)
-    span.set_attribute("llm.output.tokens", output_tokens)
-    span.set_attribute("llm.latency_ms", latency_ms)
-    span.set_attribute("llm.tokens_per_sec", tokens_per_sec)
-    span.set_attribute("gpu.device_id", gpu_id)
+    span.set_attribute(gen_ai.GEN_AI_PROVIDER_NAME, gen_ai.PROVIDER_LLAMA_CPP)
+    span.set_attribute(gen_ai.GEN_AI_REQUEST_MODEL, model)
+    span.set_attribute(gen_ai.GEN_AI_USAGE_INPUT_TOKENS, prompt_tokens)
+    span.set_attribute(gen_ai.GEN_AI_USAGE_OUTPUT_TOKENS, output_tokens)
+    span.set_attribute("llamatelemetry.latency_ms", latency_ms)
+    span.set_attribute("gpu.id", str(gpu_id))
     span.set_attribute("nccl.split_mode", split_mode)

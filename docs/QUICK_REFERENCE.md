@@ -1,4 +1,4 @@
-# Quick Reference (v1.1.0)
+# Quick Reference (v1.2.0)
 
 ## Module Cheat-Sheet
 
@@ -10,7 +10,7 @@
 | `llamatelemetry.inference.metrics` | `compute_ttft()`, `compute_tps()`, `compute_all_metrics()` |
 | `llamatelemetry.bench` | `BenchmarkRunner`, `BenchmarkReport`, `compare_reports()` |
 | `llamatelemetry.pipeline` | `PipelineTracer`, `PipelineContext` |
-| `llamatelemetry.semconv` | `keys`, `GenAI`, `GenAIAttrs`, `set_dual_attrs()` |
+| `llamatelemetry.semconv` | `keys`, `gen_ai`, `GenAIAttrs`, `set_gen_ai_attrs()` |
 | `llamatelemetry.semconv.gen_ai` | Full `gen_ai.*` OTel attribute registry |
 | `llamatelemetry.backends` | `LLMBackend`, `LlamaCppBackend`, `TransformersBackend` |
 | `llamatelemetry.gpu` | `list_devices()`, `GPUSnapshot`, `GPUSpanEnricher` |
@@ -69,9 +69,16 @@ report.save("baseline.json")
 ### Emit GenAI OTel attributes
 
 ```python
-from llamatelemetry.semconv.mapping import set_dual_attrs
-with tracer.start_as_current_span("llm.inference") as span:
-    set_dual_attrs(span, request, response)
+from llamatelemetry.semconv import gen_ai
+from llamatelemetry.semconv.mapping import set_gen_ai_attrs
+with tracer.start_as_current_span("chat gemma-3-1b") as span:
+    set_gen_ai_attrs(span, {
+        "provider": gen_ai.PROVIDER_LLAMA_CPP,
+        "operation": gen_ai.OP_CHAT,
+        "model": "gemma-3-1b",
+        "input_tokens": 42,
+        "output_tokens": 128,
+    })
 ```
 
 ### Pipeline observability

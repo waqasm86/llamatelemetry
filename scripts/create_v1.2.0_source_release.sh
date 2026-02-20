@@ -1,10 +1,10 @@
 #!/bin/bash
 ################################################################################
-# Create Source Release Archives for llamatelemetry v1.0.0
+# Create Source Release Archives for llamatelemetry v1.2.0
 #
 # Output:
-#   releases/v1.0.0/llamatelemetry-v1.0.0-source.tar.gz
-#   releases/v1.0.0/llamatelemetry-v1.0.0-source.zip
+#   releases/v1.2.0/llamatelemetry-v1.2.0-source.tar.gz
+#   releases/v1.2.0/llamatelemetry-v1.2.0-source.zip
 #
 # Excludes:
 #   - binaries/, lib/, models/ (large binary artifacts)
@@ -13,17 +13,17 @@
 #   - archive/ (old releases)
 #   - *.gguf (model files)
 #   - *.tar.gz, *.zip within the tree (nested archives)
-#   - releases/v0.1.0/ (old release artifacts)
+#   - releases/v1.2.0/ (old release artifacts)
 #
 # Usage:
-#   chmod +x scripts/create_v1.0.0_source_release.sh
-#   ./scripts/create_v1.0.0_source_release.sh
+#   chmod +x scripts/create_v1.2.0_source_release.sh
+#   ./scripts/create_v1.2.0_source_release.sh
 ################################################################################
 
 set -euo pipefail
 
 # Configuration
-VERSION="1.0.0"
+VERSION="1.2.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 OUTPUT_DIR="${PROJECT_ROOT}/releases/v${VERSION}"
@@ -68,7 +68,7 @@ rsync -a --quiet \
     --exclude='lib/' \
     --exclude='models/' \
     --exclude='archive/' \
-    --exclude='releases/v0.1.0/' \
+    --exclude='releases/v1.2.0/' \
     --exclude='.mypy_cache' \
     --exclude='.pytest_cache' \
     --exclude='.tox' \

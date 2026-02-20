@@ -51,7 +51,7 @@ class TorchEngine:
             model: Pre-loaded model. If None, loads from model_path.
             tokenizer: Pre-loaded tokenizer. If None, loads from model_path.
             model_path: HuggingFace model ID or local path.
-            device: Device string ("cuda", "cuda:0", "cpu").
+            device: Device string ("cuda", "cuda:0").
             config: Full inference configuration.
         """
         self._model = model
@@ -60,12 +60,10 @@ class TorchEngine:
         self._config = config
 
         if device is None:
-            try:
-                import torch
-                self._device = "cuda" if torch.cuda.is_available() else "cpu"
-            except ImportError:
-                self._device = "cpu"
+            self._device = "cuda"
         else:
+            if device.startswith("cpu"):
+                raise ValueError("CPU devices are not supported. CUDA is required.")
             self._device = device
 
     @classmethod
@@ -87,6 +85,9 @@ class TorchEngine:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA is required for Transformers inference.")
+
         dtype_map = {
             "fp16": torch.float16,
             "bf16": torch.bfloat16,
@@ -101,8 +102,8 @@ class TorchEngine:
         self._model = AutoModelForCausalLM.from_pretrained(
             self._model_path,
             torch_dtype=dtype,
-            device_map=self._device,
         )
+        self._model.to(self._device)
 
         # Apply torch.compile if configured
         if self._config and self._config.use_torch_compile:
@@ -150,19 +151,50 @@ class TorchEngine:
                 gen_kwargs["top_p"] = request.sampling.top_p
             if request.sampling.top_k > 0:
                 gen_kwargs["top_k"] = request.sampling.top_k
+            if request.sampling.repetition_penalty != 1.0:
+                gen_kwargs["repetition_penalty"] = request.sampling.repetition_penalty
             if request.sampling.seed is not None:
                 torch.manual_seed(request.sampling.seed)
+            if request.sampling.stop_sequences:
+                try:
+                    from transformers import StoppingCriteria, StoppingCriteriaList
+
+                    stop_ids = [
+                        self._tokenizer.encode(s, add_special_tokens=False)
+                        for s in request.sampling.stop_sequences
+                    ]
+                    stop_ids = [s for s in stop_ids if s]
+
+                    if stop_ids:
+                        class _StopOnSequences(StoppingCriteria):
+                            def __init__(self, sequences):
+                                self._sequences = sequences
+
+                            def __call__(self, input_ids, scores, **kwargs):
+                                for seq in self._sequences:
+                                    if input_ids.shape[-1] >= len(seq):
+                                        if input_ids[0, -len(seq):].tolist() == seq:
+                                            return True
+                                return False
+
+                        gen_kwargs["stopping_criteria"] = StoppingCriteriaList(
+                            [_StopOnSequences(stop_ids)]
+                        )
+                except Exception:
+                    pass
 
         # Generate
         with torch.no_grad():
             output_ids = self._model.generate(**inputs, **gen_kwargs)
 
-        events.mark_first_token()
-
         # Decode
         new_tokens = output_ids[0][input_token_count:]
         output_text = self._tokenizer.decode(new_tokens, skip_special_tokens=True)
         output_token_count = len(new_tokens)
+
+        if events.start_ts is not None and output_token_count > 0:
+            # Without streaming, TTFT is unknown; use start_ts to avoid overstating it.
+            events.first_token_ts = events.start_ts
 
         events.mark_last_token()
         events.mark_complete()

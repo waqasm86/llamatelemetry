@@ -1,13 +1,12 @@
 """Tests for llamatelemetry.otel.redaction."""
-import pytest
 from llamatelemetry.otel.redaction import RedactionSpanProcessor, _PROMPT_KEYS
 
 
 def test_prompt_keys_defined():
     assert isinstance(_PROMPT_KEYS, frozenset)
-    assert "llm.prompt" in _PROMPT_KEYS
-    assert "gen_ai.prompt" in _PROMPT_KEYS
-    assert "gen_ai.completion" in _PROMPT_KEYS
+    assert "gen_ai.input.messages" in _PROMPT_KEYS
+    assert "gen_ai.output.messages" in _PROMPT_KEYS
+    assert "gen_ai.system_instructions" in _PROMPT_KEYS
 
 
 def test_redaction_processor_creation():

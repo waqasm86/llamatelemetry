@@ -1,18 +1,21 @@
-"""Integration test for the full llamatelemetry v1.1.0 workflow."""
+"""Integration test for the full llamatelemetry v1.2.0 workflow."""
 
 import os
 import pytest
 import llamatelemetry
+from llamatelemetry import utils
 
 
 def test_sdk_version():
-    """Verify SDK reports v1.1.0."""
-    assert llamatelemetry.version() == "1.1.0"
-    assert llamatelemetry.__version__ == "1.1.0"
+    """Verify SDK reports v1.2.0."""
+    assert llamatelemetry.version() == "1.2.0"
+    assert llamatelemetry.__version__ == "1.2.0"
 
 
 def test_engine_creation():
     """InferenceEngine can be instantiated (backward compat)."""
+    if not utils.detect_cuda().get("available"):
+        pytest.skip("CUDA not available")
     engine = llamatelemetry.InferenceEngine()
     assert engine is not None
 
@@ -27,6 +30,8 @@ def test_gpu_detection():
 
 def test_init_and_shutdown():
     """Full init -> shutdown lifecycle completes without error."""
+    if not utils.detect_cuda().get("available"):
+        pytest.skip("CUDA not available")
     llamatelemetry.init(service_name="test-workflow")
     assert llamatelemetry.is_initialized()
     llamatelemetry.shutdown()
@@ -42,6 +47,8 @@ def test_init_and_shutdown():
 )
 def test_model_inference():
     """End-to-end model loading and inference (requires local model)."""
+    if not utils.detect_cuda().get("available"):
+        pytest.skip("CUDA not available")
     model_path = (
         "/media/waqasm86/External1/Project-Nvidia/"
         "Ubuntu-Cuda-Llama.cpp-Executable/bin/"

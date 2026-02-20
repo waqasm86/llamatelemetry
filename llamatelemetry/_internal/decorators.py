@@ -44,7 +44,7 @@ def _make_decorator(span_kind: str, name: Optional[str] = None, **extra_attrs: A
                         return await fn(*args, **kwargs)
                     except Exception as exc:
                         span.record_exception(exc)
-                        span.set_attribute(keys.LLM_ERROR, str(exc))
+                        span.set_attribute("error.type", exc.__class__.__name__)
                         raise
 
             return async_wrapper
@@ -61,7 +61,7 @@ def _make_decorator(span_kind: str, name: Optional[str] = None, **extra_attrs: A
                         return fn(*args, **kwargs)
                     except Exception as exc:
                         span.record_exception(exc)
-                        span.set_attribute(keys.LLM_ERROR, str(exc))
+                        span.set_attribute("error.type", exc.__class__.__name__)
                         raise
 
             return sync_wrapper

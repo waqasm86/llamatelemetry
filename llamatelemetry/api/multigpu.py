@@ -426,10 +426,9 @@ def kaggle_t4_dual_config(model_size_gb: float = 7.0) -> MultiGPUConfig:
 
 def colab_t4_single_config() -> MultiGPUConfig:
     """
-    Legacy single-T4 configuration (pre-0.1.0).
+    Legacy single-T4 configuration.
 
-    llamatelemetry v0.1.0 targets Kaggle dual T4 only. This helper remains for
-    legacy compatibility with single-T4 environments.
+    This helper remains for compatibility with single-T4 environments.
 
     Returns:
         MultiGPUConfig for a single Tesla T4
@@ -459,11 +458,7 @@ def auto_config() -> MultiGPUConfig:
     gpus = detect_gpus()
     
     if not gpus:
-        # No GPUs detected, CPU only
-        return MultiGPUConfig(
-            n_gpu_layers=0,
-            flash_attention=False
-        )
+        raise RuntimeError("CUDA GPU required: no NVIDIA GPUs detected.")
     
     if len(gpus) == 1:
         # Single GPU

@@ -79,7 +79,7 @@ def _nccl_available() -> bool:
             return False
 
 
-def build_gpu_resource(service_name: str = "llamatelemetry", service_version: str = "0.1.0"):
+def build_gpu_resource(service_name: str = "llamatelemetry", service_version: str = "1.2.0"):
     """
     Build an OpenTelemetry Resource with GPU and NCCL attributes.
 
@@ -94,8 +94,8 @@ def build_gpu_resource(service_name: str = "llamatelemetry", service_version: st
     attributes = {
         "service.name": service_name,
         "service.version": service_version,
-        "llamatelemetry.version": "0.1.0",
-        "llamatelemetry.binary_version": "0.1.0",  # llama.cpp artifact version
+        "llamatelemetry.version": "1.2.0",
+        "llamatelemetry.binary_version": "1.2.0",  # llama.cpp artifact version
     }
 
     # Add GPU info

@@ -319,7 +319,7 @@ def setup_graphistry_auth() -> bool:
 
 def load_secrets(mapping: Dict[str, str]) -> Dict[str, Optional[str]]:
     """
-    Generic Kaggle secret loader (v1.0.0 simplified API).
+    Generic Kaggle secret loader (simplified API).
 
     The caller provides a mapping of ``{env_var_name: kaggle_secret_name}``
     and gets back the resolved values.  Each resolved value is also set

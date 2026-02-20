@@ -8,7 +8,6 @@ These constants align with the official OTel GenAI attribute registry.
 # ---------------------------------------------------------------------------
 # Core GenAI attributes
 # ---------------------------------------------------------------------------
-GEN_AI_SYSTEM = "gen_ai.system"
 GEN_AI_PROVIDER_NAME = "gen_ai.provider.name"
 GEN_AI_OPERATION_NAME = "gen_ai.operation.name"
 

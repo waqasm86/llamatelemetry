@@ -2,17 +2,12 @@
 from llamatelemetry.semconv import keys
 
 
-def test_llm_keys_are_strings():
-    llm_keys = [
-        keys.LLM_SYSTEM, keys.LLM_MODEL, keys.LLM_REQUEST_DURATION_MS,
-        keys.LLM_TOKENS_TOTAL, keys.LLM_TOKENS_PER_SECOND,
-        keys.LLM_INPUT_TOKENS, keys.LLM_OUTPUT_TOKENS,
-        keys.LLM_PHASE, keys.LLM_QUANT, keys.LLM_GGUF_SHA256,
-        keys.LLM_STREAM, keys.LLM_FINISH_REASON, keys.LLM_ERROR,
+def test_no_legacy_llm_keys():
+    all_keys = [
+        v for name, v in vars(keys).items()
+        if not name.startswith("_") and isinstance(v, str)
     ]
-    for k in llm_keys:
-        assert isinstance(k, str), f"{k} is not a string"
-        assert k.startswith("llm."), f"{k} doesn't start with llm."
+    assert not any(k.startswith("llm.") for k in all_keys)
 
 
 def test_gpu_keys_are_strings():
@@ -53,6 +48,5 @@ def test_key_uniqueness():
 def test_attrs_module_importable():
     from llamatelemetry.semconv import attrs
     assert callable(attrs.run_id)
-    assert callable(attrs.model_attrs)
     assert callable(attrs.gpu_attrs)
     assert callable(attrs.nccl_attrs)

@@ -142,15 +142,17 @@ class InferenceRuntime:
 
         self._scheduler.submit(request, callback=on_complete)
 
-        # Poll and execute
-        batch = self._scheduler.poll()
-        if batch:
+        # Poll and execute until our request completes
+        while not result_holder:
+            batch = self._scheduler.poll(force=True)
+            if not batch:
+                continue
             for scheduled_req in batch.requests:
                 res = self._engine.generate(scheduled_req.request)
                 if scheduled_req.callback:
                     scheduled_req.callback(res)
 
-        return result_holder[0] if result_holder else self._engine.generate(request)
+        return result_holder[0]
 
     @property
     def engine(self) -> InferenceEngine:

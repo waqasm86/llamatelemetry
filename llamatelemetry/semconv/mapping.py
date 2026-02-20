@@ -1,8 +1,7 @@
 """
-llamatelemetry.semconv.mapping - Dual-emit mapper for gen_ai.* and legacy llm.* attributes.
+llamatelemetry.semconv.mapping - Mapper for gen_ai.* attributes.
 
-Allows emitting both gen_ai.* (OTel standard) and llm.* (legacy llamatelemetry)
-attributes for backward compatibility.
+Converts backend payloads into OpenTelemetry GenAI semantic convention attributes.
 """
 
 from __future__ import annotations
@@ -10,18 +9,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from . import gen_ai, keys
+from . import gen_ai
 
 
 @dataclass(frozen=True)
 class GenAIAttrs:
     """Structured container for GenAI semantic convention attributes."""
 
-    system: Optional[str] = None
     provider: Optional[str] = None
     model: Optional[str] = None
     operation: Optional[str] = None
-    request_id: Optional[str] = None
     response_id: Optional[str] = None
     input_tokens: Optional[int] = None
     output_tokens: Optional[int] = None
@@ -50,11 +47,9 @@ def to_gen_ai_attrs(payload: Dict[str, Any]) -> Dict[str, Any]:
         Dictionary of gen_ai.* attributes (only non-None values).
     """
     mapping = {
-        "system": gen_ai.GEN_AI_SYSTEM,
         "provider": gen_ai.GEN_AI_PROVIDER_NAME,
         "model": gen_ai.GEN_AI_REQUEST_MODEL,
         "operation": gen_ai.GEN_AI_OPERATION_NAME,
-        "request_id": gen_ai.GEN_AI_RESPONSE_ID,
         "response_id": gen_ai.GEN_AI_RESPONSE_ID,
         "input_tokens": gen_ai.GEN_AI_USAGE_INPUT_TOKENS,
         "output_tokens": gen_ai.GEN_AI_USAGE_OUTPUT_TOKENS,
@@ -79,61 +74,14 @@ def to_gen_ai_attrs(payload: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def to_legacy_llm_attrs(payload: Dict[str, Any]) -> Dict[str, Any]:
+def set_gen_ai_attrs(span: Any, payload: Dict[str, Any]) -> None:
     """
-    Convert a backend payload dict to legacy llm.* attributes for backward compatibility.
-
-    Args:
-        payload: Dictionary with keys like 'model', 'input_tokens', etc.
-
-    Returns:
-        Dictionary of legacy llm.* attributes (only non-None values).
-    """
-    mapping = {
-        "system": keys.LLM_SYSTEM,
-        "model": keys.LLM_MODEL,
-        "input_tokens": keys.LLM_INPUT_TOKENS,
-        "output_tokens": keys.LLM_OUTPUT_TOKENS,
-        "finish_reasons": keys.LLM_FINISH_REASON,
-        "stream": keys.LLM_STREAM,
-    }
-
-    result: Dict[str, Any] = {}
-    for key, attr_name in mapping.items():
-        value = payload.get(key)
-        if value is not None:
-            # For finish_reasons, take the first one for legacy single-value field
-            if key == "finish_reasons" and isinstance(value, list):
-                result[attr_name] = value[0] if value else ""
-            else:
-                result[attr_name] = value
-    return result
-
-
-def dual_emit_attrs(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Emit both gen_ai.* and legacy llm.* attributes from a single payload.
-
-    Args:
-        payload: Dictionary with keys like 'model', 'operation', 'input_tokens', etc.
-
-    Returns:
-        Merged dictionary containing both gen_ai.* and llm.* attributes.
-    """
-    attrs: Dict[str, Any] = {}
-    attrs.update(to_gen_ai_attrs(payload))
-    attrs.update(to_legacy_llm_attrs(payload))
-    return attrs
-
-
-def set_dual_attrs(span: Any, payload: Dict[str, Any]) -> None:
-    """
-    Set both gen_ai.* and legacy llm.* attributes on a span.
+    Set gen_ai.* attributes on a span.
 
     Args:
         span: An OpenTelemetry span (or noop span).
         payload: Dictionary with attribute values.
     """
-    attrs = dual_emit_attrs(payload)
+    attrs = to_gen_ai_attrs(payload)
     for k, v in attrs.items():
         span.set_attribute(k, v)

@@ -84,12 +84,11 @@ class GraphistryTraceExporter:
             "start_time": start_time / 1e9 if start_time else 0,
             "end_time": end_time / 1e9 if end_time else 0,
             "duration_ms": duration_ms,
-            "llm.model": attrs.get("llm.model", ""),
-            "llm.input.tokens": attrs.get("llm.input.tokens", 0),
-            "llm.output.tokens": attrs.get("llm.output.tokens", 0),
-            "llm.latency_ms": attrs.get("llm.latency_ms", duration_ms),
-            "llm.tokens_per_sec": attrs.get("llm.tokens_per_sec", 0.0),
-            "gpu.device_id": attrs.get("gpu.device_id", 0),
+            "gen_ai.request.model": attrs.get("gen_ai.request.model", ""),
+            "gen_ai.usage.input_tokens": attrs.get("gen_ai.usage.input_tokens", 0),
+            "gen_ai.usage.output_tokens": attrs.get("gen_ai.usage.output_tokens", 0),
+            "llamatelemetry.latency_ms": attrs.get("llamatelemetry.latency_ms", duration_ms),
+            "gpu.id": attrs.get("gpu.id", 0),
             "nccl.split_mode": attrs.get("nccl.split_mode", "none"),
             "status": str(span.status) if hasattr(span, "status") else "OK",
         }
@@ -103,8 +102,8 @@ class GraphistryTraceExporter:
             Returns (None, None) if pandas is not installed or no spans collected.
 
         Node columns:
-            span_id, name, duration_ms, llm.model, llm.latency_ms,
-            llm.tokens_per_sec, gpu.device_id, nccl.split_mode
+            span_id, name, duration_ms, gen_ai.request.model, latency_ms,
+            gen_ai.usage.output_tokens, gpu.id, nccl.split_mode
 
         Edge columns:
             src (parent span_id), dst (child span_id), weight (tokens/sec)
@@ -120,12 +119,11 @@ class GraphistryTraceExporter:
                 "span_id": s["span_id"],
                 "name": s["name"],
                 "duration_ms": s["duration_ms"],
-                "llm_model": s["llm.model"],
-                "llm_latency_ms": s["llm.latency_ms"],
-                "llm_tokens_per_sec": s["llm.tokens_per_sec"],
-                "llm_input_tokens": s["llm.input.tokens"],
-                "llm_output_tokens": s["llm.output.tokens"],
-                "gpu_device_id": s["gpu.device_id"],
+                "gen_ai_request_model": s["gen_ai.request.model"],
+                "gen_ai_latency_ms": s["llametelemetry.latency_ms"],
+                "gen_ai_input_tokens": s["gen_ai.usage.input_tokens"],
+                "gen_ai_output_tokens": s["gen_ai.usage.output_tokens"],
+                "gpu_id": s["gpu.id"],
                 "nccl_split_mode": s["nccl.split_mode"],
                 "trace_id": s["trace_id"],
             })
@@ -134,8 +132,12 @@ class GraphistryTraceExporter:
                 edges.append({
                     "src": s["parent_span_id"],
                     "dst": s["span_id"],
-                    "weight": s["llm.tokens_per_sec"],
-                    "latency_ms": s["llm.latency_ms"],
+                    "weight": (
+                        (s["gen_ai.usage.output_tokens"] / (s["llamatelemetry.latency_ms"] / 1000.0))
+                        if s["llamatelemetry.latency_ms"] > 0
+                        else 0.0
+                    ),
+                    "latency_ms": s["llamatelemetry.latency_ms"],
                 })
 
         nodes_df = pd.DataFrame(nodes)
@@ -167,7 +169,7 @@ class GraphistryTraceExporter:
         return (
             graphistry.edges(edges_df, "src", "dst")
             .nodes(nodes_df, "span_id")
-            .bind(edge_color="latency_ms", node_color="llm_latency_ms")
+            .bind(edge_color="latency_ms", node_color="gen_ai_latency_ms")
         )
 
     def clear(self) -> None:

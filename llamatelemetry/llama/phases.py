@@ -2,18 +2,19 @@
 llamatelemetry.llama.phases - Prefill/decode span hierarchy + trace_request().
 
 Creates the span tree:
-    llm.request
-        llm.phase.prefill
-        llm.phase.decode
-And emits associated metrics.
+    {gen_ai.operation.name} {gen_ai.request.model}
+        llamatelemetry.phase.prefill
+        llamatelemetry.phase.decode
+And emits associated GenAI metrics.
 """
 
 import time
 from contextlib import contextmanager
 from typing import Any, Optional
 
-from ..otel.provider import get_tracer, get_meter
-from ..semconv import keys
+from ..otel.provider import get_tracer
+from ..otel.gen_ai_metrics import get_gen_ai_metrics
+from ..otel.gen_ai_utils import build_gen_ai_span_attrs, build_span_name
 from ..semconv import gen_ai as gen_ai_keys
 from ..semconv.gen_ai_builder import build_gen_ai_attrs_from_request, build_gen_ai_attrs_from_response
 
@@ -27,7 +28,7 @@ def trace_request(
     completion_tokens: int = 0,
 ):
     """
-    Context manager that creates the ``llm.request`` -> ``llm.phase.*`` span hierarchy.
+    Context manager that creates the GenAI root span with prefill/decode children.
 
     Usage::
 
@@ -43,18 +44,6 @@ def trace_request(
         completion_tokens: Number of completion tokens (set upfront if known).
     """
     tracer = get_tracer("llamatelemetry.llama")
-    meter = get_meter("llamatelemetry.llama")
-
-    _duration_hist = meter.create_histogram(
-        name="llm.request.duration_ms",
-        description="LLM request latency",
-        unit="ms",
-    )
-    _tokens_counter = meter.create_counter(
-        name="llm.tokens.total",
-        description="Total tokens generated",
-        unit="tokens",
-    )
 
     handle = _RequestHandle(
         prompt_tokens=prompt_tokens,
@@ -62,13 +51,26 @@ def trace_request(
     )
     start = time.perf_counter()
 
-    with tracer.start_as_current_span("llm.request") as root_span:
-        # Legacy llm.* attributes
-        root_span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
-        root_span.set_attribute(keys.LLM_MODEL, model)
-        root_span.set_attribute(keys.LLM_STREAM, stream)
+    span_name = build_span_name(gen_ai_keys.OP_CHAT, model or None)
+    span_attrs = build_gen_ai_span_attrs(
+        operation=gen_ai_keys.OP_CHAT,
+        provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+        model=model or None,
+    )
+
+    try:
+        from opentelemetry.trace import SpanKind
+        span_kind = SpanKind.CLIENT
+    except Exception:
+        span_kind = None
+
+    with tracer.start_as_current_span(
+        span_name,
+        kind=span_kind,
+        attributes=span_attrs if span_kind is not None else None,
+    ) as root_span:
         if request_id:
-            root_span.set_attribute(keys.REQUEST_ID, request_id)
+            root_span.set_attribute("request.id", request_id)
 
         # gen_ai.* request attributes
         gen_ai_req = build_gen_ai_attrs_from_request(
@@ -81,14 +83,13 @@ def trace_request(
             root_span.set_attribute(k, v)
 
         # Prefill child span
-        with tracer.start_as_current_span("llm.phase.prefill") as pfill:
-            pfill.set_attribute(keys.LLM_PHASE, "prefill")
-            pfill.set_attribute(keys.LLM_INPUT_TOKENS, prompt_tokens)
+        with tracer.start_as_current_span("llamatelemetry.phase.prefill") as pfill:
+            pass
 
         try:
             yield handle
         except Exception as exc:
-            root_span.set_attribute(keys.LLM_ERROR, str(exc))
+            root_span.set_attribute("error.type", exc.__class__.__name__)
             root_span.record_exception(exc)
             raise
         finally:
@@ -96,16 +97,8 @@ def trace_request(
             total_out = handle.completion_tokens
 
             # Decode child span
-            with tracer.start_as_current_span("llm.phase.decode") as dec:
-                dec.set_attribute(keys.LLM_PHASE, "decode")
-                dec.set_attribute(keys.LLM_OUTPUT_TOKENS, total_out)
-                tps = (total_out / (elapsed_ms / 1000.0)) if elapsed_ms > 0 else 0.0
-                dec.set_attribute(keys.LLM_TOKENS_PER_SECOND, tps)
-
-            root_span.set_attribute(keys.LLM_REQUEST_DURATION_MS, elapsed_ms)
-            root_span.set_attribute(keys.LLM_OUTPUT_TOKENS, total_out)
-            root_span.set_attribute(keys.LLM_INPUT_TOKENS, handle.prompt_tokens)
-            root_span.set_attribute(keys.LLM_TOKENS_TOTAL, handle.prompt_tokens + total_out)
+            with tracer.start_as_current_span("llamatelemetry.phase.decode") as dec:
+                pass
 
             # gen_ai.* response attributes
             gen_ai_resp = build_gen_ai_attrs_from_response(
@@ -115,9 +108,21 @@ def trace_request(
             for k, v in gen_ai_resp.items():
                 root_span.set_attribute(k, v)
 
-            attrs = {keys.LLM_MODEL: model}
-            _duration_hist.record(elapsed_ms, attrs)
-            _tokens_counter.add(total_out, attrs)
+            metrics = get_gen_ai_metrics()
+            base_attrs = build_gen_ai_span_attrs(
+                operation=gen_ai_keys.OP_CHAT,
+                provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+                model=model or None,
+            )
+            metrics.record_client_operation_duration(elapsed_ms / 1000.0, base_attrs)
+            if handle.prompt_tokens:
+                metrics.record_client_token_usage(
+                    handle.prompt_tokens, gen_ai_keys.TOKEN_INPUT, base_attrs
+                )
+            if total_out:
+                metrics.record_client_token_usage(
+                    total_out, gen_ai_keys.TOKEN_OUTPUT, base_attrs
+                )
 
 
 class _RequestHandle:

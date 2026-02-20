@@ -1,8 +1,8 @@
 """
-llamatelemetry.compat - Backward compatibility shims for v0.1.0 API.
+llamatelemetry.compat - Backward compatibility shims for legacy APIs.
 
 Provides InferenceEngine and InferResult with deprecation warnings
-pointing to the new v1.0.0 APIs.
+pointing to the current v1.2.0 APIs.
 """
 
 import warnings
@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 def _deprecated(old: str, new: str) -> None:
     warnings.warn(
-        f"{old} is deprecated since v1.0.0. Use {new} instead.",
+        f"{old} is deprecated as of v1.2.0. Use {new} instead.",
         DeprecationWarning,
         stacklevel=3,
     )
@@ -47,7 +47,7 @@ class InferenceEngine:
     Backward-compatible InferenceEngine (deprecated).
 
     Use ``llamatelemetry.init()`` + ``llamatelemetry.llama.LlamaCppClient``
-    for the v1.0.0 API.
+    for the v1.2.0 API.
     """
 
     def __init__(
@@ -60,6 +60,9 @@ class InferenceEngine:
             "InferenceEngine",
             "llamatelemetry.init() + llamatelemetry.llama.LlamaCppClient",
         )
+        from .utils import require_cuda
+
+        require_cuda()
         # Delegate to the original implementation that still lives in __init__.py
         # during the transition period.
         from . import _legacy_init  # type: ignore[attr-defined]

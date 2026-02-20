@@ -5,23 +5,6 @@ Consolidates all scattered attribute string literals into a single module.
 """
 
 # ---------------------------------------------------------------------------
-# LLM attributes
-# ---------------------------------------------------------------------------
-LLM_SYSTEM = "llm.system"
-LLM_MODEL = "llm.model"
-LLM_REQUEST_DURATION_MS = "llm.request.duration_ms"
-LLM_TOKENS_TOTAL = "llm.tokens.total"
-LLM_TOKENS_PER_SECOND = "llm.tokens_per_sec"
-LLM_INPUT_TOKENS = "llm.input.tokens"
-LLM_OUTPUT_TOKENS = "llm.output.tokens"
-LLM_PHASE = "llm.phase"
-LLM_QUANT = "llm.quantization"
-LLM_GGUF_SHA256 = "llm.gguf.sha256"
-LLM_STREAM = "llm.stream"
-LLM_FINISH_REASON = "llm.finish_reason"
-LLM_ERROR = "llm.error"
-
-# ---------------------------------------------------------------------------
 # GPU attributes
 # ---------------------------------------------------------------------------
 GPU_ID = "gpu.id"

@@ -9,14 +9,12 @@ from typing import Any, List, Optional, Sequence
 
 _PROMPT_KEYS = frozenset(
     {
-        "llm.prompt",
-        "llm.prompts",
-        "gen_ai.prompt",
-        "gen_ai.completion",
-        "llm.input",
-        "llm.output",
-        "llm.request.body",
-        "llm.response.body",
+        "gen_ai.input.messages",
+        "gen_ai.output.messages",
+        "gen_ai.system_instructions",
+        "gen_ai.tool.call.arguments",
+        "gen_ai.tool.call.result",
+        "gen_ai.tool.definitions",
     }
 )
 
