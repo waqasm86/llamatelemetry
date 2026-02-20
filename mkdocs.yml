@@ -21,7 +21,7 @@ exclude_docs: |
   FINAL_WORKFLOW_GUIDE.md
   GITHUB_RELEASE_NOTES_SIMPLIFIED.md
   INDEX.md
-  LINKEDIN_POST_V0.1.0.md
+  LINKEDIN_POST_V1.2.0.md
   PYPI_PACKAGE_GUIDE.md
   RELEASE_SUMMARY.md
 
@@ -82,6 +82,7 @@ nav:
   - Getting Started:
       - Installation: INSTALLATION.md
       - Quick Start: QUICK_START_GUIDE.md
+      - Golden Path: GOLDEN_PATH.md
       - Kaggle Guide: KAGGLE_GUIDE.md
   - Core Documentation:
       - Architecture: ARCHITECTURE.md

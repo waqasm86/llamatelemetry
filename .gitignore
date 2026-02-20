@@ -107,6 +107,7 @@ llamatelemetry-assets/
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -114,6 +115,9 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*
+.python-version
+.direnv/
+.uv/
 
 # IDE
 .vscode/
@@ -156,15 +160,8 @@ desktop.ini
 *.webp
 *.pdf
 
-# Old version files - archived to archive/, not committed
+# Archived files (not committed)
 archive/
-# Archived pre-v1.2.0 build scripts (moved to archive/v1.0.0/scripts/)
-scripts/build_v1.0.0_cuda_binary.sh
-scripts/create_v1.0.0_source_release.sh
-*v2.0*
-*v2.1.0*
-*v2.1.1*
-*v2.1.2*
 *_REPORT.md
 *_SUMMARY.md
 *_COMPLETE*.md
