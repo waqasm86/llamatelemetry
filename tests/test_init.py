@@ -6,8 +6,8 @@ import pytest
 
 def test_version():
     import llamatelemetry
-    assert llamatelemetry.version() == "1.0.0"
-    assert llamatelemetry.__version__ == "1.0.0"
+    assert llamatelemetry.version() == "1.1.0"
+    assert llamatelemetry.__version__ == "1.1.0"
 
 
 def test_public_api_exists():

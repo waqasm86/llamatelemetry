@@ -5,7 +5,13 @@ Load Unsloth fine-tuned models directly into llamatelemetry-compatible format.
 Supports both local and HuggingFace Hub models.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.unsloth. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Tuple, Dict, Any, Union
 from pathlib import Path
 import sys

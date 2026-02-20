@@ -11,7 +11,13 @@ References:
     - OpenAI Triton: https://github.com/openai/triton
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.cuda. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Dict, Any, Callable, List, Tuple
 from dataclasses import dataclass
 import warnings

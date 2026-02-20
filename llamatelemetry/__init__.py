@@ -1,7 +1,7 @@
 """
 llamatelemetry - CUDA-first OpenTelemetry Python SDK for LLM inference.
 
-v1.0.0 - Production-grade GPU-native LLM observability.
+v1.1.0 - Production inference subsystem, GenAI semantic conventions, and benchmark harness.
 
 Quick start::
 

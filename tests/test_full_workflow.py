@@ -1,4 +1,4 @@
-"""Integration test for the full llamatelemetry v1.0.0 workflow."""
+"""Integration test for the full llamatelemetry v1.1.0 workflow."""
 
 import os
 import pytest
@@ -6,9 +6,9 @@ import llamatelemetry
 
 
 def test_sdk_version():
-    """Verify SDK reports v1.0.0."""
-    assert llamatelemetry.version() == "1.0.0"
-    assert llamatelemetry.__version__ == "1.0.0"
+    """Verify SDK reports v1.1.0."""
+    assert llamatelemetry.version() == "1.1.0"
+    assert llamatelemetry.__version__ == "1.1.0"
 
 
 def test_engine_creation():

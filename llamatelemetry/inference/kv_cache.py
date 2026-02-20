@@ -5,7 +5,13 @@ Optimized Key-Value cache management for long-context inference.
 Reduces memory usage and enables efficient sequential generation.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.inference.kv_cache. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Tuple, List
 from dataclasses import dataclass
 

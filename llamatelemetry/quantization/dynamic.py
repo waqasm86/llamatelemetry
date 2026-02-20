@@ -8,7 +8,13 @@ This module intelligently selects quantization schemes for optimal inference
 on Tesla T4 GPUs while maintaining model quality.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.quantization. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Dict, Any, Union, Tuple
 from dataclasses import dataclass
 from enum import Enum

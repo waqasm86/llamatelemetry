@@ -4,7 +4,13 @@ Batch Inference Optimization
 Optimized batching strategies for maximizing throughput on Tesla T4.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.inference.batch. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import List, Optional, Callable, Any
 from dataclasses import dataclass
 

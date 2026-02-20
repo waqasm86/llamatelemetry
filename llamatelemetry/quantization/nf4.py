@@ -10,7 +10,13 @@ References:
     - bitsandbytes: https://github.com/bitsandbytes-foundation/bitsandbytes
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.quantization. "
+        "Install with: pip install torch"
+    ) from _torch_err
 import numpy as np
 from typing import Optional, Tuple, Dict, Any
 from dataclasses import dataclass

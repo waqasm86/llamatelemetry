@@ -14,7 +14,13 @@ References:
     - PyTorch CUDA Graphs: https://pytorch.org/docs/stable/notes/cuda.html#cuda-graphs
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.cuda. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Callable, Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass
 import warnings

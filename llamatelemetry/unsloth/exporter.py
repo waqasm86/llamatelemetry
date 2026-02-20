@@ -5,7 +5,13 @@ Export Unsloth fine-tuned models to GGUF format for llamatelemetry inference.
 Handles LoRA merging, quantization, and metadata preservation.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.unsloth. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Union, Dict, Any
 from pathlib import Path
 from dataclasses import dataclass

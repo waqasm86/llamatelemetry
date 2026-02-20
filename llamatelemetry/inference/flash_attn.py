@@ -14,7 +14,13 @@ References:
     - FlashAttention-2: https://arxiv.org/abs/2307.08691
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.inference.flash_attn. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Tuple
 from dataclasses import dataclass
 import warnings

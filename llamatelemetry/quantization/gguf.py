@@ -7,7 +7,13 @@ Supports direct export from Unsloth fine-tuned models and HuggingFace transforme
 GGUF (GPT-Generated Unified Format) is the standard format for llama.cpp inference.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.quantization. "
+        "Install with: pip install torch"
+    ) from _torch_err
 import struct
 import numpy as np
 from pathlib import Path

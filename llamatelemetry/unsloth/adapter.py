@@ -5,7 +5,13 @@ Handle LoRA adapters from Unsloth fine-tuning, including merging,
 extraction, and management for llamatelemetry deployment.
 """
 
-import torch
+try:
+    import torch
+except ImportError as _torch_err:
+    raise ImportError(
+        "PyTorch is required for llamatelemetry.unsloth. "
+        "Install with: pip install torch"
+    ) from _torch_err
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 from dataclasses import dataclass
