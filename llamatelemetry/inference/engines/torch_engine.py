@@ -58,6 +58,7 @@ class TorchEngine:
         self._tokenizer = tokenizer
         self._model_path = model_path
         self._config = config
+        self._input_device = None
 
         if device is None:
             self._device = "cuda"
@@ -99,11 +100,50 @@ class TorchEngine:
         )
 
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_path)
+        model_kwargs: Dict[str, Any] = {"torch_dtype": dtype}
+        if self._config:
+            if self._config.transformers_device_map is not None:
+                model_kwargs["device_map"] = self._config.transformers_device_map
+            if self._config.transformers_max_memory is not None:
+                model_kwargs["max_memory"] = self._config.transformers_max_memory
+            if self._config.transformers_trust_remote_code:
+                model_kwargs["trust_remote_code"] = True
+
+            if self._config.transformers_load_in_4bit or self._config.transformers_load_in_8bit:
+                try:
+                    from transformers import BitsAndBytesConfig
+
+                    bnb_kwargs: Dict[str, Any] = {
+                        "load_in_4bit": self._config.transformers_load_in_4bit,
+                        "load_in_8bit": self._config.transformers_load_in_8bit,
+                    }
+                    if self._config.transformers_bnb_4bit_compute_dtype:
+                        bnb_dtype = dtype_map.get(
+                            self._config.transformers_bnb_4bit_compute_dtype,
+                            torch.float16,
+                        )
+                        bnb_kwargs["bnb_4bit_compute_dtype"] = bnb_dtype
+                    if self._config.transformers_bnb_4bit_quant_type:
+                        bnb_kwargs["bnb_4bit_quant_type"] = self._config.transformers_bnb_4bit_quant_type
+                    if self._config.transformers_bnb_4bit_use_double_quant:
+                        bnb_kwargs["bnb_4bit_use_double_quant"] = True
+                    model_kwargs["quantization_config"] = BitsAndBytesConfig(**bnb_kwargs)
+                except Exception as exc:
+                    raise RuntimeError(
+                        "BitsAndBytesConfig required for 4-bit/8-bit loading. "
+                        "Install bitsandbytes and transformers with quantization support."
+                    ) from exc
+
         self._model = AutoModelForCausalLM.from_pretrained(
             self._model_path,
-            torch_dtype=dtype,
+            **model_kwargs,
         )
-        self._model.to(self._device)
+
+        if not model_kwargs.get("device_map"):
+            self._model.to(self._device)
+            self._input_device = self._device
+        else:
+            self._input_device = self._infer_input_device()
 
         # Apply torch.compile if configured
         if self._config and self._config.use_torch_compile:
@@ -138,7 +178,9 @@ class TorchEngine:
         else:
             prompt_text = request.prompt or ""
 
-        inputs = self._tokenizer(prompt_text, return_tensors="pt").to(self._device)
+        inputs = self._tokenizer(prompt_text, return_tensors="pt")
+        input_device = self._input_device or self._device
+        inputs = inputs.to(input_device)
         input_token_count = inputs["input_ids"].shape[-1]
 
         # Build generate kwargs
@@ -249,3 +291,22 @@ class TorchEngine:
         except Exception:
             pass
         return None
+
+    def _infer_input_device(self) -> str:
+        """Infer the best input device for sharded models."""
+        if self._model is None:
+            return self._device
+
+        try:
+            if hasattr(self._model, "hf_device_map") and isinstance(self._model.hf_device_map, dict):
+                for device in self._model.hf_device_map.values():
+                    if isinstance(device, str) and device.startswith("cuda"):
+                        return device
+        except Exception:
+            pass
+
+        try:
+            first_param = next(self._model.parameters())
+            return str(first_param.device)
+        except Exception:
+            return self._device

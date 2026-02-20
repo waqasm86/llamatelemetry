@@ -23,7 +23,7 @@ Usage:
     ...     result = engine.infer("Hello")
 """
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, Dict
 
 # Lazy imports to avoid hard dependency on opentelemetry packages
 _OTEL_AVAILABLE = False
@@ -64,6 +64,7 @@ def setup_telemetry(
     service_name: str = "llamatelemetry",
     service_version: str = "1.2.0",
     otlp_endpoint: Optional[str] = None,
+    otlp_headers: Optional[Dict[str, str]] = None,
     enable_graphistry: bool = False,
     graphistry_server: Optional[str] = None,
 ) -> Tuple[Any, Any]:
@@ -78,6 +79,7 @@ def setup_telemetry(
         service_name: OpenTelemetry service name
         service_version: Service version string
         otlp_endpoint: OTLP collector endpoint (gRPC, e.g. http://localhost:4317)
+        otlp_headers: Optional OTLP headers (e.g. Authorization)
         enable_graphistry: Enable real-time graph export to pygraphistry
         graphistry_server: Graphistry server URL (uses cloud if None)
 
@@ -103,41 +105,27 @@ def setup_telemetry(
         )
         return None, None
 
-    from .tracer import InferenceTracerProvider
-    from .metrics import GpuMetricsCollector
-    from .exporter import build_exporters
+    from ..config import LlamaTelemetryConfig, set_config
+    from ..otel import init_providers, get_tracer, get_meter, add_span_processor
 
-    # Build resource with GPU info
-    from .resource import build_gpu_resource
-    resource = build_gpu_resource(service_name, service_version)
-
-    # Create TracerProvider
-    span_exporters = build_exporters(otlp_endpoint)
-    tracer_provider = InferenceTracerProvider(
-        resource=resource,
-        span_exporters=span_exporters,
+    cfg = LlamaTelemetryConfig(
+        service_name=service_name,
+        otlp_endpoint=otlp_endpoint,
+        otlp_headers=otlp_headers,
+        enable_gpu=True,
+        _initialized=True,
     )
-    trace.set_tracer_provider(tracer_provider)
+    set_config(cfg)
+    init_providers(cfg)
 
-    # Create MeterProvider
-    meter_provider = MeterProvider(resource=resource)
-    metrics.set_meter_provider(meter_provider)
-
-    # Start GPU metrics collector
-    global _GPU_COLLECTOR
-    gpu_collector = GpuMetricsCollector(meter_provider)
-    gpu_collector.start()
-    _GPU_COLLECTOR = gpu_collector
-
-    # Optionally set up pygraphistry export
+    # Optionally attach Graphistry span processor
     if enable_graphistry:
-        from .graphistry_export import GraphistryTraceExporter
-        g_exporter = GraphistryTraceExporter(server=graphistry_server)
-        tracer_provider.add_graphistry_exporter(g_exporter)
+        from .graphistry_export import GraphistryTraceExporter, GraphistrySpanProcessor
+        exporter = GraphistryTraceExporter(server=graphistry_server)
+        add_span_processor(GraphistrySpanProcessor(exporter))
 
-    tracer = tracer_provider.get_tracer(service_name, version=service_version)
-    meter = meter_provider.get_meter(service_name, version=service_version)
-
+    tracer = get_tracer(service_name)
+    meter = get_meter(service_name)
     return tracer, meter
 
 

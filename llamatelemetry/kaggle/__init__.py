@@ -10,10 +10,9 @@ Quick Start:
     >>> # One-liner setup (replaces 50+ lines of boilerplate)
     >>> env = KaggleEnvironment.setup()
     >>>
-    >>> # Create engine with optimal settings
-    >>> engine = env.create_engine("gemma-3-4b-Q4_K_M")
-    >>> result = engine.infer("Hello!")
-    >>> print(result.text)
+    >>> # Create runtime with optimal settings
+    >>> runtime = env.create_engine("gemma-3-4b-Q4_K_M")
+    >>> result = runtime.generate(...)
     >>>
     >>> # RAPIDS on GPU 1
     >>> with env.rapids_context():

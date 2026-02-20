@@ -59,7 +59,7 @@ def instrument_inference(
 
             try:
                 from opentelemetry.trace import SpanKind
-                span_kind = SpanKind.INTERNAL
+                span_kind = SpanKind.CLIENT
             except Exception:
                 span_kind = None
 

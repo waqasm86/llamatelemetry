@@ -20,7 +20,7 @@ from pathlib import Path
 import os
 
 if TYPE_CHECKING:
-    from .. import InferenceEngine
+    from ..inference.runtime import InferenceRuntime
     from .presets import ServerPreset
     from .gpu_context import GPUContext
 
@@ -43,8 +43,8 @@ class KaggleEnvironment:
         >>> print(f"Total VRAM: {env.total_vram_gb} GB")
 
         >>> # Create engine with optimal settings
-        >>> engine = env.create_engine("gemma-3-4b-Q4_K_M")
-        >>> result = engine.infer("Hello!")
+        >>> runtime = env.create_engine("gemma-3-4b-Q4_K_M")
+        >>> result = runtime.generate(...)
 
         >>> # RAPIDS on GPU 1
         >>> with env.rapids_context():
@@ -73,7 +73,7 @@ class KaggleEnvironment:
     llm_gpu_ids: List[int] = field(default_factory=lambda: [0, 1])
 
     # Internal state
-    _engine: Optional["InferenceEngine"] = None
+    _engine: Optional["InferenceRuntime"] = None
     _graphistry_registered: bool = False
     _setup_complete: bool = False
 
@@ -237,65 +237,125 @@ class KaggleEnvironment:
     def create_engine(
         self,
         model_name_or_path: str,
+        backend: str = "auto",
         preset: Optional["ServerPreset"] = None,
         auto_start: bool = True,
         verbose: bool = True,
         **kwargs
-    ) -> "InferenceEngine":
+    ) -> "InferenceRuntime":
         """
-        Create InferenceEngine with optimal Kaggle settings.
+        Create inference runtime with optimal Kaggle settings.
 
-        This method creates an InferenceEngine configured for the detected
+        This method creates an InferenceRuntime configured for the detected
         hardware with telemetry and optimal batch/context sizes.
 
         Args:
             model_name_or_path: Model name from registry or path to GGUF file
+            backend: "auto", "llama.cpp", or "transformers"
             preset: Override preset (default: auto-detected)
             auto_start: Start server automatically (default: True)
             verbose: Print status messages (default: True)
-            **kwargs: Additional InferenceEngine parameters
+            **kwargs: Additional engine parameters
 
         Returns:
-            Configured InferenceEngine ready for inference
+            Configured InferenceRuntime ready for inference
 
         Example:
-            >>> engine = env.create_engine("gemma-3-4b-Q4_K_M")
-            >>> result = engine.infer("Hello, world!")
-            >>> print(result.text)
+            >>> runtime = env.create_engine("gemma-3-4b-Q4_K_M")
+            >>> result = runtime.generate(...)
         """
-        from .. import InferenceEngine
+        from ..utils import require_cuda
+        from ..inference.api import create_engine as _create_runtime
+        from ..inference.config import CudaInferenceConfig
+        from ..server import ServerManager
+        from ..models import load_model_smart
         from .presets import get_preset_config
 
-        # Get preset configuration
+        require_cuda()
+        if self.gpu_count <= 0:
+            raise RuntimeError("CUDA GPU required for Kaggle inference.")
+
         preset = preset or self.preset
-        config = get_preset_config(preset)
+        preset_cfg = get_preset_config(preset)
 
-        # Create engine with telemetry
-        engine = InferenceEngine(
-            server_url=config.server_url,
-            enable_telemetry=self.telemetry_enabled,
-            telemetry_config={
-                "service_name": "llamatelemetry-kaggle",
-                "enable_graphistry": self.graphistry_enabled,
-            } if self.telemetry_enabled else None,
-        )
+        if backend == "auto":
+            if model_name_or_path.endswith(".gguf") or Path(model_name_or_path).suffix == ".gguf":
+                backend = "llama.cpp"
+            else:
+                backend = "transformers"
 
-        # Merge preset config with kwargs
-        load_kwargs = {**config.to_load_kwargs(), **kwargs}
-
-        # Load model
-        if auto_start:
-            engine.load_model(
+        if backend == "llama.cpp":
+            # Resolve GGUF model path (supports registry + HF syntax)
+            model_path = load_model_smart(
                 model_name_or_path,
-                auto_start=True,
-                auto_configure=True,
-                interactive_download=not bool(self.hf_token),  # Skip prompt if token set
-                verbose=verbose,
-                **load_kwargs
+                interactive=not bool(self.hf_token),
             )
+            if model_path is None:
+                raise RuntimeError("Model loading cancelled or failed.")
 
-        self._engine = engine
-        return engine
+            if auto_start:
+                server = ServerManager(server_url=preset_cfg.server_url)
+                server_kwargs = {
+                    "model_path": str(model_path),
+                    "gpu_layers": preset_cfg.gpu_layers,
+                    "ctx_size": preset_cfg.ctx_size,
+                    "batch_size": preset_cfg.batch_size,
+                    "ubatch_size": preset_cfg.ubatch_size,
+                    "n_parallel": preset_cfg.n_parallel,
+                    "flash_attn": preset_cfg.flash_attention,
+                    "verbose": verbose,
+                }
+                if preset_cfg.tensor_split:
+                    server_kwargs["tensor_split"] = ",".join(str(v) for v in preset_cfg.tensor_split)
+                    server_kwargs["split_mode"] = "layer"
+                server.start_server(**server_kwargs)
+
+            cfg = CudaInferenceConfig(
+                backend="llama.cpp",
+                model_path=str(model_path),
+                llama_server_url=preset_cfg.server_url,
+                llama_n_ctx=preset_cfg.ctx_size,
+                llama_n_batch=preset_cfg.batch_size,
+                llama_n_ubatch=preset_cfg.ubatch_size,
+                llama_n_gpu_layers=preset_cfg.gpu_layers,
+                llama_mmap=preset_cfg.use_mmap,
+                multi_gpu="split" if preset_cfg.tensor_split else "single",
+            )
+        elif backend == "transformers":
+            cfg = CudaInferenceConfig(
+                backend="transformers",
+                model_path=model_name_or_path,
+            )
+            if self.gpu_count >= 2:
+                cfg.transformers_device_map = kwargs.pop("device_map", "auto")
+                cfg.transformers_max_memory = kwargs.pop(
+                    "max_memory",
+                    {
+                        str(i): f"{int(vram)}GiB"
+                        for i, vram in enumerate(self.vram_per_gpu_gb or [15, 15])
+                    },
+                )
+            cfg.transformers_load_in_4bit = kwargs.pop("load_in_4bit", False)
+            cfg.transformers_load_in_8bit = kwargs.pop("load_in_8bit", False)
+            cfg.transformers_bnb_4bit_compute_dtype = kwargs.pop(
+                "bnb_4bit_compute_dtype", None
+            )
+            cfg.transformers_bnb_4bit_quant_type = kwargs.pop(
+                "bnb_4bit_quant_type", None
+            )
+            cfg.transformers_bnb_4bit_use_double_quant = kwargs.pop(
+                "bnb_4bit_use_double_quant", False
+            )
+            cfg.transformers_trust_remote_code = kwargs.pop("trust_remote_code", False)
+        else:
+            raise ValueError(f"Unsupported backend: {backend}")
+
+        runtime = _create_runtime(backend=cfg.backend, config=cfg, **kwargs)
+        if auto_start:
+            runtime.start()
+
+        self._engine = runtime
+        return runtime
 
     def rapids_context(self) -> "GPUContext":
         """
@@ -328,7 +388,7 @@ class KaggleEnvironment:
 
         Example:
             >>> with env.llm_context():
-            ...     result = engine.infer("Hello!")
+            ...     result = runtime.generate(...)
         """
         from .gpu_context import GPUContext
         return GPUContext(gpu_ids=self.llm_gpu_ids)

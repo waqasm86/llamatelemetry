@@ -178,3 +178,25 @@ class GraphistryTraceExporter:
 
     def __len__(self) -> int:
         return len(self._spans_raw)
+
+
+class GraphistrySpanProcessor:
+    """SpanProcessor that feeds spans into GraphistryTraceExporter."""
+
+    def __init__(self, exporter: GraphistryTraceExporter):
+        self._exporter = exporter
+
+    def on_start(self, span: Any, parent_context: Any = None) -> None:
+        pass
+
+    def on_end(self, span: Any) -> None:
+        try:
+            self._exporter.export_spans([span])
+        except Exception:
+            pass
+
+    def shutdown(self) -> None:
+        pass
+
+    def force_flush(self, timeout_millis: int = 0) -> bool:
+        return True
