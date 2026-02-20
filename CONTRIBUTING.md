@@ -48,7 +48,7 @@ Good first issues are labeled with `good first issue`. Start there!
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - CUDA 12.x (for GPU features)
 - Git
 
@@ -96,43 +96,123 @@ mypy llamatelemetry/
 ```
 llamatelemetry/
 ├── llamatelemetry/               # Main package
-│   ├── __init__.py
-│   ├── server.py         # ServerManager, ServerConfig
-│   ├── api/
-│   │   ├── client.py     # LlamaCppClient
-│   │   ├── gguf.py       # GGUFParser
-│   │   └── multigpu.py   # Multi-GPU utilities
-│   └── utils/
-├── core/                 # Core utilities
-├── csrc/                 # C/C++ source (if any)
-├── docs/                 # Documentation
+│   ├── __init__.py               # Public API, require_cuda(), detect_cuda()
+│   ├── _version.py               # Version string (1.2.0)
+│   ├── config.py                 # LlamaTelemetryConfig dataclass
+│   ├── server.py                 # ServerManager, ServerConfig
+│   ├── utils.py                  # require_cuda(), detect_cuda(), check_gpu_compatibility()
+│   ├── llama/                    # llama.cpp integration
+│   │   ├── client.py             # LlamaCppClient, wrap_openai_client()
+│   │   ├── phases.py             # Inference phase timing (prefill/decode/TTFT/TPOT)
+│   │   ├── server.py             # LlamaServerManager
+│   │   ├── gguf.py               # GGUF model metadata parser
+│   │   └── autotune.py           # Auto-tune server parameters
+│   ├── otel/                     # OpenTelemetry core
+│   │   ├── provider.py           # TracerProvider + MeterProvider setup
+│   │   ├── exporters.py          # OTLP exporter factories
+│   │   ├── redaction.py          # RedactionSpanProcessor (gen_ai.* keys)
+│   │   ├── sampling.py           # Custom samplers
+│   │   ├── gen_ai_metrics.py     # GenAI histogram instruments (v1.2.0)
+│   │   └── gen_ai_utils.py       # Span name builder, server address parser
+│   ├── semconv/                  # Semantic conventions
+│   │   ├── gen_ai.py             # GEN_AI_* constants, normalize_operation()
+│   │   ├── attrs.py              # Attribute helpers
+│   │   ├── mapping.py            # set_gen_ai_attrs()
+│   │   ├── keys.py               # Attribute key constants
+│   │   └── gen_ai_builder.py     # Span attribute builder
+│   ├── gpu/                      # GPU monitoring
+│   │   ├── nvml.py               # NVML/nvidia-smi query (PermissionError safe)
+│   │   ├── otel.py               # GPU → OTel attribute mapper
+│   │   └── schemas.py            # GPUSnapshot, GPUInfo dataclasses
+│   ├── transformers/             # HuggingFace Transformers integration
+│   │   ├── instrumentation.py    # TransformersInstrumentor
+│   │   └── backend.py            # TransformersBackend (CUDA enforced)
+│   ├── bench/                    # Benchmarking
+│   │   ├── runner.py             # BenchmarkRunner
+│   │   ├── profiles.py           # BenchmarkProfile enum
+│   │   ├── report.py             # BenchmarkResults, summary/to_dataframe
+│   │   └── compare.py            # compare_configs()
+│   ├── kaggle/                   # Kaggle environment helpers
+│   │   ├── __init__.py           # auto_configure()
+│   │   ├── presets.py            # Kaggle T4 presets
+│   │   ├── gpu_context.py        # GPU context detection
+│   │   ├── secrets.py            # Kaggle Secrets integration
+│   │   ├── graphistry.py         # Graphistry on Kaggle
+│   │   └── grafana.py            # Grafana on Kaggle
+│   ├── telemetry/                # Auto-instrumentation
+│   │   ├── auto_instrument.py    # Auto-detect and instrument backends
+│   │   ├── tracer.py             # Tracer helpers
+│   │   ├── metrics.py            # Metrics helpers
+│   │   ├── instrumentor.py       # Base instrumentor
+│   │   ├── monitor.py            # Continuous GPU monitor
+│   │   ├── exporter.py           # Export helpers
+│   │   ├── resource.py           # OTel Resource builder
+│   │   └── graphistry_export.py  # Export spans to Graphistry
+│   ├── pipeline/                 # Pipeline tracing
+│   │   └── spans.py              # PipelineTracer, stage context manager
+│   ├── graphistry/               # Graphistry visualization
+│   │   ├── viz.py                # GraphistryViz
+│   │   ├── connector.py          # Graphistry API connector
+│   │   ├── rapids.py             # RAPIDS cuGraph integration
+│   │   └── workload.py           # Workload graph builder
+│   ├── artifacts/                # Binary artifact management
+│   │   ├── manifest.py           # Download manifest
+│   │   └── trace_graph.py        # Trace graph artifacts
+│   ├── distributed/              # Distributed inference
+│   │   └── topology.py           # TopologyMapper, NVLink detection
+│   ├── nccl/                     # NCCL multi-GPU comm
+│   │   ├── api.py                # NCCLGroup API
+│   │   └── torchdist.py          # PyTorch distributed integration
+│   ├── cuda/                     # CUDA optimizations
+│   │   ├── graphs.py             # CUDA graph capture
+│   │   ├── tensor_core.py        # Tensor core helpers
+│   │   ├── triton_kernels.py     # Triton kernel wrappers
+│   │   └── optim/                # Optimization modules
+│   ├── quantization/             # Quantization utilities
+│   ├── unsloth/                  # Unsloth fine-tuning integration
+│   └── louie/                    # Louie AI integration
+├── core/                         # Core shared utilities
+├── csrc/                         # C++/CUDA source (SM 7.5, llama.cpp b7760)
+├── docs/                         # Documentation
+│   ├── GOLDEN_PATH.md
 │   ├── INSTALLATION.md
 │   ├── CONFIGURATION.md
 │   ├── API_REFERENCE.md
+│   ├── ARCHITECTURE.md
 │   ├── KAGGLE_GUIDE.md
-│   ├── GGUF_GUIDE.md
-│   └── TROUBLESHOOTING.md
-├── examples/             # Example scripts
-├── notebooks/            # Tutorial notebooks
-│   └── README.md         # Notebook index
-├── scripts/              # Build and utility scripts
-├── tests/                # Test suite
+│   ├── INTEGRATION_GUIDE.md
+│   ├── QUICK_START_GUIDE.md
+│   └── QUICK_REFERENCE.md
+├── notebooks/                    # Tutorial notebooks
+├── scripts/                      # Build and release scripts
+├── tests/                        # Test suite (246 tests)
+├── releases/                     # Local release archives
+│   └── v1.2.0/
 ├── CHANGELOG.md
-├── CONTRIBUTING.md       # This file
+├── CONTRIBUTING.md               # This file
 ├── LICENSE
 ├── pyproject.toml
-├── README.md
-└── requirements.txt
+└── README.md
 ```
 
 ### Key Modules
 
 | Module | Purpose |
 |--------|---------|
-| `llamatelemetry/server.py` | Server management |
-| `llamatelemetry/api/client.py` | API client |
-| `llamatelemetry/api/gguf.py` | GGUF parsing |
-| `llamatelemetry/api/multigpu.py` | Multi-GPU config |
+| `llamatelemetry/server.py` | ServerManager, ServerConfig |
+| `llamatelemetry/llama/client.py` | LlamaCppClient, wrap_openai_client() |
+| `llamatelemetry/llama/phases.py` | Inference phase timing (TTFT, TPOT, prefill, decode) |
+| `llamatelemetry/otel/gen_ai_metrics.py` | 5 GenAI histogram instruments (v1.2.0) |
+| `llamatelemetry/otel/gen_ai_utils.py` | Span name builder, server address parser |
+| `llamatelemetry/otel/redaction.py` | Prompt/key redaction span processor |
+| `llamatelemetry/semconv/gen_ai.py` | GEN_AI_* constants, normalize_operation() |
+| `llamatelemetry/semconv/mapping.py` | set_gen_ai_attrs() |
+| `llamatelemetry/gpu/nvml.py` | NVML/nvidia-smi GPU monitoring |
+| `llamatelemetry/transformers/instrumentation.py` | HuggingFace Transformers instrumentation |
+| `llamatelemetry/bench/runner.py` | BenchmarkRunner, latency phase benchmarking |
+| `llamatelemetry/kaggle/__init__.py` | auto_configure() for Kaggle T4 environments |
+| `llamatelemetry/telemetry/auto_instrument.py` | Auto-detect and instrument backends |
+| `llamatelemetry/utils.py` | require_cuda(), detect_cuda(), check_gpu_compatibility() |
 
 ---
 
@@ -264,7 +344,7 @@ We use:
 # pyproject.toml
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
@@ -327,11 +407,15 @@ class ServerConfig:
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview |
+| `docs/GOLDEN_PATH.md` | Recommended quickstart |
 | `docs/INSTALLATION.md` | Installation guide |
 | `docs/CONFIGURATION.md` | Configuration reference |
 | `docs/API_REFERENCE.md` | API documentation |
-| `docs/KAGGLE_GUIDE.md` | Kaggle-specific guide |
-| `docs/GGUF_GUIDE.md` | GGUF and quantization |
+| `docs/ARCHITECTURE.md` | System design |
+| `docs/KAGGLE_GUIDE.md` | Kaggle T4 GPU guide |
+| `docs/INTEGRATION_GUIDE.md` | Backend integration guide |
+| `docs/QUICK_START_GUIDE.md` | 5-minute quickstart |
+| `docs/QUICK_REFERENCE.md` | Cheat sheet |
 | `docs/TROUBLESHOOTING.md` | Common issues |
 
 ### Documentation Style
