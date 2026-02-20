@@ -90,9 +90,12 @@ class LoRAAdapter:
         """
         return self.adapter_config is not None
 
-    def merge(self) -> Any:
+    def merge(self, ctx: Optional[Any] = None) -> Any:
         """
         Merge LoRA adapters into base model.
+
+        Args:
+            ctx: Optional PipelineContext for OTel span correlation.
 
         Returns:
             Model with merged adapters
@@ -110,13 +113,19 @@ class LoRAAdapter:
         print(f"  Alpha: {self.adapter_config.lora_alpha}")
         print(f"  Target modules: {len(self.adapter_config.target_modules)}")
 
-        try:
-            merged_model = self.model.merge_and_unload()
-            print("✓ Adapters merged successfully")
-            return merged_model
-        except Exception as e:
-            print(f"Error merging adapters: {e}")
-            return self.model
+        from ..pipeline.spans import PipelineContext, PipelineTracer
+        if ctx is None:
+            ctx = PipelineContext(adapter=self.adapter_config.adapter_name)
+        tracer = PipelineTracer()
+
+        with tracer.span_merge_lora(ctx):
+            try:
+                merged_model = self.model.merge_and_unload()
+                print("✓ Adapters merged successfully")
+                return merged_model
+            except Exception as e:
+                print(f"Error merging adapters: {e}")
+                return self.model
 
     def extract_adapter_weights(self) -> Dict[str, torch.Tensor]:
         """
@@ -205,12 +214,13 @@ class LoRAAdapter:
         }
 
 
-def merge_lora_adapters(model: Any) -> Any:
+def merge_lora_adapters(model: Any, ctx: Optional[Any] = None) -> Any:
     """
     Merge LoRA adapters into model (convenience function).
 
     Args:
         model: Model with LoRA adapters
+        ctx: Optional PipelineContext for OTel span correlation.
 
     Returns:
         Model with merged adapters
@@ -219,7 +229,7 @@ def merge_lora_adapters(model: Any) -> Any:
         >>> merged_model = merge_lora_adapters(model)
     """
     adapter = LoRAAdapter(model)
-    return adapter.merge()
+    return adapter.merge(ctx)
 
 
 def extract_base_model(model: Any) -> Any:

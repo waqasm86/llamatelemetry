@@ -61,6 +61,7 @@ class UnslothExporter:
         tokenizer: Any,
         output_path: Union[str, Path],
         config: Optional[ExportConfig] = None,
+        pipeline_ctx: Optional[Any] = None,
     ) -> Path:
         """
         Export Unsloth model to GGUF format.
@@ -70,6 +71,7 @@ class UnslothExporter:
             tokenizer: Associated tokenizer
             output_path: Output GGUF file path
             config: Export configuration (uses defaults if None)
+            pipeline_ctx: Optional PipelineContext for OTel span correlation.
 
         Returns:
             Path to exported GGUF file
@@ -88,41 +90,50 @@ class UnslothExporter:
             print(f"  Output: {output_path}")
             print(f"  Quantization: {config.quant_type}")
 
-        # Check if model has LoRA adapters
-        has_adapters = self._check_has_adapters(model)
+        from ..pipeline.spans import PipelineContext, PipelineTracer
+        if pipeline_ctx is None:
+            pipeline_ctx = PipelineContext(
+                output_artifact=str(output_path),
+                quantization=config.quant_type,
+            )
+        tracer = PipelineTracer()
 
-        if has_adapters and config.merge_lora:
+        with tracer.span_export_gguf(pipeline_ctx):
+            # Check if model has LoRA adapters
+            has_adapters = self._check_has_adapters(model)
+
+            if has_adapters and config.merge_lora:
+                if config.verbose:
+                    print("  Merging LoRA adapters...")
+                model = self._merge_adapters(model)
+
+            # Extract base model if wrapped
+            base_model = self._extract_base_model(model)
+
+            # Export to GGUF using quantization module
+            from ..quantization import convert_to_gguf
+
             if config.verbose:
-                print("  Merging LoRA adapters...")
-            model = self._merge_adapters(model)
+                print(f"  Converting to GGUF with {config.quant_type}...")
 
-        # Extract base model if wrapped
-        base_model = self._extract_base_model(model)
+            convert_to_gguf(
+                base_model,
+                output_path,
+                tokenizer=tokenizer,
+                quant_type=config.quant_type,
+                verbose=config.verbose,
+            )
 
-        # Export to GGUF using quantization module
-        from ..quantization import convert_to_gguf
+            # Save tokenizer if requested
+            if config.preserve_tokenizer:
+                self._save_tokenizer(tokenizer, output_path.parent)
 
-        if config.verbose:
-            print(f"  Converting to GGUF with {config.quant_type}...")
+            # Save metadata
+            if config.metadata:
+                self._save_metadata(config.metadata, output_path)
 
-        convert_to_gguf(
-            base_model,
-            output_path,
-            tokenizer=tokenizer,
-            quant_type=config.quant_type,
-            verbose=config.verbose,
-        )
-
-        # Save tokenizer if requested
-        if config.preserve_tokenizer:
-            self._save_tokenizer(tokenizer, output_path.parent)
-
-        # Save metadata
-        if config.metadata:
-            self._save_metadata(config.metadata, output_path)
-
-        if config.verbose:
-            print(f"✓ Export complete: {output_path}")
+            if config.verbose:
+                print(f"✓ Export complete: {output_path}")
 
         return output_path
 
@@ -236,6 +247,7 @@ def export_to_llamatelemetry(
     quant_type: str = "Q4_K_M",
     merge_lora: bool = True,
     verbose: bool = True,
+    pipeline_ctx: Optional[Any] = None,
 ) -> Path:
     """
     Export Unsloth model for llamatelemetry inference (convenience function).
@@ -247,6 +259,7 @@ def export_to_llamatelemetry(
         quant_type: Quantization type
         merge_lora: Merge LoRA adapters
         verbose: Print progress
+        pipeline_ctx: Optional PipelineContext for OTel span correlation.
 
     Returns:
         Path to exported file
@@ -263,7 +276,7 @@ def export_to_llamatelemetry(
     )
 
     exporter = UnslothExporter()
-    return exporter.export(model, tokenizer, output_path, config)
+    return exporter.export(model, tokenizer, output_path, config, pipeline_ctx)
 
 
 def export_to_gguf(
