@@ -15,7 +15,7 @@ class LLMRequest:
     """Standardized LLM request object for any backend.
 
     Attributes:
-        operation: Operation type - "chat", "completions", "embeddings".
+        operation: Operation type - "chat", "text_completion", "embeddings".
         model: Model name or identifier.
         provider: Provider name (e.g. "llama_cpp", "transformers").
         messages: Chat messages (for chat operations).

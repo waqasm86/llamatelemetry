@@ -12,7 +12,11 @@ from typing import Any, Optional
 from .base import InferenceEngine
 from .config import CudaInferenceConfig
 from .runtime import InferenceRuntime
-from ..utils import require_cuda
+try:
+    from ..utils import require_cuda
+except ImportError:
+    # Support top-level imports when "inference" is added to sys.path directly.
+    from llamatelemetry.utils import require_cuda
 
 
 def create_engine(

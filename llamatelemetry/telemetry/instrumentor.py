@@ -28,6 +28,7 @@ class LlamaCppClientInstrumentorConfig:
     record_events: bool = False
     emit_metrics: bool = True
     record_content_max_chars: int = 2000
+    strict_operation_names: bool = True
 
 
 class LlamaCppClientInstrumentor:
@@ -125,6 +126,12 @@ class LlamaCppClientInstrumentor:
 
             # Determine operation name from endpoint
             operation, is_gen_ai = _endpoint_to_operation(endpoint, method)
+            if is_gen_ai:
+                from ..semconv import gen_ai as gen_ai_keys
+                operation = gen_ai_keys.normalize_operation(
+                    operation,
+                    strict=config.strict_operation_names,
+                )
 
             server_address, server_port = _parse_server(self_client)
             model = _extract_model(json_data, params)

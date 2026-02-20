@@ -33,7 +33,7 @@ from ..api.client import (
 )
 
 
-def wrap_openai_client(client: Any) -> Any:
+def wrap_openai_client(client: Any, strict_operation_names: bool = True) -> Any:
     """
     Instrument an OpenAI-compatible client to emit OTel spans.
 
@@ -78,9 +78,13 @@ def wrap_openai_client(client: Any) -> Any:
         except Exception:
             span_kind = None
 
-        span_name = build_span_name(gen_ai_keys.OP_CHAT, model)
+        operation = gen_ai_keys.normalize_operation(
+            gen_ai_keys.OP_CHAT,
+            strict=strict_operation_names,
+        )
+        span_name = build_span_name(operation, model)
         span_attrs = build_gen_ai_span_attrs(
-            operation=gen_ai_keys.OP_CHAT,
+            operation=operation,
             provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
             model=str(model) if model else None,
             server_address=server_address,
@@ -96,7 +100,7 @@ def wrap_openai_client(client: Any) -> Any:
             # gen_ai.* request attributes
             gen_ai_req = build_gen_ai_attrs_from_request(
                 model=str(model),
-                operation=gen_ai_keys.OP_CHAT,
+                operation=operation,
                 provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
                 temperature=kwargs.get("temperature"),
                 top_p=kwargs.get("top_p"),
@@ -134,7 +138,7 @@ def wrap_openai_client(client: Any) -> Any:
                 # Metrics
                 metrics = get_gen_ai_metrics()
                 base_attrs = build_gen_ai_span_attrs(
-                    operation=gen_ai_keys.OP_CHAT,
+                    operation=operation,
                     provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
                     model=str(model) if model else None,
                     response_model=getattr(result, "model", None),

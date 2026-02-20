@@ -57,8 +57,8 @@ class ServerManager:
         self.server_process: Optional[subprocess.Popen] = None
         self._server_path: Optional[Path] = None
 
-    def find_llama_server(self) -> Optional[Path]:
-        """Locate the llama-server executable or download it if missing."""
+    def find_llama_server(self, allow_download: bool = False) -> Optional[Path]:
+        """Locate the llama-server executable (optionally download if missing)."""
 
         def _validate(candidate: Optional[Path]) -> Optional[Path]:
             if not candidate:
@@ -132,9 +132,10 @@ class ServerManager:
                 return self._server_path
 
         # 7) Download fresh bundle as last resort
-        downloaded = self._download_llama_server()
-        if downloaded:
-            return _validate(Path(downloaded))
+        if allow_download:
+            downloaded = self._download_llama_server()
+            if downloaded:
+                return _validate(Path(downloaded))
 
         return None
     def _setup_library_path(self, server_path: Path):
@@ -384,13 +385,19 @@ class ServerManager:
                 print(f"✓ llama-server already running at {self.server_url}")
             return True
 
+        # Verify model exists before attempting any download
+        model_path_obj = Path(model_path)
+        if not model_path_obj.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+
         # Find llama-server executable
         if self._server_path is None:
-            self._server_path = self.find_llama_server()
+            self._server_path = self.find_llama_server(allow_download=True)
 
         if self._server_path is None:
-            # Auto-download llama-server binary
-            self._server_path = self._download_llama_server()
+            raise FileNotFoundError(
+                "llama-server not found. Set LLAMA_SERVER_PATH or install binaries."
+            )
 
         # Verify the binary exists and is executable
         if not os.path.exists(self._server_path):
@@ -401,11 +408,6 @@ class ServerManager:
 
         # Make sure it's executable
         os.chmod(self._server_path, 0o755)
-
-        # Verify model exists
-        model_path_obj = Path(model_path)
-        if not model_path_obj.exists():
-            raise FileNotFoundError(f"Model file not found: {model_path}")
 
         # Build command
         cmd = [

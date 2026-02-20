@@ -43,6 +43,7 @@ class TransformersInstrumentorConfig:
     record_tools: bool = False
     record_events: bool = False
     emit_metrics: bool = True
+    strict_operation_names: bool = True
 
 
 class InstrumentedBackend:
@@ -98,6 +99,10 @@ class InstrumentedBackend:
         """
         provider = req.provider or self._backend.name
         model = req.model or None
+        operation = gen_ai.normalize_operation(
+            req.operation,
+            strict=self._config.strict_operation_names,
+        )
         server_address, server_port = parse_server_address(
             getattr(self._backend, "_base_url", None)
             or getattr(self._backend, "base_url", None)
@@ -109,7 +114,7 @@ class InstrumentedBackend:
             gpu_before = self._gpu.snapshot()
 
         start = time.perf_counter()
-        span_name = build_span_name(req.operation, model)
+        span_name = build_span_name(operation, model)
 
         try:
             from opentelemetry.trace import SpanKind
@@ -120,7 +125,7 @@ class InstrumentedBackend:
             span_kind = None
 
         span_attrs = build_gen_ai_span_attrs(
-            operation=req.operation,
+            operation=operation,
             provider=provider,
             model=model,
             server_address=server_address,
@@ -135,7 +140,7 @@ class InstrumentedBackend:
             # Set gen_ai.* request attributes
             gen_ai_req_attrs = build_gen_ai_attrs_from_request(
                 model=model or "",
-                operation=req.operation,
+                operation=operation,
                 provider=provider,
                 temperature=req.parameters.get("temperature") if req.parameters else None,
                 top_p=req.parameters.get("top_p") if req.parameters else None,
@@ -227,7 +232,7 @@ class InstrumentedBackend:
                 if self._config.emit_metrics:
                     metrics = get_gen_ai_metrics()
                     base_attrs = build_gen_ai_span_attrs(
-                        operation=req.operation,
+                        operation=operation,
                         provider=provider,
                         model=model,
                         response_model=resp.response_model,

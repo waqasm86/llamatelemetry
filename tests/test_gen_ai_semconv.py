@@ -1,5 +1,7 @@
 """Tests for llamatelemetry.semconv.gen_ai, gen_ai_builder, and mapping modules."""
 
+import pytest
+
 
 # ---------------------------------------------------------------------------
 # gen_ai constants
@@ -126,6 +128,21 @@ class TestGenAIConstants:
     def test_gen_ai_importable_from_semconv(self):
         from llamatelemetry.semconv import gen_ai
         assert gen_ai is not None
+
+    def test_normalize_operation(self):
+        from llamatelemetry.semconv import gen_ai
+        assert gen_ai.normalize_operation("completions") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("completion") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("text") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("chat") == gen_ai.OP_CHAT
+        assert gen_ai.normalize_operation("embeddings") == gen_ai.OP_EMBEDDINGS
+        assert gen_ai.normalize_operation(None) == gen_ai.OP_CHAT
+
+    def test_normalize_operation_strict(self):
+        from llamatelemetry.semconv import gen_ai
+        assert gen_ai.normalize_operation("chat", strict=True) == gen_ai.OP_CHAT
+        with pytest.raises(ValueError):
+            gen_ai.normalize_operation("unknown-op", strict=True)
 
 
 # ---------------------------------------------------------------------------

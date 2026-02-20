@@ -23,6 +23,8 @@ from ..semconv.gen_ai_builder import build_gen_ai_attrs_from_request, build_gen_
 def trace_request(
     request_id: str = "",
     model: str = "",
+    operation: str = gen_ai_keys.OP_CHAT,
+    strict_operation_names: bool = True,
     stream: bool = False,
     prompt_tokens: int = 0,
     completion_tokens: int = 0,
@@ -51,9 +53,13 @@ def trace_request(
     )
     start = time.perf_counter()
 
-    span_name = build_span_name(gen_ai_keys.OP_CHAT, model or None)
+    operation = gen_ai_keys.normalize_operation(
+        operation,
+        strict=strict_operation_names,
+    )
+    span_name = build_span_name(operation, model or None)
     span_attrs = build_gen_ai_span_attrs(
-        operation=gen_ai_keys.OP_CHAT,
+        operation=operation,
         provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
         model=model or None,
     )
@@ -75,7 +81,7 @@ def trace_request(
         # gen_ai.* request attributes
         gen_ai_req = build_gen_ai_attrs_from_request(
             model=model,
-            operation=gen_ai_keys.OP_CHAT,
+            operation=operation,
             provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
             stream=stream,
         )
@@ -110,7 +116,7 @@ def trace_request(
 
             metrics = get_gen_ai_metrics()
             base_attrs = build_gen_ai_span_attrs(
-                operation=gen_ai_keys.OP_CHAT,
+                operation=operation,
                 provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
                 model=model or None,
             )
