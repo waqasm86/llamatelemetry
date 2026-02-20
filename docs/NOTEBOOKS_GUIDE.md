@@ -1,106 +1,127 @@
-# Notebooks Guide
+# Notebooks Guide (v1.1.0)
 
-The `notebooks/` directory contains 16 comprehensive Jupyter notebooks covering foundation to production-ready observability workflows.
-
-## 📚 Complete Notebook Catalog
-
-### **Phase 1: Foundation (Beginner)** - 65 minutes
-1. **01-quickstart** (10 min) - Basic inference setup
-2. **02-llama-server-setup** (15 min) - Server configuration and optimization
-3. **03-multi-gpu-inference** (20 min) - Dual GPU tensor parallelism
-4. **04-gguf-quantization** (20 min) - 29 quantization types, VRAM estimation
-
-### **Phase 2: Integration (Intermediate)** - 60 minutes
-5. **05-unsloth-integration** (30 min) - Fine-tuning → GGUF export → deployment
-6. **06-split-gpu-graphistry** (30 min) - Concurrent LLM + RAPIDS analytics
-
-### **Phase 3: Advanced Applications** - 65 minutes
-7. **07-knowledge-graph-extraction** (35 min) - LLM-powered knowledge graphs
-8. **08-document-network-analysis** (30 min) - Document similarity networks
-
-### **Phase 4: Optimization & Production** - 120 minutes
-9. **09-large-models-kaggle** (35 min) - 70B models on dual T4
-10. **10-complete-workflow** (45 min) - End-to-end production pipeline
-11. **11-gguf-neural-network-visualization** (40 min) - Architecture visualization (929 nodes)
-
-### **Phase 5: Observability Trilogy** ⭐ **NEW** - 120 minutes
-12. **12-gguf-attention-mechanism-explorer** (25 min) - Q-K-V decomposition, 896 attention heads
-13. **13-gguf-token-embedding-visualizer** (30 min) - 3D UMAP embedding space
-14. **14-opentelemetry-llm-observability** (45 min) - Full OpenTelemetry integration
-15. **15-real-time-performance-monitoring** ⭐ (30 min) - Live Plotly dashboards with llama.cpp metrics
-16. **16-production-observability-stack** ⭐ (45 min) - Complete observability stack (Graphistry + Plotly 2D/3D)
+The `notebooks/` directory contains 16 comprehensive Jupyter notebooks covering foundation-to-production observability workflows for Kaggle dual Tesla T4.
 
 ---
 
-## 🎯 Learning Paths
+## Complete Notebook Catalog
 
-### **Path 1: Quick Start** (1 hour)
+### Phase 1: Foundation (Beginner) — 65 minutes
+
+| # | Notebook | Time | Description |
+|---|---|---|---|
+| 01 | `01-quickstart` | 10 min | Basic inference setup — install, init, first chat |
+| 02 | `02-llama-server-setup` | 15 min | Server configuration and optimization |
+| 03 | `03-multi-gpu-inference` | 20 min | Dual GPU tensor parallelism |
+| 04 | `04-gguf-quantization` | 20 min | 29 quantization types, VRAM estimation |
+
+### Phase 2: Integration (Intermediate) — 60 minutes
+
+| # | Notebook | Time | Description |
+|---|---|---|---|
+| 05 | `05-unsloth-integration` | 30 min | Fine-tuning → LoRA merge → GGUF export → deploy |
+| 06 | `06-split-gpu-graphistry` | 30 min | Concurrent LLM (GPU0) + RAPIDS analytics (GPU1) |
+
+### Phase 3: Advanced Applications — 65 minutes
+
+| # | Notebook | Time | Description |
+|---|---|---|---|
+| 07 | `07-knowledge-graph-extraction` | 35 min | LLM-powered knowledge graphs with Graphistry |
+| 08 | `08-document-network-analysis` | 30 min | Document similarity networks |
+
+### Phase 4: Optimization & Production — 120 minutes
+
+| # | Notebook | Time | Description |
+|---|---|---|---|
+| 09 | `09-large-models-kaggle` | 35 min | 70B models on dual T4 |
+| 10 | `10-complete-workflow` | 45 min | End-to-end production pipeline |
+| 11 | `11-gguf-neural-network-visualization` | 40 min | Architecture visualization (929 nodes, 981 edges) |
+
+### Phase 5: Observability Trilogy ⭐ — 120 minutes
+
+| # | Notebook | Time | Description |
+|---|---|---|---|
+| 12 | `12-gguf-attention-mechanism-explorer` | 25 min | Q-K-V decomposition, 896 attention heads |
+| 13 | `13-gguf-token-embedding-visualizer` | 30 min | 3D UMAP embedding space (cuML on GPU1) |
+| 14 | `14-opentelemetry-llm-observability` | 45 min | Full OpenTelemetry integration with llamatelemetry |
+| 15 | `15-real-time-performance-monitoring` | 30 min | Live Plotly dashboards with llama.cpp metrics |
+| 16 | `16-production-observability-stack` | 45 min | Complete stack: Graphistry + Plotly 2D/3D |
+
+---
+
+## Learning Paths
+
+### Path 1: Quick Start (1 hour)
 ```
 01 → 02 → 03
 ```
-**Outcome:** Deploy and run LLM inference on Kaggle T4
+**Outcome:** Deploy and run LLM inference on Kaggle T4.
 
-### **Path 2: Full Foundation** (3 hours)
+### Path 2: Full Foundation (3 hours)
 ```
 01 → 02 → 03 → 04 → 05 → 06 → 10
 ```
-**Outcome:** Deploy production-ready LLM systems
+**Outcome:** Deploy production-ready LLM systems.
 
-### **Path 3: Observability Focus** ⭐ **RECOMMENDED** (2.5 hours)
+### Path 3: Observability Focus ⭐ RECOMMENDED (2.5 hours)
 ```
 01 → 03 → 14 → 15 → 16
 ```
-**Outcome:** Build complete production observability stack
+**Outcome:** Build a complete production observability stack with OTel, live dashboards, and Graphistry.
 
-### **Path 4: Graph Analytics** (2.5 hours)
+### Path 4: Graph Analytics (2.5 hours)
 ```
 01 → 03 → 06 → 07 → 08 → 11
 ```
-**Outcome:** Build LLM-powered graph analytics applications
+**Outcome:** Build LLM-powered graph analytics applications.
 
-### **Path 5: Large Model Specialist** (2 hours)
+### Path 5: Large Model Specialist (2 hours)
 ```
 01 → 03 → 04 → 09
 ```
-**Outcome:** Run 70B models on Kaggle dual T4
+**Outcome:** Run 70B models on Kaggle dual T4.
+
+### Path 6: Visualization Track (3.5 hours)
+```
+01 → 03 → 04 → 06 → 11 → 12 → 13
+```
+**Outcome:** Explore a quantized transformer's internals visually — architecture, attention heads, and embedding space.
 
 ---
 
-## 📊 Notebooks 14-16 Comparison
+## Observability Notebooks Comparison (14–16)
 
 | Feature | Notebook 14 | Notebook 15 | Notebook 16 |
-|---------|-------------|-------------|-------------|
-| **Focus** | OpenTelemetry basics | Real-time monitoring | Complete production stack |
-| **Complexity** | Intermediate | Intermediate-Advanced | Expert |
+|---|---|---|---|
+| **Focus** | OTel basics | Real-time monitoring | Full production stack |
+| **Complexity** | Intermediate | Intermediate–Advanced | Expert |
 | **Time** | 45 min | 30 min | 45 min |
-| **OpenTelemetry** | ✅ Full | ❌ | ✅ Full + Advanced |
-| **llama.cpp Metrics** | ❌ | ✅ Full | ✅ Full |
-| **GPU Monitoring** | ❌ | ✅ PyNVML | ✅ PyNVML |
-| **Graphistry** | ✅ Basic | ❌ | ✅ Advanced |
-| **Plotly 2D** | ✅ Static | ✅ Live Updates | ✅ Comprehensive |
-| **Plotly 3D** | ❌ | ❌ | ✅ Model Internals |
-| **Live Dashboards** | ❌ | ✅ FigureWidget | ✅ Multi-panel |
+| **OpenTelemetry** | Full | — | Full + Advanced |
+| **llama.cpp Metrics** | — | Full | Full |
+| **GPU Monitoring** | — | PyNVML | PyNVML |
+| **Graphistry** | Basic | — | Advanced |
+| **Plotly 2D** | Static | Live updates | Comprehensive |
+| **Plotly 3D** | — | — | Model internals |
+| **Live Dashboards** | — | FigureWidget | Multi-panel |
 
 ---
 
-## 📁 Repository Structure
+## Getting Started
 
-All notebooks are located in the `notebooks/` directory:
-- **Executed versions** (with outputs): `*-e1.ipynb`, `*-e2.ipynb`, etc.
-- **Specification files**: `*-SPEC-*.md` (implementation guides)
-
----
-
-## 🚀 Getting Started
-
-1. Start with **notebooks/README.md** for an overview
-2. Follow the **Quick Start** path (notebooks 01-03) for immediate results
-3. Progress to the **Observability Trilogy** (notebooks 14-16) for production workflows
+1. Set Kaggle accelerator to **GPU T4 × 2**.
+2. Install the SDK in notebook cell 1:
+   ```python
+   !pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.1.0
+   ```
+3. Start with **notebook 01** for a 10-minute quickstart.
+4. Follow the **Observability Focus** path (01 → 03 → 14 → 15 → 16) for production workflows.
 
 ---
 
-## 💡 Additional Resources
+## Additional Resources
 
-- `notebooks/14-15-16-INDEX.md` - Detailed observability notebooks guide
-- `docs/KAGGLE_GUIDE.md` - Kaggle-specific optimization tips
-- `docs/TROUBLESHOOTING.md` - Common issues and solutions
+- `docs/QUICK_START_GUIDE.md` — Step-by-step first inference
+- `docs/KAGGLE_GUIDE.md` — Kaggle-specific optimization tips
+- `docs/GGUF_GUIDE.md` — GGUF model selection and quantization
+- `docs/TROUBLESHOOTING.md` — Common issues and solutions
+- `docs/API_REFERENCE.md` — Full v1.1.0 API reference
