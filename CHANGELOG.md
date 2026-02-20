@@ -76,9 +76,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/test_bench.py` - 18 tests for profiles, reports, compare, runner
 - `tests/test_pipeline.py` - 20 tests for PipelineContext, PipelineTracer (all 6 span types)
 
+### Changed
+
+**Torch import consistency (all torch-dependent modules):**
+- All 12 modules that previously used bare `import torch` now use a `try/except ImportError`
+  with a clear, actionable error message pointing users to `pip install torch`.
+- Affected: `unsloth/loader.py`, `unsloth/adapter.py`, `unsloth/exporter.py`,
+  `cuda/graphs.py`, `cuda/tensor_core.py`, `cuda/triton_kernels.py`,
+  `inference/flash_attn.py`, `inference/kv_cache.py`, `inference/batch.py`,
+  `quantization/gguf.py`, `quantization/nf4.py`, `quantization/dynamic.py`
+- v1.1.0 new modules (`backends/`, `bench/`, `pipeline/`, `inference/base`, etc.)
+  remain fully torch-optional as designed.
+
+**Version declared as 1.1.0 in all version files:**
+- `pyproject.toml` → `version = "1.1.0"`
+- `llamatelemetry/_version.py` → `__version__ = "1.1.0"`
+- `__binary_version__` remains `"1.0.0"` (CUDA binary unchanged in v1.1.0)
+
+**Pipeline spans wired into Unsloth modules:**
+- `unsloth/adapter.py` `LoRAAdapter.merge()` → wrapped with `PipelineTracer.span_merge_lora()`
+- `unsloth/exporter.py` `UnslothExporter.export()` → wrapped with `PipelineTracer.span_export_gguf()`
+
 ### Test Results
 - **244 passed, 24 skipped** (up from 95 passed in v1.0.0)
 - 24 skipped tests require `torch` (existing behavior, unchanged)
+
+### Release Files (`releases/v1.1.0/`)
+| File | Size | SHA256 |
+|---|---|---|
+| `llamatelemetry-v1.1.0-cuda12-kaggle-t4x2.tar.gz` | 1.4 GB | `89b5b7db...` |
+| `llamatelemetry-v1.1.0-cuda12-kaggle-t4x2.tar.gz.sha256` | — | — |
+| `llamatelemetry-v1.1.0-source.tar.gz` | 9.5 MB | `d2142130...` |
+| `llamatelemetry-v1.1.0-source.tar.gz.sha256` | — | — |
+| `llamatelemetry-v1.1.0-source.zip` | 9.7 MB | `e087e7c8...` |
+| `llamatelemetry-v1.1.0-source.zip.sha256` | — | — |
 
 ---
 
