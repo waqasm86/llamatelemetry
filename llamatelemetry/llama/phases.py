@@ -14,6 +14,8 @@ from typing import Any, Optional
 
 from ..otel.provider import get_tracer, get_meter
 from ..semconv import keys
+from ..semconv import gen_ai as gen_ai_keys
+from ..semconv.gen_ai_builder import build_gen_ai_attrs_from_request, build_gen_ai_attrs_from_response
 
 
 @contextmanager
@@ -61,11 +63,22 @@ def trace_request(
     start = time.perf_counter()
 
     with tracer.start_as_current_span("llm.request") as root_span:
+        # Legacy llm.* attributes
         root_span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
         root_span.set_attribute(keys.LLM_MODEL, model)
         root_span.set_attribute(keys.LLM_STREAM, stream)
         if request_id:
             root_span.set_attribute(keys.REQUEST_ID, request_id)
+
+        # gen_ai.* request attributes
+        gen_ai_req = build_gen_ai_attrs_from_request(
+            model=model,
+            operation=gen_ai_keys.OP_CHAT,
+            provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+            stream=stream,
+        )
+        for k, v in gen_ai_req.items():
+            root_span.set_attribute(k, v)
 
         # Prefill child span
         with tracer.start_as_current_span("llm.phase.prefill") as pfill:
@@ -93,6 +106,14 @@ def trace_request(
             root_span.set_attribute(keys.LLM_OUTPUT_TOKENS, total_out)
             root_span.set_attribute(keys.LLM_INPUT_TOKENS, handle.prompt_tokens)
             root_span.set_attribute(keys.LLM_TOKENS_TOTAL, handle.prompt_tokens + total_out)
+
+            # gen_ai.* response attributes
+            gen_ai_resp = build_gen_ai_attrs_from_response(
+                input_tokens=handle.prompt_tokens,
+                output_tokens=total_out,
+            )
+            for k, v in gen_ai_resp.items():
+                root_span.set_attribute(k, v)
 
             attrs = {keys.LLM_MODEL: model}
             _duration_hist.record(elapsed_ms, attrs)

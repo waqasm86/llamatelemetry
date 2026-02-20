@@ -17,6 +17,9 @@ from typing import Callable, Any, Optional, Dict
 from contextlib import contextmanager
 import time
 
+from ..semconv import keys
+from ..semconv import gen_ai as gen_ai_keys
+
 
 def instrument_inference(
     tracer: Any,
@@ -55,10 +58,13 @@ def instrument_inference(
                 return func(*args, **kwargs)
 
             with tracer.start_as_current_span(operation) as span:
-                span.set_attribute("llm.system", "llamatelemetry")
-                span.set_attribute("llm.model", model_name)
-                span.set_attribute("gpu.device_id", gpu_id)
-                span.set_attribute("nccl.split_mode", split_mode)
+                span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
+                span.set_attribute(keys.LLM_MODEL, model_name)
+                span.set_attribute(keys.GPU_ID, str(gpu_id))
+                span.set_attribute(keys.NCCL_SPLIT_MODE, split_mode)
+                # gen_ai.* attributes
+                span.set_attribute(gen_ai_keys.GEN_AI_PROVIDER_NAME, gen_ai_keys.PROVIDER_LLAMA_CPP)
+                span.set_attribute(gen_ai_keys.GEN_AI_REQUEST_MODEL, model_name)
 
                 start_time = time.time()
 
@@ -66,7 +72,7 @@ def instrument_inference(
                     result = func(*args, **kwargs)
 
                     latency_ms = (time.time() - start_time) * 1000
-                    span.set_attribute("llm.latency_ms", latency_ms)
+                    span.set_attribute(keys.LLM_REQUEST_DURATION_MS, latency_ms)
 
                     # Try to extract metrics from result
                     _annotate_from_result(span, result, latency_ms)
@@ -75,7 +81,7 @@ def instrument_inference(
 
                 except Exception as e:
                     span.record_exception(e)
-                    span.set_attribute("llm.error", str(e))
+                    span.set_attribute(keys.LLM_ERROR, str(e))
                     raise
 
         return wrapper

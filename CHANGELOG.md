@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-02-20
+
+### Production Inference Subsystem + GenAI Semantic Conventions
+
+### Added
+
+**GenAI Semantic Conventions (`semconv/gen_ai.py`, `gen_ai_builder.py`, `mapping.py`):**
+- `semconv/gen_ai.py` - Full OTel GenAI attribute registry: `gen_ai.*` request/response/usage/tool/agent constants
+- `semconv/gen_ai_builder.py` - Builder functions: `build_gen_ai_attrs_from_request()`, `build_gen_ai_attrs_from_response()`, `build_gen_ai_attrs_from_tools()`, `build_content_attrs()`
+- `semconv/mapping.py` - Dual-emit helpers: `to_gen_ai_attrs()`, `to_legacy_llm_attrs()`, `dual_emit_attrs()`, `set_dual_attrs()`, `GenAIAttrs` dataclass
+
+**Unified Backends (`backends/`, `transformers/`, `sdk.py`):**
+- `backends/base.py` - `LLMRequest`, `LLMResponse`, `LLMBackend` protocol (runtime_checkable)
+- `backends/llamacpp.py` - `LlamaCppBackend` wrapping existing `LlamaCppClient` into unified interface
+- `transformers/backend.py` - `TransformersBackend` for HuggingFace models
+- `transformers/instrumentation.py` - `InstrumentedBackend`, `TransformersInstrumentorConfig` with OTel tracing
+- `sdk.py` - High-level factory: `instrument_llamacpp()`, `instrument_transformers()`
+
+**Inference Subsystem (`inference/`):**
+- `inference/base.py` - `InferenceRequest`, `InferenceResult`, `InferenceEngine` Protocol
+- `inference/types.py` - `SamplingParams`, `BatchConstraints`, `DeviceConfig`, `EngineStats`
+- `inference/config.py` - `CudaInferenceConfig` (llama.cpp + Transformers, KV cache, scheduler settings)
+- `inference/events.py` - `InferenceEvents` (TTFT/TPOT timestamp lifecycle), `EventRecorder` factory
+- `inference/metrics.py` - `compute_ttft()`, `compute_tpot()`, `compute_tps()`, `compute_queue_delay()`, `compute_all_metrics()`
+- `inference/scheduler.py` - `Scheduler` with FIFO/priority scheduling, `ScheduledRequest`
+- `inference/runtime.py` - `InferenceRuntime` orchestrating engine + scheduler
+- `inference/kv/allocator.py` - `KVCacheAllocator` (paged, token-level tracking)
+- `inference/kv/policy.py` - Eviction policies: `LRUEviction`, `FIFOEviction`, `SessionPinEviction`
+- `inference/engines/llamacpp_engine.py` - `LlamaCppEngine` implementing `InferenceEngine`
+- `inference/engines/torch_engine.py` - `TorchEngine` implementing `InferenceEngine` (torch optional)
+- `inference/api.py` - `create_engine()` factory (single entrypoint)
+
+**GPU OTel Enrichment (`gpu/otel.py`):**
+- `GPUSnapshot` dataclass for point-in-time GPU state
+- `GPUSpanEnricher` - before/after GPU snapshots, delta computation, `attach_deltas()`, `attach_static()`
+
+**Benchmark Harness (`bench/`):**
+- `bench/profiles.py` - `BenchmarkProfile`, `get_default_profiles()` (short/medium/long/code/multi-turn)
+- `bench/runner.py` - `BenchmarkRunner` (llama.cpp + Transformers, configurable iterations/warmup)
+- `bench/report.py` - `BenchmarkReport`, `TestResult`, JSON save/load, aggregate statistics
+- `bench/compare.py` - `compare_reports()`, `ComparisonResult` with regression detection
+
+**Pipeline Observability (`pipeline/`):**
+- `pipeline/spans.py` - `PipelineContext`, `PipelineTracer` with spans for: `span_finetune()`, `span_merge_lora()`, `span_export_gguf()`, `span_quantize()`, `span_benchmark()`, `span_deploy()`
+
+**Supporting Modules:**
+- `artifacts/manifest.py` - `ArtifactManifest` for tracking pipeline artifacts + SHA256 verification
+- `cuda/policy.py` - `CudaPolicy` unified CUDA optimization config
+- `cuda/optim/` - `autocast.py`, `compile.py`, `cudagraphs.py`, `flash_attn.py`, `kernel_fusion.py`, `paged_attention.py`
+- `distributed/topology.py` - `ClusterTopology`, `NodeInfo` for multi-GPU topology detection
+- `llama/autotune.py` - `LlamaAutotuner` for server parameter optimization
+- `nccl/torchdist.py` - `TorchDistBackend` bridging NCCL tracing to PyTorch distributed
+- `quantization/pipeline.py` - `QuantizationPipeline`, `PipelineResult` for end-to-end quant pipelines
+
+**Updated Modules:**
+- `llama/client.py` - Now dual-emits `gen_ai.*` + legacy `llm.*` span attributes
+- `llama/phases.py` - Now dual-emits `gen_ai.*` + legacy `llm.*` attributes in `trace_request()`
+- `semconv/__init__.py` - Re-exports `gen_ai`, `GenAIAttrs`, `to_gen_ai_attrs`, `dual_emit_attrs`, `set_dual_attrs`
+- `inference/__init__.py` - Exports new inference contract alongside legacy torch-optional imports
+- `telemetry/auto_instrument.py` - Uses semconv key constants; adds `gen_ai.*` provider/model attributes
+
+**Tests (6 new test files, 149 new tests):**
+- `tests/test_gen_ai_semconv.py` - 33 tests for gen_ai constants, builder, mapping
+- `tests/test_backends.py` - 22 tests for LLMRequest, LLMResponse, LLMBackend, LlamaCppBackend
+- `tests/test_gpu_otel.py` - 22 tests for GPUSnapshot, GPUSpanEnricher (deltas, static, none-safety)
+- `tests/test_inference_runtime.py` - 44 tests for types, base, config, events, metrics, API
+- `tests/test_bench.py` - 18 tests for profiles, reports, compare, runner
+- `tests/test_pipeline.py` - 20 tests for PipelineContext, PipelineTracer (all 6 span types)
+
+### Test Results
+- **244 passed, 24 skipped** (up from 95 passed in v1.0.0)
+- 24 skipped tests require `torch` (existing behavior, unchanged)
+
+---
+
 ## [1.0.0] - 2026-02-15
 
 ### Production-Grade Release - CUDA-first OpenTelemetry SDK
