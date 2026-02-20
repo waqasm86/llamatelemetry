@@ -39,7 +39,7 @@ def _query_nvidia_smi_full() -> List[dict]:
                         }
                     )
             return devices
-    except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
+    except (FileNotFoundError, PermissionError, OSError, subprocess.TimeoutExpired, ValueError):
         pass
     return []
 
@@ -75,7 +75,7 @@ def _query_nvidia_smi_utilization() -> List[GPUSnapshot]:
                         )
                     )
             return snapshots
-    except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
+    except (FileNotFoundError, PermissionError, OSError, subprocess.TimeoutExpired, ValueError):
         pass
     return []
 

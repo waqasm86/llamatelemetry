@@ -1,4 +1,4 @@
-# Configuration Reference (v1.1.0)
+# Configuration Reference (v1.2.0)
 
 All runtime configuration options for llamatelemetry.
 
@@ -10,7 +10,7 @@ All runtime configuration options for llamatelemetry.
 llamatelemetry.init(
     service_name: str,              # Required. OTel service name.
     otlp_endpoint: str = None,      # OTLP HTTP endpoint (e.g. "https://host/v1/traces")
-    service_version: str = "1.1.0", # OTel service version attribute.
+    service_version: str = "1.2.0", # OTel service version attribute.
     enable_gpu: bool = False,        # Enable pynvml GPU metrics collection.
     enable_nccl: bool = False,       # Enable NCCL collective span instrumentation.
     sample_rate: float = 1.0,        # Trace sampling rate (0.0 – 1.0).
@@ -117,7 +117,7 @@ server.stop_server()
 ```python
 llamatelemetry.llama.quick_start(
     model_path: str,
-    preset: str = "kaggle_t4_dual",  # "kaggle_t4_dual" | "single_gpu" | "cpu"
+    preset: str = "kaggle_t4_dual",  # "kaggle_t4_dual" | "single_gpu"
 )
 ```
 
@@ -125,7 +125,6 @@ llamatelemetry.llama.quick_start(
 |---|---|---|---|
 | `kaggle_t4_dual` | 99 | `"1.0,0.0"` | 4096 |
 | `single_gpu` | 99 | `"1.0"` | 4096 |
-| `cpu` | 0 | `""` | 2048 |
 
 ---
 
@@ -136,7 +135,7 @@ from llamatelemetry.otel import setup_provider
 
 provider = setup_provider(
     service_name: str,
-    service_version: str = "1.1.0",
+    service_version: str = "1.2.0",
     otlp_endpoint: str = None,      # None = stdout exporter.
     sample_rate: float = 1.0,
     export_interval_ms: int = 5000,
@@ -151,7 +150,7 @@ provider = setup_provider(
 from llamatelemetry.kaggle import auto_configure
 
 cfg = auto_configure(
-    binary_version: str = "1.0.0",  # CUDA binary version to bootstrap.
+    binary_version: str = "1.2.0",  # CUDA binary version to bootstrap.
     cache_dir: str = "/kaggle/working/.llamatelemetry",
     load_secrets: bool = True,       # Load Kaggle secrets into env.
 )
@@ -166,6 +165,6 @@ cfg = auto_configure(
 | `LLAMATELEMETRY_SERVICE_NAME` | `"llamatelemetry"` | OTel service name |
 | `LLAMATELEMETRY_OTLP_ENDPOINT` | `""` | OTLP HTTP endpoint |
 | `LLAMATELEMETRY_SAMPLE_RATE` | `"1.0"` | Trace sample rate |
-| `LLAMATELEMETRY_BINARY_VERSION` | `"1.0.0"` | CUDA binary version |
+| `LLAMATELEMETRY_BINARY_VERSION` | `"1.2.0"` | CUDA binary version |
 | `LLAMATELEMETRY_CACHE_DIR` | `"/kaggle/working/.llamatelemetry"` | Binary cache directory |
 | `LLAMATELEMETRY_LOG_LEVEL` | `"INFO"` | SDK log level |

@@ -12,6 +12,11 @@ from typing import Any, Optional
 from .base import InferenceEngine
 from .config import CudaInferenceConfig
 from .runtime import InferenceRuntime
+try:
+    from ..utils import require_cuda
+except ImportError:
+    # Support top-level imports when "inference" is added to sys.path directly.
+    from llamatelemetry.utils import require_cuda
 
 
 def create_engine(
@@ -50,6 +55,7 @@ def create_engine(
         ... ))
         >>> print(f"TPS: {result.tps:.1f}, TTFT: {result.ttft_ms:.1f}ms")
     """
+    require_cuda()
     if config is None:
         config = CudaInferenceConfig(
             backend=backend,

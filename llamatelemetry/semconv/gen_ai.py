@@ -8,7 +8,6 @@ These constants align with the official OTel GenAI attribute registry.
 # ---------------------------------------------------------------------------
 # Core GenAI attributes
 # ---------------------------------------------------------------------------
-GEN_AI_SYSTEM = "gen_ai.system"
 GEN_AI_PROVIDER_NAME = "gen_ai.provider.name"
 GEN_AI_OPERATION_NAME = "gen_ai.operation.name"
 
@@ -153,3 +152,35 @@ TOKEN_OUTPUT = "output"
 TOOL_FUNCTION = "function"
 TOOL_EXTENSION = "extension"
 TOOL_DATASTORE = "datastore"
+
+
+def normalize_operation(operation: str | None, strict: bool = False) -> str:
+    """Normalize operation names to GenAI semantic convention values.
+
+    Mappings:
+        "completions" / "completion" / "text" -> "text_completion"
+        "chat" -> "chat"
+        "embeddings" -> "embeddings"
+    """
+    if operation is None:
+        return OP_CHAT
+
+    op = operation.strip().lower()
+    if op in {"completions", "completion", "text"}:
+        return OP_TEXT_COMPLETION
+
+    valid = {
+        OP_CHAT,
+        OP_TEXT_COMPLETION,
+        OP_EMBEDDINGS,
+        OP_CREATE_AGENT,
+        OP_EXECUTE_TOOL,
+        OP_INVOKE_AGENT,
+        OP_GENERATE_CONTENT,
+    }
+    if op in valid:
+        return op
+
+    if strict:
+        raise ValueError(f"Unsupported gen_ai.operation.name: {operation}")
+    return op

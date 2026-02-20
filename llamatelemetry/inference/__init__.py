@@ -16,7 +16,7 @@ Example:
     >>> result = engine.generate(InferenceRequest(messages=[{"role": "user", "content": "Hi"}]))
 """
 
-# Legacy imports (v1.0.0 compatibility) - torch optional
+# Legacy imports (compatibility layer) - torch optional
 try:
     from .flash_attn import (
         FlashAttentionConfig,
@@ -49,7 +49,7 @@ except ImportError:
     ContinuousBatching = None  # type: ignore[assignment,misc]
     batch_inference_optimized = None  # type: ignore[assignment]
 
-# New v1.0.0+ inference contract
+# Inference contract (current)
 from .base import InferenceRequest, InferenceResult, InferenceEngine
 from .types import SamplingParams, BatchConstraints, DeviceConfig
 from .config import CudaInferenceConfig

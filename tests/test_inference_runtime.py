@@ -376,3 +376,79 @@ class TestInferenceAPIImport:
         assert InferenceRequest is not None
         assert InferenceResult is not None
         assert create_engine is not None
+
+
+class TestInferenceSchedulerRuntime:
+    """Test runtime scheduler edge cases."""
+
+    def test_scheduler_does_not_leave_queued_request(self):
+        from llamatelemetry.inference.base import InferenceRequest, InferenceResult
+        from llamatelemetry.inference.runtime import InferenceRuntime
+        from llamatelemetry.inference.types import BatchConstraints
+
+        class DummyEngine:
+            name = "dummy"
+
+            def __init__(self):
+                self.calls = 0
+
+            def warmup(self):
+                pass
+
+            def generate(self, request):
+                self.calls += 1
+                return InferenceResult(output_text="ok")
+
+            def stream_generate(self, request):
+                yield "ok"
+
+            def shutdown(self):
+                pass
+
+        engine = DummyEngine()
+        runtime = InferenceRuntime(
+            engine=engine,
+            enable_scheduler=True,
+            batch_constraints=BatchConstraints(max_wait_ms=10.0),
+        )
+        runtime.start()
+        runtime.generate(InferenceRequest(prompt="hello", max_tokens=8))
+        assert runtime.scheduler is not None
+        assert runtime.scheduler.queue_depth == 0
+        assert engine.calls == 1
+
+    def test_scheduler_handles_oversize_request(self):
+        from llamatelemetry.inference.base import InferenceRequest, InferenceResult
+        from llamatelemetry.inference.runtime import InferenceRuntime
+        from llamatelemetry.inference.types import BatchConstraints
+
+        class DummyEngine:
+            name = "dummy"
+
+            def __init__(self):
+                self.calls = 0
+
+            def warmup(self):
+                pass
+
+            def generate(self, request):
+                self.calls += 1
+                return InferenceResult(output_text="ok")
+
+            def stream_generate(self, request):
+                yield "ok"
+
+            def shutdown(self):
+                pass
+
+        engine = DummyEngine()
+        runtime = InferenceRuntime(
+            engine=engine,
+            enable_scheduler=True,
+            batch_constraints=BatchConstraints(max_batch_tokens=4),
+        )
+        runtime.start()
+        runtime.generate(InferenceRequest(prompt="this is a long prompt", max_tokens=10))
+        assert runtime.scheduler is not None
+        assert runtime.scheduler.queue_depth == 0
+        assert engine.calls == 1

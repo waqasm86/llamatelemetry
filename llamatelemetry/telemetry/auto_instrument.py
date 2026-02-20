@@ -2,14 +2,14 @@
 llamatelemetry.telemetry.auto_instrument - Auto-instrumentation utilities.
 
 Provides decorators and context managers for automatic span creation
-in LLM inference operations.
+in GenAI inference operations.
 
 Example:
     >>> from llamatelemetry.telemetry.auto_instrument import inference_span
     >>>
     >>> with inference_span(tracer, model="gemma-3-4b") as span:
     ...     result = engine.infer(prompt)
-    ...     span.set_attribute("llm.output.tokens", result.tokens_generated)
+    ...     span.set_attribute("gen_ai.usage.output_tokens", result.tokens_generated)
 """
 
 from functools import wraps
@@ -17,8 +17,8 @@ from typing import Callable, Any, Optional, Dict
 from contextlib import contextmanager
 import time
 
-from ..semconv import keys
 from ..semconv import gen_ai as gen_ai_keys
+from ..otel.gen_ai_utils import build_gen_ai_span_attrs, build_span_name
 
 
 def instrument_inference(
@@ -26,13 +26,13 @@ def instrument_inference(
     model_name: str = "",
     gpu_id: int = 0,
     split_mode: str = "none",
-    operation: str = "llm.inference"
+    operation: str = gen_ai_keys.OP_GENERATE_CONTENT
 ) -> Callable:
     """
     Decorator to auto-instrument inference methods.
 
-    Wraps a function to automatically create OpenTelemetry spans
-    with LLM-specific attributes.
+    Wraps a function to automatically create OpenTelemetry GenAI spans
+    with GenAI semantic attributes.
 
     Args:
         tracer: OpenTelemetry tracer instance
@@ -57,32 +57,42 @@ def instrument_inference(
             if tracer is None:
                 return func(*args, **kwargs)
 
-            with tracer.start_as_current_span(operation) as span:
-                span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
-                span.set_attribute(keys.LLM_MODEL, model_name)
-                span.set_attribute(keys.GPU_ID, str(gpu_id))
-                span.set_attribute(keys.NCCL_SPLIT_MODE, split_mode)
-                # gen_ai.* attributes
-                span.set_attribute(gen_ai_keys.GEN_AI_PROVIDER_NAME, gen_ai_keys.PROVIDER_LLAMA_CPP)
-                span.set_attribute(gen_ai_keys.GEN_AI_REQUEST_MODEL, model_name)
+            try:
+                from opentelemetry.trace import SpanKind
+                span_kind = SpanKind.CLIENT
+            except Exception:
+                span_kind = None
+
+            span_name = build_span_name(operation, model_name or None)
+            span_attrs = build_gen_ai_span_attrs(
+                operation=operation,
+                provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+                model=model_name or None,
+            )
+
+            with tracer.start_as_current_span(
+                span_name,
+                kind=span_kind,
+                attributes=span_attrs if span_kind is not None else None,
+            ) as span:
+                span.set_attribute("gpu.id", str(gpu_id))
+                span.set_attribute("nccl.split_mode", split_mode)
 
                 start_time = time.time()
 
                 try:
                     result = func(*args, **kwargs)
-
-                    latency_ms = (time.time() - start_time) * 1000
-                    span.set_attribute(keys.LLM_REQUEST_DURATION_MS, latency_ms)
-
-                    # Try to extract metrics from result
-                    _annotate_from_result(span, result, latency_ms)
-
-                    return result
-
                 except Exception as e:
                     span.record_exception(e)
-                    span.set_attribute(keys.LLM_ERROR, str(e))
+                    span.set_attribute("error.type", e.__class__.__name__)
                     raise
+
+                latency_ms = (time.time() - start_time) * 1000
+
+                # Try to extract metrics from result
+                _annotate_from_result(span, result, latency_ms)
+
+                return result
 
         return wrapper
     return decorator
@@ -94,28 +104,24 @@ def _annotate_from_result(span: Any, result: Any, latency_ms: float) -> None:
         # Handle InferResult objects
         if hasattr(result, 'tokens_generated'):
             tokens = result.tokens_generated
-            span.set_attribute("llm.output.tokens", tokens)
-            if latency_ms > 0:
-                span.set_attribute("llm.tokens_per_sec", tokens / (latency_ms / 1000))
+            span.set_attribute(gen_ai_keys.GEN_AI_USAGE_OUTPUT_TOKENS, tokens)
 
         if hasattr(result, 'success'):
-            span.set_attribute("llm.success", result.success)
+            span.set_attribute("result.success", result.success)
 
         if hasattr(result, 'error_message') and result.error_message:
-            span.set_attribute("llm.error", result.error_message)
+            span.set_attribute("error.type", "InferenceError")
 
         # Handle dict results
         if isinstance(result, dict):
             if "tokens_predicted" in result:
                 tokens = result["tokens_predicted"]
-                span.set_attribute("llm.output.tokens", tokens)
-                if latency_ms > 0:
-                    span.set_attribute("llm.tokens_per_sec", tokens / (latency_ms / 1000))
+                span.set_attribute(gen_ai_keys.GEN_AI_USAGE_OUTPUT_TOKENS, tokens)
 
             if "timings" in result:
                 t = result["timings"]
                 if "predicted_per_second" in t:
-                    span.set_attribute("llm.tokens_per_sec", t["predicted_per_second"])
+                    span.set_attribute("llamatelemetry.predicted_per_second", t["predicted_per_second"])
 
     except Exception:
         pass  # Don't fail if annotation fails
@@ -124,14 +130,14 @@ def _annotate_from_result(span: Any, result: Any, latency_ms: float) -> None:
 @contextmanager
 def inference_span(
     tracer: Any,
-    operation: str = "llm.inference",
+    operation: str = gen_ai_keys.OP_GENERATE_CONTENT,
     model: str = "",
     **attributes
 ):
     """
     Context manager for inference spans.
 
-    Creates an OpenTelemetry span with LLM-specific attributes.
+    Creates an OpenTelemetry GenAI span with GenAI attributes.
     Automatically records timing and allows adding custom attributes.
 
     Args:
@@ -147,15 +153,20 @@ def inference_span(
         >>> with inference_span(tracer, model="gemma-3-4b") as span:
         ...     result = engine.infer(prompt)
         ...     if span:
-        ...         span.set_attribute("llm.output.tokens", result.tokens_generated)
+        ...         span.set_attribute("gen_ai.usage.output_tokens", result.tokens_generated)
     """
     if tracer is None:
         yield None
         return
 
-    with tracer.start_as_current_span(operation) as span:
-        span.set_attribute("llm.system", "llamatelemetry")
-        span.set_attribute("llm.model", model)
+    span_name = build_span_name(operation, model or None)
+    span_attrs = build_gen_ai_span_attrs(
+        operation=operation,
+        provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+        model=model or None,
+    )
+
+    with tracer.start_as_current_span(span_name, attributes=span_attrs) as span:
 
         for key, value in attributes.items():
             span.set_attribute(key, value)
@@ -165,7 +176,7 @@ def inference_span(
             yield span
         finally:
             latency_ms = (time.time() - start_time) * 1000
-            span.set_attribute("llm.latency_ms", latency_ms)
+            span.set_attribute("llamatelemetry.latency_ms", latency_ms)
 
 
 @contextmanager
@@ -200,16 +211,21 @@ def batch_inference_span(
         yield None, lambda idx: _null_context()
         return
 
-    with tracer.start_as_current_span("llm.batch_inference") as parent:
-        parent.set_attribute("llm.system", "llamatelemetry")
-        parent.set_attribute("llm.model", model)
-        parent.set_attribute("llm.batch_size", batch_size)
+    span_name = build_span_name(gen_ai_keys.OP_GENERATE_CONTENT, model or None)
+    span_attrs = build_gen_ai_span_attrs(
+        operation=gen_ai_keys.OP_GENERATE_CONTENT,
+        provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+        model=model or None,
+    )
+
+    with tracer.start_as_current_span(span_name, attributes=span_attrs) as parent:
+        parent.set_attribute("batch.size", batch_size)
 
         for key, value in attributes.items():
             parent.set_attribute(key, value)
 
         def create_child(index: int):
-            return tracer.start_as_current_span(f"llm.inference.{index}")
+            return tracer.start_as_current_span(f"llamatelemetry.inference.{index}")
 
         yield parent, create_child
 
@@ -220,7 +236,7 @@ def _null_context():
     yield None
 
 
-def create_llm_attributes(
+def create_gen_ai_attributes(
     model: str = "",
     prompt_tokens: int = 0,
     output_tokens: int = 0,
@@ -229,7 +245,7 @@ def create_llm_attributes(
     split_mode: str = "none"
 ) -> Dict[str, Any]:
     """
-    Create standard LLM span attributes.
+    Create standard GenAI span attributes.
 
     Args:
         model: Model name
@@ -243,17 +259,14 @@ def create_llm_attributes(
         Dictionary of span attributes
     """
     attrs = {
-        "llm.system": "llamatelemetry",
-        "llm.model": model,
-        "llm.input.tokens": prompt_tokens,
-        "llm.output.tokens": output_tokens,
-        "llm.latency_ms": latency_ms,
-        "gpu.device_id": gpu_id,
+        gen_ai_keys.GEN_AI_PROVIDER_NAME: gen_ai_keys.PROVIDER_LLAMA_CPP,
+        gen_ai_keys.GEN_AI_REQUEST_MODEL: model,
+        gen_ai_keys.GEN_AI_USAGE_INPUT_TOKENS: prompt_tokens,
+        gen_ai_keys.GEN_AI_USAGE_OUTPUT_TOKENS: output_tokens,
+        "llamatelemetry.latency_ms": latency_ms,
+        "gpu.id": str(gpu_id),
         "nccl.split_mode": split_mode,
     }
-
-    if latency_ms > 0 and output_tokens > 0:
-        attrs["llm.tokens_per_sec"] = output_tokens / (latency_ms / 1000)
 
     return attrs
 
@@ -279,25 +292,22 @@ def annotate_span_from_result(
         return
 
     try:
-        span.set_attribute("llm.system", "llamatelemetry")
-        span.set_attribute("llm.model", model)
-        span.set_attribute("gpu.device_id", gpu_id)
+        span.set_attribute(gen_ai_keys.GEN_AI_PROVIDER_NAME, gen_ai_keys.PROVIDER_LLAMA_CPP)
+        span.set_attribute(gen_ai_keys.GEN_AI_REQUEST_MODEL, model)
+        span.set_attribute("gpu.id", str(gpu_id))
         span.set_attribute("nccl.split_mode", split_mode)
 
         if hasattr(result, 'tokens_generated'):
-            span.set_attribute("llm.output.tokens", result.tokens_generated)
+            span.set_attribute(gen_ai_keys.GEN_AI_USAGE_OUTPUT_TOKENS, result.tokens_generated)
 
         if hasattr(result, 'latency_ms'):
-            span.set_attribute("llm.latency_ms", result.latency_ms)
-
-        if hasattr(result, 'tokens_per_sec'):
-            span.set_attribute("llm.tokens_per_sec", result.tokens_per_sec)
+            span.set_attribute("llamatelemetry.latency_ms", result.latency_ms)
 
         if hasattr(result, 'success'):
-            span.set_attribute("llm.success", result.success)
+            span.set_attribute("result.success", result.success)
 
         if hasattr(result, 'error_message') and result.error_message:
-            span.set_attribute("llm.error", result.error_message)
+            span.set_attribute("error.type", "InferenceError")
 
     except Exception:
         pass
@@ -307,6 +317,6 @@ __all__ = [
     "instrument_inference",
     "inference_span",
     "batch_inference_span",
-    "create_llm_attributes",
+    "create_gen_ai_attributes",
     "annotate_span_from_result",
 ]

@@ -38,6 +38,15 @@ class CudaInferenceConfig:
         scheduler: Enable request scheduler.
         multi_gpu: Multi-GPU mode ("auto", "single", "tensor_parallel", "split").
         extra: Additional engine-specific configuration.
+
+        transformers_device_map: Optional device_map ("auto" or dict).
+        transformers_max_memory: Optional max_memory dict per GPU.
+        transformers_load_in_4bit: Enable 4-bit loading (bitsandbytes).
+        transformers_load_in_8bit: Enable 8-bit loading (bitsandbytes).
+        transformers_bnb_4bit_compute_dtype: Compute dtype for 4-bit.
+        transformers_bnb_4bit_quant_type: Quant type for 4-bit (e.g. "nf4").
+        transformers_bnb_4bit_use_double_quant: Enable double quantization.
+        transformers_trust_remote_code: Enable trust_remote_code in HF loader.
     """
 
     backend: str = "llama.cpp"
@@ -67,6 +76,15 @@ class CudaInferenceConfig:
     llama_n_gpu_layers: int = -1
     llama_mmap: bool = True
     llama_mlock: bool = False
+    # transformers specific
+    transformers_device_map: Optional[Any] = None
+    transformers_max_memory: Optional[Dict[str, str]] = None
+    transformers_load_in_4bit: bool = False
+    transformers_load_in_8bit: bool = False
+    transformers_bnb_4bit_compute_dtype: Optional[str] = None
+    transformers_bnb_4bit_quant_type: Optional[str] = None
+    transformers_bnb_4bit_use_double_quant: bool = False
+    transformers_trust_remote_code: bool = False
 
     def to_device_config(self) -> DeviceConfig:
         """Convert to DeviceConfig."""

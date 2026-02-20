@@ -1,4 +1,6 @@
-# Quick Start Guide (v1.1.0)
+# Quick Start Guide (v1.2.0)
+
+For a full end-to-end path, see `GOLDEN_PATH.md`.
 
 Get llamatelemetry running on Kaggle dual T4 in minutes.
 
@@ -12,7 +14,7 @@ Get llamatelemetry running on Kaggle dual T4 in minutes.
 ## 1. Install
 
 ```python
-!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.1.0
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.2.0
 ```
 
 ---

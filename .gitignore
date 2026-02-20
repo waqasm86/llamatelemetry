@@ -1,5 +1,5 @@
 # ============================================================================
-# llamatelemetry v1.1.0 .gitignore
+# llamatelemetry v1.2.0 .gitignore
 # ============================================================================
 # Keep repo lightweight - no binaries, large files, or build artifacts
 # ============================================================================
@@ -68,8 +68,9 @@ share/python-wheels/
 build/
 build-artifacts/
 release-packages/
-# Release tarballs are uploaded to GitHub Releases, not committed
+# Release tarballs/zips/checksums are uploaded to GitHub Releases, not committed
 releases/**/*.tar.gz
+releases/**/*.zip
 releases/**/*.sha256
 releases/**/extracted/
 dist/

@@ -262,6 +262,80 @@ class GraphistryViz:
 
         return plotter.plot(**kwargs)
 
+    def plot_pipeline_graph(
+        self,
+        model_name: str,
+        backend: str,
+        gpu_names: Optional[List[str]] = None,
+        tensor_split: Optional[List[float]] = None,
+        server_url: Optional[str] = None,
+        exporter: Optional[str] = "otlp",
+        title: str = "Inference Pipeline Graph",
+        **kwargs
+    ):
+        """
+        Plot a high-level inference pipeline graph.
+
+        Nodes represent the request, model, GPUs, phases, and exporter.
+        Edges represent the flow of inference and observability data.
+
+        Args:
+            model_name: Model identifier.
+            backend: Backend type ("llama.cpp" or "transformers").
+            gpu_names: List of GPU names (e.g. ["T4", "T4"]).
+            tensor_split: Optional tensor split ratios.
+            server_url: Optional server URL for llama.cpp.
+            exporter: Observability exporter name (default: "otlp").
+            title: Visualization title.
+            **kwargs: Additional graphistry plot arguments.
+
+        Returns:
+            Graphistry plotter object.
+        """
+        pd = self._pd
+        g = self._graphistry
+
+        nodes: List[Dict[str, Any]] = []
+        edges: List[Dict[str, Any]] = []
+
+        nodes.append({"id": "request", "type": "request"})
+        nodes.append({
+            "id": "model",
+            "type": "model",
+            "model_name": model_name,
+            "backend": backend,
+            "server_url": server_url or "",
+        })
+        nodes.append({"id": "prefill", "type": "phase"})
+        nodes.append({"id": "decode", "type": "phase"})
+        nodes.append({"id": "exporter", "type": "exporter", "name": exporter or "otlp"})
+
+        edges.extend([
+            {"src": "request", "dst": "model"},
+            {"src": "model", "dst": "prefill"},
+            {"src": "model", "dst": "decode"},
+            {"src": "prefill", "dst": "exporter"},
+            {"src": "decode", "dst": "exporter"},
+        ])
+
+        if gpu_names:
+            for idx, name in enumerate(gpu_names):
+                gpu_id = f"gpu{idx}"
+                nodes.append({
+                    "id": gpu_id,
+                    "type": "gpu",
+                    "gpu_name": name,
+                    "tensor_split": tensor_split[idx] if tensor_split and idx < len(tensor_split) else None,
+                })
+                edges.append({"src": "model", "dst": gpu_id})
+
+        nodes_df = pd.DataFrame(nodes)
+        edges_df = pd.DataFrame(edges)
+
+        plotter = g.edges(edges_df, "src", "dst").nodes(nodes_df, "id")
+        plotter = plotter.settings(url_params={"title": title})
+        return plotter.plot(**kwargs)
+
     def plot_gpu_metrics(
         self,
         metrics: List[Dict[str, Any]],

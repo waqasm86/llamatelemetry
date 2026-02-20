@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
 from ..otel.provider import get_tracer
-from ..semconv import keys
+from ..semconv import gen_ai
 
 
 @dataclass
@@ -109,7 +109,7 @@ class PipelineTracer:
         with self._tracer.start_as_current_span("gen_ai.pipeline.quantize") as span:
             self._set_context_attrs(span, ctx)
             if ctx.quantization:
-                span.set_attribute(keys.LLM_QUANT, ctx.quantization)
+                span.set_attribute("llamatelemetry.quantization", ctx.quantization)
             for k, v in extra.items():
                 span.set_attribute(k, v)
             yield span
@@ -134,13 +134,13 @@ class PipelineTracer:
 
     def _set_context_attrs(self, span: Any, ctx: PipelineContext) -> None:
         """Set common pipeline context attributes on a span."""
-        span.set_attribute(keys.RUN_ID, ctx.run_id)
-        span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
+        span.set_attribute("run.id", ctx.run_id)
+        span.set_attribute(gen_ai.GEN_AI_PROVIDER_NAME, "llamatelemetry")
         if ctx.base_model:
-            span.set_attribute(keys.LLM_MODEL, ctx.base_model)
+            span.set_attribute(gen_ai.GEN_AI_REQUEST_MODEL, ctx.base_model)
         if ctx.model_sha256:
-            span.set_attribute(keys.LLM_GGUF_SHA256, ctx.model_sha256)
+            span.set_attribute("llamatelemetry.gguf.sha256", ctx.model_sha256)
         if ctx.quantization:
-            span.set_attribute(keys.LLM_QUANT, ctx.quantization)
+            span.set_attribute("llamatelemetry.quantization", ctx.quantization)
         for k, v in ctx.metadata.items():
             span.set_attribute(f"pipeline.{k}", v)

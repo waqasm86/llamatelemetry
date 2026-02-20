@@ -14,6 +14,10 @@ import time
 # Add parent directory to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+def _cuda_available() -> bool:
+    from llamatelemetry.utils import detect_cuda
+    return detect_cuda().get("available", False)
+
 def test_import_and_version():
     """Test that the package can be imported and has version"""
     import llamatelemetry
@@ -152,7 +156,9 @@ def test_server_manager_creation():
 def test_inference_engine_workflow():
     """Test the main InferenceEngine workflow without actual server"""
     import llamatelemetry
-    
+    if not _cuda_available():
+        pytest.skip("CUDA not available")
+
     engine = llamatelemetry.InferenceEngine()
     
     # Verify engine has expected methods
@@ -178,7 +184,7 @@ def test_model_config_handling():
     import llamatelemetry
     
     # Test with a mock model path
-    test_model_path = "/tmp/test_dummy.gguf"
+    test_model_path = Path(tempfile.gettempdir()) / "test_dummy.gguf"
     
     # Create dummy file for path testing
     with open(test_model_path, 'w') as f:
@@ -202,8 +208,11 @@ def test_error_handling():
     manager = ServerManager()
     
     # Test 1: Non-existent model file
+    missing_model = Path(tempfile.gettempdir()) / "llamatelemetry_missing_model.gguf"
+    if missing_model.exists():
+        missing_model.unlink()
     with pytest.raises(FileNotFoundError) as exc_info:
-        manager.start_server("/non/existent/model.gguf", gpu_layers=0)
+        manager.start_server(str(missing_model), gpu_layers=1, skip_gpu_check=True)
     assert "Model file not found" in str(exc_info.value)
     
     print("\n✓ Error handling tests passed")
@@ -212,7 +221,9 @@ def test_error_handling():
 def test_metrics_structure():
     """Test metrics structure and initialization"""
     import llamatelemetry
-    
+    if not _cuda_available():
+        pytest.skip("CUDA not available")
+
     engine = llamatelemetry.InferenceEngine()
     metrics = engine.get_metrics()
     
@@ -237,7 +248,7 @@ def test_xubuntu_specific_compatibility():
         distro_info = platform.freedesktop_os_release()
         print(f"  Distribution: {distro_info.get('NAME', 'Unknown')} {distro_info.get('VERSION', '')}")
         print(f"  ID: {distro_info.get('ID', 'Unknown')}")
-    except AttributeError:
+    except (AttributeError, OSError, FileNotFoundError):
         try:
             # Older method (Python 3.8-3.9)
             distro_info = platform.linux_distribution()
@@ -264,7 +275,7 @@ def test_xubuntu_specific_compatibility():
     manager = ServerManager()
     
     # Create a test binary path
-    test_dir = Path("/tmp/llamatelemetry_test")
+    test_dir = Path(tempfile.gettempdir()) / "llamatelemetry_test"
     test_dir.mkdir(exist_ok=True)
     test_bin_dir = test_dir / "bin"
     test_bin_dir.mkdir(exist_ok=True)

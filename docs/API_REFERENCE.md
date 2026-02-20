@@ -1,4 +1,4 @@
-# API Reference (v1.1.0)
+# API Reference (v1.2.0)
 
 Full reference for all public llamatelemetry modules and classes.
 
@@ -14,7 +14,7 @@ llamatelemetry.init(
     otlp_endpoint: str = None,
     enable_gpu: bool = False,
     enable_nccl: bool = False,
-    service_version: str = "1.1.0",
+    service_version: str = "1.2.0",
 )
 
 llamatelemetry.shutdown()
@@ -172,18 +172,18 @@ with tracer.span_deploy(ctx): ...
 ## Semantic Conventions (`llamatelemetry.semconv`)
 
 ```python
-from llamatelemetry.semconv import keys
-from llamatelemetry.semconv.gen_ai import GenAI, GenAIAttrs
-from llamatelemetry.semconv.mapping import set_dual_attrs
+from llamatelemetry.semconv import gen_ai
+from llamatelemetry.semconv.mapping import set_gen_ai_attrs
 
-# Emit gen_ai.* + legacy llm.* on the same span
-set_dual_attrs(span, request, response)
+# Emit gen_ai.* on a span
+set_gen_ai_attrs(span, request)
 
 # Direct attribute access
-span.set_attribute(GenAI.SYSTEM, "llamacpp")
-span.set_attribute(GenAI.REQUEST_MODEL, "llama-3-8b")
-span.set_attribute(GenAI.USAGE_INPUT_TOKENS, 42)
-span.set_attribute(GenAI.USAGE_OUTPUT_TOKENS, 128)
+span.set_attribute(gen_ai.GEN_AI_PROVIDER_NAME, "llama_cpp")
+span.set_attribute(gen_ai.GEN_AI_OPERATION_NAME, "chat")
+span.set_attribute(gen_ai.GEN_AI_REQUEST_MODEL, "llama-3-8b")
+span.set_attribute(gen_ai.GEN_AI_USAGE_INPUT_TOKENS, 42)
+span.set_attribute(gen_ai.GEN_AI_USAGE_OUTPUT_TOKENS, 128)
 ```
 
 ---

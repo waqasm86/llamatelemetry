@@ -5,7 +5,7 @@ Streamlined PyTorch-style package with hybrid bootstrap architecture.
 Lightweight Python package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-Version 0.1.0 - Initial release (renamed from llcuda, built on llama.cpp binaries v0.1.0).
+Legacy runtime shim retained for compatibility with older workflows.
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -177,7 +177,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "0.1.0"  # SDK version (binary artifact is llama.cpp v0.1.0)
+__version__ = "1.2.0"  # SDK version for the legacy compatibility shim
 __all__ = [
     # Core classes
     "InferenceEngine",
@@ -199,14 +199,14 @@ __all__ = [
     "chat",
     "embeddings",
     "models",
-    # New API modules (v2.1+)
+    # New API modules
     "quantization",
     "unsloth",
     "cuda",
     "inference",
-    # OpenTelemetry observability (v2.2+)
+    # OpenTelemetry observability
     "telemetry",
-    # Kaggle zero-boilerplate setup (v0.2.0+)
+    # Kaggle zero-boilerplate setup
     "kaggle",
 ]
 
@@ -249,6 +249,9 @@ class InferenceEngine:
         Args:
             server_url: URL of llama-server backend (default: http://127.0.0.1:8090)
         """
+        from .utils import require_cuda
+
+        require_cuda()
         self.server_url = server_url
         self._model_loaded = False
         self._server_manager: Optional[ServerManager] = None
@@ -513,7 +516,25 @@ class InferenceEngine:
 
         span_cm = nullcontext()
         if self._tracer:
-            span_cm = self._tracer.start_as_current_span("llm.inference")
+            from .otel.gen_ai_utils import build_gen_ai_span_attrs, build_span_name
+            from .semconv import gen_ai as gen_ai_keys
+            try:
+                from opentelemetry.trace import SpanKind
+                span_kind = SpanKind.CLIENT
+            except Exception:
+                span_kind = None
+
+            span_name = build_span_name(gen_ai_keys.OP_TEXT_COMPLETION, self._model_name or None)
+            span_attrs = build_gen_ai_span_attrs(
+                operation=gen_ai_keys.OP_TEXT_COMPLETION,
+                provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+                model=self._model_name or None,
+            )
+            span_cm = self._tracer.start_as_current_span(
+                span_name,
+                kind=span_kind,
+                attributes=span_attrs if span_kind is not None else None,
+            )
 
         with span_cm as span:
             payload = {
@@ -552,10 +573,15 @@ class InferenceEngine:
 
                     if self._metrics_collector:
                         try:
+                            from .semconv import gen_ai as gen_ai_keys
                             self._metrics_collector.record_inference(
                                 latency_ms=latency_ms,
-                                tokens=tokens_generated,
+                                input_tokens=prompt_tokens,
+                                output_tokens=tokens_generated,
+                                operation=gen_ai_keys.OP_TEXT_COMPLETION,
+                                provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
                                 model=self._model_name or "",
+                                response_model=self._model_name or "",
                             )
                         except Exception:
                             pass
@@ -594,7 +620,7 @@ class InferenceEngine:
                     )
                     if span:
                         try:
-                            span.set_attribute("llm.error", result.error_message)
+                            span.set_attribute("error.type", "ServerError")
                         except Exception:
                             pass
                     return result
@@ -606,7 +632,7 @@ class InferenceEngine:
                 if span:
                     try:
                         span.record_exception(e)
-                        span.set_attribute("llm.error", result.error_message)
+                        span.set_attribute("error.type", "Timeout")
                     except Exception:
                         pass
                 return result
@@ -617,7 +643,7 @@ class InferenceEngine:
                 if span:
                     try:
                         span.record_exception(e)
-                        span.set_attribute("llm.error", result.error_message)
+                        span.set_attribute("error.type", "ConnectionError")
                     except Exception:
                         pass
                 return result
@@ -628,7 +654,7 @@ class InferenceEngine:
                 if span:
                     try:
                         span.record_exception(e)
-                        span.set_attribute("llm.error", result.error_message)
+                        span.set_attribute("error.type", "UnexpectedError")
                     except Exception:
                         pass
                 return result

@@ -1,4 +1,4 @@
-# Documentation Index (v1.1.0)
+# Documentation Index (v1.2.0)
 
 This index is the single source of truth for all docs in this repo.
 
@@ -14,7 +14,7 @@ This index is the single source of truth for all docs in this repo.
 - `docs/TROUBLESHOOTING.md` — Common issues and solutions
 
 ## Reference
-- `docs/API_REFERENCE.md` — Full v1.1.0 API reference
+- `docs/API_REFERENCE.md` — Full v1.2.0 API reference
 - `docs/QUICK_REFERENCE.md` — Quick module and API cheat-sheet
 - `docs/GGUF_GUIDE.md` — GGUF model selection and quantization
 - `docs/KAGGLE_GUIDE.md` — Kaggle-specific optimization tips
@@ -23,4 +23,4 @@ This index is the single source of truth for all docs in this repo.
 - `notebooks/` — 16 Jupyter notebooks (foundation → production)
 
 ## Changelog
-- `CHANGELOG.md` — Full version history (v0.1.0 → v1.1.0)
+- `CHANGELOG.md` — Version history for v1.2.0

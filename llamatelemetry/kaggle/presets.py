@@ -12,7 +12,7 @@ Before:
     )
 
 After:
-    engine = env.create_engine(model, preset=ServerPreset.KAGGLE_DUAL_T4)
+    runtime = env.create_engine(model, preset=ServerPreset.KAGGLE_DUAL_T4)
 """
 
 from enum import Enum, auto

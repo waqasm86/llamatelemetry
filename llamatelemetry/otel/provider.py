@@ -209,6 +209,14 @@ def init_providers(config: LlamaTelemetryConfig) -> None:
             )
         )
 
+    # Trace graph buffer (optional)
+    if config.enable_trace_graphs:
+        try:
+            from ..artifacts.trace_graph import TraceGraphSpanProcessor
+            _tracer_provider.add_span_processor(TraceGraphSpanProcessor())
+        except Exception:
+            pass
+
     trace.set_tracer_provider(_tracer_provider)
 
     # MeterProvider
@@ -267,3 +275,12 @@ def shutdown_providers(timeout_s: float = 5.0) -> None:
         except Exception:
             pass
         _meter_provider = None
+
+
+def add_span_processor(processor: Any) -> None:
+    """Attach an extra SpanProcessor to the active TracerProvider."""
+    if _tracer_provider is not None:
+        try:
+            _tracer_provider.add_span_processor(processor)
+        except Exception:
+            pass

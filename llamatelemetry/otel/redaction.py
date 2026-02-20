@@ -9,14 +9,12 @@ from typing import Any, List, Optional, Sequence
 
 _PROMPT_KEYS = frozenset(
     {
-        "llm.prompt",
-        "llm.prompts",
-        "gen_ai.prompt",
-        "gen_ai.completion",
-        "llm.input",
-        "llm.output",
-        "llm.request.body",
-        "llm.response.body",
+        "gen_ai.input.messages",
+        "gen_ai.output.messages",
+        "gen_ai.system_instructions",
+        "gen_ai.tool.call.arguments",
+        "gen_ai.tool.call.result",
+        "gen_ai.tool.definitions",
     }
 )
 
@@ -78,5 +76,22 @@ except ImportError:
     class RedactionSpanProcessor:  # type: ignore[no-redef]
         """Stub when OTel SDK is not installed."""
 
-        def __init__(self, **kwargs: Any):
+        def __init__(
+            self,
+            redact_prompts: bool = False,
+            redact_keys: Optional[List[str]] = None,
+        ):
+            self._redact_prompts = redact_prompts
+            self._redact_keys = set(redact_keys or [])
+
+        def on_start(self, span: Any, parent_context: Optional[Any] = None) -> None:
             pass
+
+        def on_end(self, span: Any) -> None:
+            pass
+
+        def shutdown(self) -> None:
+            pass
+
+        def force_flush(self, timeout_millis: int = 0) -> bool:
+            return True

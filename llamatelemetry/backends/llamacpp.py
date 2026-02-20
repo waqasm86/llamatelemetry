@@ -46,13 +46,13 @@ class LlamaCppBackend:
             timeout_s: Request timeout in seconds.
         """
         from ..api.client import LlamaCppClient
-
         self._client = LlamaCppClient(
             base_url=base_url,
             api_key=api_key,
             timeout=timeout_s,
         )
         self._base_url = base_url
+        self._cuda_checked = False
 
     def invoke(self, req: LLMRequest) -> LLMResponse:
         """Execute an LLM request via the llama.cpp server.
@@ -61,11 +61,23 @@ class LlamaCppBackend:
         """
         start = time.perf_counter()
 
-        if req.operation == "chat":
+        from ..semconv import gen_ai as gen_ai_keys
+
+        try:
+            operation = gen_ai_keys.normalize_operation(req.operation, strict=True)
+        except ValueError as exc:
+            raise ValueError(f"Unsupported operation: {req.operation}") from exc
+
+        from ..utils import require_cuda
+        if not self._cuda_checked:
+            require_cuda()
+            self._cuda_checked = True
+
+        if operation == "chat":
             return self._invoke_chat(req, start)
-        elif req.operation == "completions" or req.operation == "text_completion":
+        elif operation == "text_completion":
             return self._invoke_completions(req, start)
-        elif req.operation == "embeddings":
+        elif operation == "embeddings":
             return self._invoke_embeddings(req, start)
         else:
             raise ValueError(f"Unsupported operation: {req.operation}")

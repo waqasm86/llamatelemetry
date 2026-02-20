@@ -138,6 +138,10 @@ class TritonKernel:
 # Global kernel registry
 _KERNEL_REGISTRY: Dict[str, TritonKernel] = {}
 
+if not TRITON_AVAILABLE:
+    for _name in ("add", "layernorm", "softmax"):
+        _KERNEL_REGISTRY[_name] = TritonKernel(_name)
+
 
 def register_kernel(
     name: str,

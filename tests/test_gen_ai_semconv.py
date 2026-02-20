@@ -13,7 +13,6 @@ class TestGenAIConstants:
     def test_core_attributes_are_strings(self):
         from llamatelemetry.semconv import gen_ai
         attrs = [
-            gen_ai.GEN_AI_SYSTEM,
             gen_ai.GEN_AI_PROVIDER_NAME,
             gen_ai.GEN_AI_OPERATION_NAME,
         ]
@@ -130,6 +129,21 @@ class TestGenAIConstants:
         from llamatelemetry.semconv import gen_ai
         assert gen_ai is not None
 
+    def test_normalize_operation(self):
+        from llamatelemetry.semconv import gen_ai
+        assert gen_ai.normalize_operation("completions") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("completion") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("text") == gen_ai.OP_TEXT_COMPLETION
+        assert gen_ai.normalize_operation("chat") == gen_ai.OP_CHAT
+        assert gen_ai.normalize_operation("embeddings") == gen_ai.OP_EMBEDDINGS
+        assert gen_ai.normalize_operation(None) == gen_ai.OP_CHAT
+
+    def test_normalize_operation_strict(self):
+        from llamatelemetry.semconv import gen_ai
+        assert gen_ai.normalize_operation("chat", strict=True) == gen_ai.OP_CHAT
+        with pytest.raises(ValueError):
+            gen_ai.normalize_operation("unknown-op", strict=True)
+
 
 # ---------------------------------------------------------------------------
 # gen_ai_builder
@@ -233,10 +247,10 @@ class TestGenAIBuilder:
         )
         assert gen_ai.GEN_AI_TOOL_DEFINITIONS in attrs
         assert gen_ai.GEN_AI_TOOL_CALL_ID in attrs
-        assert attrs[gen_ai.GEN_AI_TOOL_CALL_ID] == "call-1"
+        assert attrs[gen_ai.GEN_AI_TOOL_CALL_ID] == ["call-1"]
 
     def test_build_content_attrs_no_content(self):
-        """Content not recorded when record_content=False - hashes used instead."""
+        """Content not recorded when record_content=False."""
         from llamatelemetry.semconv.gen_ai_builder import build_content_attrs
         from llamatelemetry.semconv import gen_ai
         msgs = [{"role": "user", "content": "Hello"}]
@@ -245,9 +259,7 @@ class TestGenAIBuilder:
             record_content=False,
         )
         assert gen_ai.GEN_AI_INPUT_MESSAGES not in attrs
-        assert "llamatelemetry.prompt.sha256" in attrs
-        sha = attrs["llamatelemetry.prompt.sha256"]
-        assert isinstance(sha, str) and len(sha) == 64  # SHA-256 hex
+        assert len(attrs) == 0
 
     def test_build_content_attrs_with_content(self):
         from llamatelemetry.semconv.gen_ai_builder import build_content_attrs
@@ -274,7 +286,7 @@ class TestGenAIBuilder:
 
 
 # ---------------------------------------------------------------------------
-# semconv.mapping (dual-emit)
+# semconv.mapping (gen_ai only)
 # ---------------------------------------------------------------------------
 
 class TestSemconvMapping:
@@ -288,32 +300,6 @@ class TestSemconvMapping:
         assert attrs[gen_ai.GEN_AI_REQUEST_MODEL] == "gemma-3-1b"
         assert attrs[gen_ai.GEN_AI_USAGE_INPUT_TOKENS] == 10
         assert attrs[gen_ai.GEN_AI_USAGE_OUTPUT_TOKENS] == 50
-
-    def test_to_legacy_llm_attrs_basic(self):
-        from llamatelemetry.semconv.mapping import to_legacy_llm_attrs
-        from llamatelemetry.semconv import keys
-        payload = {"model": "gemma-3-1b", "input_tokens": 10, "output_tokens": 50, "stream": False}
-        attrs = to_legacy_llm_attrs(payload)
-        assert attrs[keys.LLM_MODEL] == "gemma-3-1b"
-        assert attrs[keys.LLM_INPUT_TOKENS] == 10
-        assert attrs[keys.LLM_OUTPUT_TOKENS] == 50
-
-    def test_to_legacy_llm_attrs_finish_reasons_list(self):
-        """finish_reasons list is reduced to first element for legacy attribute."""
-        from llamatelemetry.semconv.mapping import to_legacy_llm_attrs
-        from llamatelemetry.semconv import keys
-        payload = {"finish_reasons": ["stop", "length"]}
-        attrs = to_legacy_llm_attrs(payload)
-        assert attrs[keys.LLM_FINISH_REASON] == "stop"
-
-    def test_dual_emit_attrs_merges_both(self):
-        from llamatelemetry.semconv.mapping import dual_emit_attrs
-        from llamatelemetry.semconv import gen_ai, keys
-        payload = {"model": "llama-3-8b", "input_tokens": 100, "output_tokens": 200}
-        attrs = dual_emit_attrs(payload)
-        # Should contain both gen_ai.* and llm.*
-        assert gen_ai.GEN_AI_REQUEST_MODEL in attrs
-        assert keys.LLM_MODEL in attrs
 
     def test_gen_ai_attrs_dataclass(self):
         from llamatelemetry.semconv.mapping import GenAIAttrs
@@ -329,9 +315,9 @@ class TestSemconvMapping:
         assert attrs.provider is None
         assert attrs.input_tokens is None
 
-    def test_set_dual_attrs_on_noop_span(self):
-        """set_dual_attrs should not raise even with a minimal span-like object."""
-        from llamatelemetry.semconv.mapping import set_dual_attrs
+    def test_set_gen_ai_attrs_on_noop_span(self):
+        """set_gen_ai_attrs should not raise even with a minimal span-like object."""
+        from llamatelemetry.semconv.mapping import set_gen_ai_attrs
 
         class FakeSpan:
             def __init__(self):
@@ -341,7 +327,7 @@ class TestSemconvMapping:
 
         span = FakeSpan()
         payload = {"model": "test-model", "input_tokens": 5, "output_tokens": 10}
-        set_dual_attrs(span, payload)
+        set_gen_ai_attrs(span, payload)
         assert len(span.attrs) > 0
 
     def test_none_values_excluded(self):

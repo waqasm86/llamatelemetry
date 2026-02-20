@@ -33,6 +33,7 @@ class LlamaTelemetryConfig:
     enable_gpu: bool = True
     enable_llama_cpp: bool = True
     enable_nccl: bool = False
+    enable_trace_graphs: bool = False
 
     # Internal
     _initialized: bool = field(default=False, repr=False)

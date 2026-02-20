@@ -1,8 +1,8 @@
 """
-llamatelemetry.extras - Non-core modules preserved from v0.1.0.
+llamatelemetry.extras - Non-core modules preserved for compatibility.
 
 These modules are kept for backward compatibility and advanced use cases
-but are not part of the core v1.0.0 API surface.
+but are not part of the core API surface.
 
 Submodules:
     - chat: ChatEngine

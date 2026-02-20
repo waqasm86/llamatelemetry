@@ -42,7 +42,7 @@ class TransformersBackend:
         Args:
             model: A HuggingFace model (AutoModelForCausalLM, etc.).
             tokenizer: Associated tokenizer.
-            device: Device string ("cuda", "cuda:0", "cpu"). Auto-detected if None.
+            device: Device string ("cuda", "cuda:0"). Auto-detected if None.
             autocast_dtype: Autocast dtype ("fp16", "bf16", None).
             trust_remote_code: Trust remote code in tokenizer.
         """
@@ -52,13 +52,18 @@ class TransformersBackend:
         self._autocast_dtype = autocast_dtype
 
         if device is None:
-            try:
-                import torch
-                self._device = "cuda" if torch.cuda.is_available() else "cpu"
-            except ImportError:
-                self._device = "cpu"
+            self._device = "cuda"
         else:
+            if device.startswith("cpu"):
+                raise ValueError("CPU devices are not supported. CUDA is required.")
             self._device = device
+
+        try:
+            import torch
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA is required for Transformers backend.")
+        except ImportError as exc:
+            raise RuntimeError("PyTorch is required for Transformers backend.") from exc
 
     def invoke(self, req: LLMRequest) -> LLMResponse:
         """Execute an LLM request using the Transformers model.
@@ -130,8 +135,46 @@ class TransformersBackend:
         if "top_k" in params:
             gen_kwargs["top_k"] = params["top_k"]
             gen_kwargs["do_sample"] = True
+        if "repetition_penalty" in params:
+            gen_kwargs["repetition_penalty"] = params["repetition_penalty"]
+        if "repeat_penalty" in params and "repetition_penalty" not in gen_kwargs:
+            gen_kwargs["repetition_penalty"] = params["repeat_penalty"]
         if "seed" in params:
             torch.manual_seed(params["seed"])
+        stop_sequences = None
+        if "stop_sequences" in params:
+            stop_sequences = params["stop_sequences"]
+        elif "stop" in params:
+            stop_sequences = params["stop"]
+        if isinstance(stop_sequences, str):
+            stop_sequences = [stop_sequences]
+        if stop_sequences:
+            try:
+                from transformers import StoppingCriteria, StoppingCriteriaList
+
+                stop_ids = [
+                    self._tokenizer.encode(s, add_special_tokens=False)
+                    for s in stop_sequences
+                ]
+                stop_ids = [s for s in stop_ids if s]
+
+                if stop_ids:
+                    class _StopOnSequences(StoppingCriteria):
+                        def __init__(self, sequences):
+                            self._sequences = sequences
+
+                        def __call__(self, input_ids, scores, **kwargs):
+                            for seq in self._sequences:
+                                if input_ids.shape[-1] >= len(seq):
+                                    if input_ids[0, -len(seq):].tolist() == seq:
+                                        return True
+                            return False
+
+                    gen_kwargs["stopping_criteria"] = StoppingCriteriaList(
+                        [_StopOnSequences(stop_ids)]
+                    )
+            except Exception:
+                pass
 
         # Run generation with optional autocast
         with self._maybe_autocast():

@@ -1,4 +1,4 @@
-# Architecture Overview (v1.1.0)
+# Architecture Overview (v1.2.0)
 
 llamatelemetry is a CUDA-first OpenTelemetry Python SDK for LLM inference observability.
 
@@ -9,7 +9,7 @@ llamatelemetry is a CUDA-first OpenTelemetry Python SDK for LLM inference observ
 - **CUDA-first**: Built for GPU-native inference; GPU metrics are first-class citizens.
 - **Torch-optional**: Core modules (inference, bench, pipeline, semconv, otel) work without PyTorch. GPU-heavy modules (cuda, unsloth, nccl, quantization) raise clear errors when torch is absent.
 - **OTel-standard**: All telemetry emits OpenTelemetry spans and metrics. Compatible with any OTLP backend.
-- **Dual-emit**: Semantic conventions emit both `gen_ai.*` (OTel standard) and legacy `llm.*` attributes.
+- **GenAI-only**: Semantic conventions emit `gen_ai.*` (OTel standard) only.
 
 ---
 
@@ -20,7 +20,7 @@ llamatelemetry/
 ├── inference/          Production inference engine (engine, scheduler, KV cache, events, metrics)
 ├── bench/              Benchmark harness (runner, report, regression detection)
 ├── pipeline/           ML pipeline OTel spans (finetune → merge → export → quantize → deploy)
-├── semconv/            Semantic conventions (gen_ai.* OTel standard + legacy llm.*)
+├── semconv/            Semantic conventions (gen_ai.* OTel standard)
 ├── backends/           Unified LLM backend protocol (LlamaCppBackend, TransformersBackend)
 ├── llama/              llama.cpp integration (client, server, phases, autotune)
 ├── gpu/                GPU metrics, snapshots, GPUSpanEnricher
@@ -67,7 +67,7 @@ InferenceEngine.generate(InferenceRequest)
     ├─ LlamaCppBackend / TransformersBackend
     │       │
     │       ├─ llama.cpp HTTP API (GPU 0)
-    │       └─ OTel span: gen_ai.* + llm.* attributes
+    │       └─ OTel span: gen_ai.* attributes
     │
     ├─ EventRecorder (TTFT, TPOT timestamps)
     │
@@ -102,12 +102,11 @@ llamatelemetry.init(service_name, otlp_endpoint)
     └─ Sampling config (head-based, always-on, or ratio)
 
 span attributes:
-    gen_ai.system           = "llamacpp"
-    gen_ai.request.model    = "llama-3-8b"
+    gen_ai.provider.name       = "llama_cpp"
+    gen_ai.operation.name      = "chat"
+    gen_ai.request.model       = "llama-3-8b"
     gen_ai.usage.input_tokens  = 42
     gen_ai.usage.output_tokens = 128
-    llm.model               = "llama-3-8b"     (legacy dual-emit)
-    llm.request.type        = "chat"            (legacy dual-emit)
 ```
 
 ---
@@ -116,7 +115,7 @@ span attributes:
 
 On first import in Kaggle:
 1. `llamatelemetry.kaggle.bootstrap` checks for cached binary.
-2. If absent, downloads `llamatelemetry-v1.0.0-cuda12-kaggle-t4x2.tar.gz` (~1.4 GB) from GitHub Releases.
+2. If absent, downloads `llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz` (~1.4 GB) from GitHub Releases.
 3. SHA256 is verified before extraction.
 4. `LD_LIBRARY_PATH` is set to include extracted llama.cpp and NCCL libraries.
 5. Subsequent imports skip download (cached in `/kaggle/working/.llamatelemetry/`).

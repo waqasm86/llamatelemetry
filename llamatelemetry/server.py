@@ -43,7 +43,7 @@ class ServerManager:
     # Binary bundles used when bootstrap-installed binaries are missing
     _BINARY_RELEASE_BASE = "https://github.com/llamatelemetry/llamatelemetry/releases/download"
     _BINARY_BUNDLES = [
-        {"version": "0.1.0", "filename": "llamatelemetry-v0.1.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
+        {"version": "1.2.0", "filename": "llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
     ]
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
@@ -57,18 +57,21 @@ class ServerManager:
         self.server_process: Optional[subprocess.Popen] = None
         self._server_path: Optional[Path] = None
 
-    def find_llama_server(self) -> Optional[Path]:
-        """Locate the llama-server executable or download it if missing."""
+    def find_llama_server(self, allow_download: bool = False) -> Optional[Path]:
+        """Locate the llama-server executable (optionally download if missing)."""
 
         def _validate(candidate: Optional[Path]) -> Optional[Path]:
             if not candidate:
                 return None
             path = Path(candidate)
-            if path.exists() and path.is_file():
-                os.chmod(path, 0o755)
-                self._setup_library_path(path)
-                self._server_path = path
-                return path
+            try:
+                if path.exists() and path.is_file():
+                    os.chmod(path, 0o755)
+                    self._setup_library_path(path)
+                    self._server_path = path
+                    return path
+            except (PermissionError, OSError):
+                pass
             return None
 
         if self._server_path and self._server_path.exists():
@@ -132,9 +135,10 @@ class ServerManager:
                 return self._server_path
 
         # 7) Download fresh bundle as last resort
-        downloaded = self._download_llama_server()
-        if downloaded:
-            return _validate(Path(downloaded))
+        if allow_download:
+            downloaded = self._download_llama_server()
+            if downloaded:
+                return _validate(Path(downloaded))
 
         return None
     def _setup_library_path(self, server_path: Path):
@@ -343,6 +347,9 @@ class ServerManager:
             FileNotFoundError: If llama-server executable not found
             RuntimeError: If server fails to start or GPU is incompatible
         """
+        if gpu_layers <= 0:
+            raise ValueError("CPU-only mode is not supported. Set gpu_layers > 0.")
+
         # Check GPU compatibility (only if using GPU layers)
         if gpu_layers > 0 and not skip_gpu_check:
             from .utils import check_gpu_compatibility
@@ -365,9 +372,8 @@ class ServerManager:
                         f"llamatelemetry requires NVIDIA GPU with compute capability 5.0 or higher.\n"
                         f"Supported GPUs: Maxwell, Pascal, Volta, Turing, Ampere, Ada Lovelace.\n\n"
                         f"Options:\n"
-                        f"1. Use CPU-only mode: engine.load_model(model_path, gpu_layers=0)\n"
-                        f"2. Upgrade to a newer GPU\n"
-                        f"3. Use skip_gpu_check=True to override (may cause runtime errors)"
+                        f"1. Upgrade to a newer GPU\n"
+                        f"2. Use skip_gpu_check=True to override (may cause runtime errors)"
                     )
                 else:
                     error_msg += "\nTo skip this check, use skip_gpu_check=True"
@@ -382,13 +388,19 @@ class ServerManager:
                 print(f"✓ llama-server already running at {self.server_url}")
             return True
 
+        # Verify model exists before attempting any download
+        model_path_obj = Path(model_path)
+        if not model_path_obj.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+
         # Find llama-server executable
         if self._server_path is None:
-            self._server_path = self.find_llama_server()
+            self._server_path = self.find_llama_server(allow_download=True)
 
         if self._server_path is None:
-            # Auto-download llama-server binary
-            self._server_path = self._download_llama_server()
+            raise FileNotFoundError(
+                "llama-server not found. Set LLAMA_SERVER_PATH or install binaries."
+            )
 
         # Verify the binary exists and is executable
         if not os.path.exists(self._server_path):
@@ -399,11 +411,6 @@ class ServerManager:
 
         # Make sure it's executable
         os.chmod(self._server_path, 0o755)
-
-        # Verify model exists
-        model_path_obj = Path(model_path)
-        if not model_path_obj.exists():
-            raise FileNotFoundError(f"Model file not found: {model_path}")
 
         # Build command
         cmd = [

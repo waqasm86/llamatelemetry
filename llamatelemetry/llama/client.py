@@ -5,6 +5,7 @@ Re-exports the full LlamaCppClient from extras/api and adds OTel instrumentation
 """
 
 from typing import Any
+import time
 
 # Re-export all dataclasses and the client from the original api module
 from ..api.client import (
@@ -32,12 +33,12 @@ from ..api.client import (
 )
 
 
-def wrap_openai_client(client: Any) -> Any:
+def wrap_openai_client(client: Any, strict_operation_names: bool = True) -> Any:
     """
     Instrument an OpenAI-compatible client to emit OTel spans.
 
     Monkey-patches ``client.chat.completions.create`` so every call
-    produces an ``llm.request`` root span with child spans for prefill/decode.
+    produces a GenAI root span with child spans for prefill/decode.
 
     Args:
         client: An OpenAI-compatible client (e.g. ``LlamaCppClient`` or
@@ -47,7 +48,8 @@ def wrap_openai_client(client: Any) -> Any:
         The same client, now instrumented.
     """
     from ..otel.provider import get_tracer
-    from ..semconv import keys
+    from ..otel.gen_ai_metrics import get_gen_ai_metrics
+    from ..otel.gen_ai_utils import build_gen_ai_span_attrs, build_span_name, parse_server_address
 
     tracer = get_tracer("llamatelemetry.llama")
 
@@ -67,17 +69,38 @@ def wrap_openai_client(client: Any) -> Any:
 
         model = kwargs.get("model", "")
         stream = kwargs.get("stream", False)
+        server_address, server_port = parse_server_address(getattr(client, "base_url", None))
+        start_time = time.perf_counter()
 
-        with tracer.start_as_current_span("llm.request") as span:
-            # Legacy llm.* attributes
-            span.set_attribute(keys.LLM_SYSTEM, "llamatelemetry")
-            span.set_attribute(keys.LLM_MODEL, str(model))
-            span.set_attribute(keys.LLM_STREAM, stream)
+        try:
+            from opentelemetry.trace import SpanKind
+            span_kind = SpanKind.CLIENT
+        except Exception:
+            span_kind = None
+
+        operation = gen_ai_keys.normalize_operation(
+            gen_ai_keys.OP_CHAT,
+            strict=strict_operation_names,
+        )
+        span_name = build_span_name(operation, model)
+        span_attrs = build_gen_ai_span_attrs(
+            operation=operation,
+            provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+            model=str(model) if model else None,
+            server_address=server_address,
+            server_port=server_port,
+        )
+
+        with tracer.start_as_current_span(
+            span_name,
+            kind=span_kind,
+            attributes=span_attrs if span_kind is not None else None,
+        ) as span:
 
             # gen_ai.* request attributes
             gen_ai_req = build_gen_ai_attrs_from_request(
                 model=str(model),
-                operation=gen_ai_keys.OP_CHAT,
+                operation=operation,
                 provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
                 temperature=kwargs.get("temperature"),
                 top_p=kwargs.get("top_p"),
@@ -90,24 +113,16 @@ def wrap_openai_client(client: Any) -> Any:
             try:
                 result = original_create(*args, **kwargs)
 
-                # Annotate response - legacy llm.*
+                # Annotate response
                 input_tokens = 0
                 output_tokens = 0
                 if hasattr(result, "usage") and result.usage is not None:
                     input_tokens = getattr(result.usage, "prompt_tokens", 0)
                     output_tokens = getattr(result.usage, "completion_tokens", 0)
-                    span.set_attribute(keys.LLM_INPUT_TOKENS, input_tokens)
-                    span.set_attribute(keys.LLM_OUTPUT_TOKENS, output_tokens)
-                    span.set_attribute(
-                        keys.LLM_TOKENS_TOTAL,
-                        getattr(result.usage, "total_tokens", 0),
-                    )
 
                 finish_reason = None
                 if hasattr(result, "choices") and result.choices:
                     finish_reason = getattr(result.choices[0], "finish_reason", None)
-                    if finish_reason:
-                        span.set_attribute(keys.LLM_FINISH_REASON, finish_reason)
 
                 # gen_ai.* response attributes
                 gen_ai_resp = build_gen_ai_attrs_from_response(
@@ -120,9 +135,28 @@ def wrap_openai_client(client: Any) -> Any:
                 for k, v in gen_ai_resp.items():
                     span.set_attribute(k, v)
 
+                # Metrics
+                metrics = get_gen_ai_metrics()
+                base_attrs = build_gen_ai_span_attrs(
+                    operation=operation,
+                    provider=gen_ai_keys.PROVIDER_LLAMA_CPP,
+                    model=str(model) if model else None,
+                    response_model=getattr(result, "model", None),
+                    server_address=server_address,
+                    server_port=server_port,
+                )
+                metrics.record_client_operation_duration(
+                    time.perf_counter() - start_time,
+                    base_attrs,
+                )
+                if input_tokens:
+                    metrics.record_client_token_usage(input_tokens, gen_ai_keys.TOKEN_INPUT, base_attrs)
+                if output_tokens:
+                    metrics.record_client_token_usage(output_tokens, gen_ai_keys.TOKEN_OUTPUT, base_attrs)
+
                 return result
             except Exception as exc:
-                span.set_attribute(keys.LLM_ERROR, str(exc))
+                span.set_attribute("error.type", exc.__class__.__name__)
                 span.record_exception(exc)
                 raise
 

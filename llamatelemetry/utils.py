@@ -72,8 +72,8 @@ def detect_cuda() -> Dict[str, Any]:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
 
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
+    except (FileNotFoundError, subprocess.TimeoutExpired, PermissionError) as exc:
+        info["error"] = str(exc)
 
     return info
 
@@ -118,6 +118,10 @@ def check_gpu_compatibility(min_compute_cap: float = 5.0) -> Dict[str, Any]:
 
     cuda_info = detect_cuda()
 
+    if cuda_info.get("error"):
+        result['reason'] = f"CUDA detection failed: {cuda_info['error']}"
+        return result
+
     if not cuda_info['available']:
         result['reason'] = 'No CUDA GPU detected. Please ensure NVIDIA drivers are installed.'
         return result
@@ -150,6 +154,19 @@ def check_gpu_compatibility(min_compute_cap: float = 5.0) -> Dict[str, Any]:
         return result
 
     return result
+
+
+def require_cuda(min_compute_cap: float = 5.0) -> Dict[str, Any]:
+    """
+    Enforce CUDA availability and minimum compute capability.
+
+    Raises:
+        RuntimeError if CUDA or a compatible NVIDIA GPU is not detected.
+    """
+    compat = check_gpu_compatibility(min_compute_cap=min_compute_cap)
+    if not compat.get("compatible"):
+        raise RuntimeError(compat.get("reason") or "CUDA GPU required.")
+    return detect_cuda()
 
 
 def get_llama_cpp_cuda_path() -> Optional[Path]:
@@ -414,8 +431,7 @@ def get_recommended_gpu_layers(model_size_gb: float, vram_gb: float) -> int:
         return 20  # Some layers
     elif ratio >= 0.2:
         return 10  # Few layers
-    else:
-        return 0   # CPU only
+    raise RuntimeError("CUDA GPU required: insufficient VRAM for GPU-only inference.")
 
 
 def validate_model_path(model_path: str) -> bool:
@@ -473,15 +489,7 @@ def auto_configure_for_model(model_path: Path, vram_gb: Optional[float] = None) 
                 # Fallback: assume MiB
                 vram_gb = float(mem_str) / 1024
         else:
-            # No CUDA detected, use CPU-only defaults
-            print("⚠ CUDA not detected, using CPU-only configuration")
-            return {
-                'gpu_layers': 0,
-                'ctx_size': 512,
-                'batch_size': 256,
-                'ubatch_size': 64,
-                'n_parallel': 1
-            }
+            raise RuntimeError("CUDA GPU required: no NVIDIA GPUs detected.")
 
     # Get model information
     try:
@@ -498,6 +506,8 @@ def auto_configure_for_model(model_path: Path, vram_gb: Optional[float] = None) 
         print(f"  Batch Size: {settings['batch_size']}")
         print(f"  Micro-batch Size: {settings['ubatch_size']}")
 
+        if settings.get("gpu_layers", 0) <= 0:
+            raise RuntimeError("CUDA GPU required: model configuration would fall back to CPU.")
         return settings
 
     except Exception as e:
@@ -537,11 +547,4 @@ def auto_configure_for_model(model_path: Path, vram_gb: Optional[float] = None) 
                 'ubatch_size': 128,
                 'n_parallel': 1
             }
-        else:
-            return {
-                'gpu_layers': 0,
-                'ctx_size': 512,
-                'batch_size': 256,
-                'ubatch_size': 64,
-                'n_parallel': 1
-            }
+        raise RuntimeError("CUDA GPU required: insufficient VRAM for GPU-only inference.")

@@ -1,5 +1,5 @@
 """
-Test suite for llamatelemetry v2.0 Tensor API
+Test suite for llamatelemetry v1.2.0 Tensor API
 """
 
 import pytest

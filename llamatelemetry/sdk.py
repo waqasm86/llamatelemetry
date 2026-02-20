@@ -82,7 +82,7 @@ def instrument_transformers(
     Args:
         model: HuggingFace model (AutoModelForCausalLM, etc.).
         tokenizer: Associated tokenizer.
-        device: Device string ("cuda", "cuda:0", "cpu").
+        device: Device string ("cuda", "cuda:0").
         autocast_dtype: Autocast dtype ("fp16", "bf16").
         gpu_device: GPU device index for enrichment.
         config: Instrumentation configuration.

@@ -69,11 +69,10 @@ def _span_to_dict(span: Any) -> dict:
         "start_time": start_time / 1e9 if start_time else 0,
         "end_time": end_time / 1e9 if end_time else 0,
         "duration_ms": duration_ms,
-        "llm.model": attrs.get("llm.model", ""),
-        "llm.input.tokens": attrs.get("llm.input.tokens", 0),
-        "llm.output.tokens": attrs.get("llm.output.tokens", 0),
-        "llm.latency_ms": attrs.get("llm.latency_ms", duration_ms),
-        "llm.tokens_per_sec": attrs.get("llm.tokens_per_sec", 0.0),
+        "gen_ai.request.model": attrs.get("gen_ai.request.model", ""),
+        "gen_ai.usage.input_tokens": attrs.get("gen_ai.usage.input_tokens", 0),
+        "gen_ai.usage.output_tokens": attrs.get("gen_ai.usage.output_tokens", 0),
+        "llamatelemetry.latency_ms": attrs.get("llamatelemetry.latency_ms", duration_ms),
         "gpu.id": attrs.get("gpu.id", "0"),
         "nccl.split_mode": attrs.get("nccl.split_mode", "none"),
         "status": str(span.status) if hasattr(span, "status") else "OK",
@@ -87,6 +86,25 @@ def record_spans(spans: List[Any]) -> None:
         _span_buffer.append(_span_to_dict(span))
     if len(_span_buffer) > _MAX_BUFFER:
         _span_buffer = _span_buffer[-_MAX_BUFFER:]
+
+
+class TraceGraphSpanProcessor:
+    """SpanProcessor that records spans for trace graph export."""
+
+    def on_start(self, span: Any, parent_context: Any = None) -> None:
+        pass
+
+    def on_end(self, span: Any) -> None:
+        try:
+            record_spans([span])
+        except Exception:
+            pass
+
+    def shutdown(self) -> None:
+        pass
+
+    def force_flush(self, timeout_millis: int = 0) -> bool:
+        return True
 
 
 def _build_dataframes(
@@ -115,11 +133,10 @@ def _build_dataframes(
             "status": s["status"],
         }
         if include_llm_phases:
-            node["llm_model"] = s["llm.model"]
-            node["llm_latency_ms"] = s["llm.latency_ms"]
-            node["llm_tokens_per_sec"] = s["llm.tokens_per_sec"]
-            node["llm_input_tokens"] = s["llm.input.tokens"]
-            node["llm_output_tokens"] = s["llm.output.tokens"]
+            node["gen_ai_request_model"] = s["gen_ai.request.model"]
+            node["gen_ai_latency_ms"] = s["llamatelemetry.latency_ms"]
+            node["gen_ai_input_tokens"] = s["gen_ai.usage.input_tokens"]
+            node["gen_ai_output_tokens"] = s["gen_ai.usage.output_tokens"]
         if include_gpu:
             node["gpu_id"] = s["gpu.id"]
             node["nccl_split_mode"] = s["nccl.split_mode"]
@@ -131,8 +148,12 @@ def _build_dataframes(
                 {
                     "src": s["parent_span_id"],
                     "dst": s["span_id"],
-                    "weight": s["llm.tokens_per_sec"],
-                    "latency_ms": s["llm.latency_ms"],
+                    "weight": (
+                        (s["gen_ai.usage.output_tokens"] / (s["llamatelemetry.latency_ms"] / 1000.0))
+                        if s["llamatelemetry.latency_ms"] > 0
+                        else 0.0
+                    ),
+                    "latency_ms": s["llamatelemetry.latency_ms"],
                 }
             )
 
