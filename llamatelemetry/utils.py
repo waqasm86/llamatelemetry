@@ -72,8 +72,8 @@ def detect_cuda() -> Dict[str, Any]:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
 
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
+    except (FileNotFoundError, subprocess.TimeoutExpired, PermissionError) as exc:
+        info["error"] = str(exc)
 
     return info
 
@@ -117,6 +117,10 @@ def check_gpu_compatibility(min_compute_cap: float = 5.0) -> Dict[str, Any]:
         result['platform'] = 'kaggle'
 
     cuda_info = detect_cuda()
+
+    if cuda_info.get("error"):
+        result['reason'] = f"CUDA detection failed: {cuda_info['error']}"
+        return result
 
     if not cuda_info['available']:
         result['reason'] = 'No CUDA GPU detected. Please ensure NVIDIA drivers are installed.'

@@ -96,7 +96,7 @@ def detect_gpu_compute_capability() -> Optional[Tuple[str, str]]:
             line = result.stdout.strip().split("\n")[0]
             gpu_name, compute_cap = line.split(",")
             return gpu_name.strip(), compute_cap.strip()
-    except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
+    except (FileNotFoundError, subprocess.TimeoutExpired, ValueError, PermissionError):
         pass
 
     return None
