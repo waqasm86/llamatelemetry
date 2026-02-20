@@ -27,6 +27,8 @@ GPU-native telemetry for quantized LLM inference pipelines — dual Tesla T4 on 
 
 ## Quick Start
 
+See `docs/GOLDEN_PATH.md` for the full end-to-end setup.
+
 ```python
 import llamatelemetry
 

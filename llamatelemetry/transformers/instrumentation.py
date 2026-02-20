@@ -176,19 +176,11 @@ class InstrumentedBackend:
                 for k, v in content_attrs.items():
                     root_span.set_attribute(k, v)
 
-            # Prefill span
-            with self._tracer.start_as_current_span("llamatelemetry.phase.prefill") as pfill:
-                pass
-
             try:
                 # Execute the actual backend call
                 resp = self._backend.invoke(req)
 
                 elapsed_ms = (time.perf_counter() - start) * 1000.0
-
-                # Decode span
-                with self._tracer.start_as_current_span("llamatelemetry.phase.decode") as dec:
-                    pass
 
                 # Set gen_ai.* response attributes
                 finish_reasons = [resp.finish_reason] if resp.finish_reason else None
@@ -215,6 +207,7 @@ class InstrumentedBackend:
                             output_messages=output_messages,
                             record_content=True,
                             record_content_max_chars=self._config.record_content_max_chars,
+                            structured=True,
                         )
                         event_attrs.update(content_attrs)
                     if self._config.record_tools:
@@ -269,6 +262,26 @@ class InstrumentedBackend:
                             metrics.record_server_time_per_output_token(
                                 (predicted_ms / 1000.0) / denom, base_attrs
                             )
+
+                # Phase spans with timing attributes (if available)
+                prompt_ms = None
+                predicted_ms = None
+                if resp.raw is not None:
+                    timings = getattr(resp.raw, "timings", None)
+                    if timings:
+                        prompt_ms = getattr(timings, "prompt_ms", None)
+                        predicted_ms = getattr(timings, "predicted_ms", None)
+
+                with self._tracer.start_as_current_span("llamatelemetry.phase.prefill") as pfill:
+                    if prompt_ms is not None:
+                        pfill.set_attribute("prefill_ms", float(prompt_ms))
+                        pfill.set_attribute("ttft_ms", float(prompt_ms))
+                with self._tracer.start_as_current_span("llamatelemetry.phase.decode") as dec:
+                    if predicted_ms is not None:
+                        dec.set_attribute("decode_ms", float(predicted_ms))
+                        if resp.output_tokens:
+                            denom = max(resp.output_tokens - 1, 1)
+                            dec.set_attribute("tpot_ms", float(predicted_ms) / denom)
 
                 # Attach GPU deltas
                 if self._gpu and self._config.enable_gpu_enrichment and gpu_before:

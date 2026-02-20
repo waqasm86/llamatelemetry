@@ -82,6 +82,7 @@ nav:
   - Getting Started:
       - Installation: INSTALLATION.md
       - Quick Start: QUICK_START_GUIDE.md
+      - Golden Path: GOLDEN_PATH.md
       - Kaggle Guide: KAGGLE_GUIDE.md
   - Core Documentation:
       - Architecture: ARCHITECTURE.md

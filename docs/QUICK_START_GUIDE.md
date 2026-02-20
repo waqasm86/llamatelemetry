@@ -1,5 +1,7 @@
 # Quick Start Guide (v1.2.0)
 
+For a full end-to-end path, see `GOLDEN_PATH.md`.
+
 Get llamatelemetry running on Kaggle dual T4 in minutes.
 
 ## Requirements

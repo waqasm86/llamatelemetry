@@ -165,6 +165,7 @@ def build_content_attrs(
     system_instructions: Optional[List[Dict[str, Any]]] = None,
     record_content: bool = False,
     record_content_max_chars: int = 2000,
+    structured: bool = False,
 ) -> Dict[str, Any]:
     """
     Build gen_ai.* content attributes (PII-sensitive, OFF by default).
@@ -182,15 +183,29 @@ def build_content_attrs(
     attrs: Dict[str, Any] = {}
 
     if record_content:
-        if input_messages:
-            content = json.dumps(input_messages)[:record_content_max_chars]
-            attrs[gen_ai.GEN_AI_INPUT_MESSAGES] = content
-        if output_messages:
-            content = json.dumps(output_messages)[:record_content_max_chars]
-            attrs[gen_ai.GEN_AI_OUTPUT_MESSAGES] = content
-        if system_instructions:
-            content = json.dumps(system_instructions)[:record_content_max_chars]
-            attrs[gen_ai.GEN_AI_SYSTEM_INSTRUCTIONS] = content
+        if structured:
+            if input_messages:
+                attrs[gen_ai.GEN_AI_INPUT_MESSAGES] = _truncate_messages(
+                    input_messages, record_content_max_chars
+                )
+            if output_messages:
+                attrs[gen_ai.GEN_AI_OUTPUT_MESSAGES] = _truncate_messages(
+                    output_messages, record_content_max_chars
+                )
+            if system_instructions:
+                attrs[gen_ai.GEN_AI_SYSTEM_INSTRUCTIONS] = _truncate_messages(
+                    system_instructions, record_content_max_chars
+                )
+        else:
+            if input_messages:
+                content = json.dumps(input_messages)[:record_content_max_chars]
+                attrs[gen_ai.GEN_AI_INPUT_MESSAGES] = content
+            if output_messages:
+                content = json.dumps(output_messages)[:record_content_max_chars]
+                attrs[gen_ai.GEN_AI_OUTPUT_MESSAGES] = content
+            if system_instructions:
+                content = json.dumps(system_instructions)[:record_content_max_chars]
+                attrs[gen_ai.GEN_AI_SYSTEM_INSTRUCTIONS] = content
     return attrs
 
 
@@ -199,3 +214,20 @@ def _set_if_not_none(attrs: Dict[str, Any], key: str, value: Any) -> None:
     if value is not None:
         attrs[key] = value
 
+
+def _truncate_messages(messages: List[Dict[str, Any]], max_chars: int) -> List[Dict[str, Any]]:
+    """Truncate message content fields in-place to honor max_chars."""
+    trimmed: List[Dict[str, Any]] = []
+    for msg in messages:
+        trimmed.append(_truncate_value(msg, max_chars))
+    return trimmed
+
+
+def _truncate_value(value: Any, max_chars: int) -> Any:
+    if isinstance(value, dict):
+        return {k: _truncate_value(v, max_chars) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_truncate_value(v, max_chars) for v in value]
+    if isinstance(value, str):
+        return value[:max_chars]
+    return value

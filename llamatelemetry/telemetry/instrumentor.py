@@ -184,6 +184,7 @@ class LlamaCppClientInstrumentor:
                         content_attrs = _build_content_attrs(
                             json_data,
                             record_content_max_chars=config.record_content_max_chars,
+                            structured=False,
                         )
                         for k, v in content_attrs.items():
                             span.set_attribute(k, v)
@@ -207,9 +208,16 @@ class LlamaCppClientInstrumentor:
                             event_attrs.update(gen_ai_req_attrs)
                             event_attrs.update(gen_ai_resp_attrs)
                             if config.record_content:
+                                input_attrs = _build_content_attrs(
+                                    json_data,
+                                    record_content_max_chars=config.record_content_max_chars,
+                                    structured=True,
+                                )
+                                event_attrs.update(input_attrs)
                                 output_attrs = _build_output_content_attrs(
                                     result,
                                     record_content_max_chars=config.record_content_max_chars,
+                                    structured=True,
                                 )
                                 event_attrs.update(output_attrs)
                             if config.record_tools:
@@ -364,7 +372,11 @@ def _build_tool_attrs(json_data: Dict[str, Any]) -> Dict[str, Any]:
     )
 
 
-def _build_content_attrs(json_data: Dict[str, Any], record_content_max_chars: int) -> Dict[str, Any]:
+def _build_content_attrs(
+    json_data: Dict[str, Any],
+    record_content_max_chars: int,
+    structured: bool,
+) -> Dict[str, Any]:
     from ..semconv.gen_ai_builder import build_content_attrs
 
     input_messages = json_data.get("messages")
@@ -375,10 +387,15 @@ def _build_content_attrs(json_data: Dict[str, Any], record_content_max_chars: in
         input_messages=input_messages,
         record_content=True,
         record_content_max_chars=record_content_max_chars,
+        structured=structured,
     )
 
 
-def _build_output_content_attrs(result: Dict[str, Any], record_content_max_chars: int) -> Dict[str, Any]:
+def _build_output_content_attrs(
+    result: Dict[str, Any],
+    record_content_max_chars: int,
+    structured: bool,
+) -> Dict[str, Any]:
     from ..semconv.gen_ai_builder import build_content_attrs
 
     output_messages: Optional[List[Dict[str, Any]]] = None
@@ -396,6 +413,7 @@ def _build_output_content_attrs(result: Dict[str, Any], record_content_max_chars
         output_messages=output_messages,
         record_content=True,
         record_content_max_chars=record_content_max_chars,
+        structured=structured,
     )
 
 

@@ -28,6 +28,10 @@ def trace_request(
     stream: bool = False,
     prompt_tokens: int = 0,
     completion_tokens: int = 0,
+    prefill_ms: Optional[float] = None,
+    decode_ms: Optional[float] = None,
+    ttft_ms: Optional[float] = None,
+    tpot_ms: Optional[float] = None,
 ):
     """
     Context manager that creates the GenAI root span with prefill/decode children.
@@ -50,6 +54,10 @@ def trace_request(
     handle = _RequestHandle(
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
+        prefill_ms=prefill_ms,
+        decode_ms=decode_ms,
+        ttft_ms=ttft_ms,
+        tpot_ms=tpot_ms,
     )
     start = time.perf_counter()
 
@@ -88,10 +96,6 @@ def trace_request(
         for k, v in gen_ai_req.items():
             root_span.set_attribute(k, v)
 
-        # Prefill child span
-        with tracer.start_as_current_span("llamatelemetry.phase.prefill") as pfill:
-            pass
-
         try:
             yield handle
         except Exception as exc:
@@ -102,9 +106,17 @@ def trace_request(
             elapsed_ms = (time.perf_counter() - start) * 1000.0
             total_out = handle.completion_tokens
 
-            # Decode child span
+            # Phase spans with timing attributes (if provided)
+            with tracer.start_as_current_span("llamatelemetry.phase.prefill") as pfill:
+                if handle.prefill_ms is not None:
+                    pfill.set_attribute("prefill_ms", float(handle.prefill_ms))
+                if handle.ttft_ms is not None:
+                    pfill.set_attribute("ttft_ms", float(handle.ttft_ms))
             with tracer.start_as_current_span("llamatelemetry.phase.decode") as dec:
-                pass
+                if handle.decode_ms is not None:
+                    dec.set_attribute("decode_ms", float(handle.decode_ms))
+                if handle.tpot_ms is not None:
+                    dec.set_attribute("tpot_ms", float(handle.tpot_ms))
 
             # gen_ai.* response attributes
             gen_ai_resp = build_gen_ai_attrs_from_response(
@@ -134,12 +146,41 @@ def trace_request(
 class _RequestHandle:
     """Mutable container so callers can set token counts inside the CM."""
 
-    def __init__(self, prompt_tokens: int = 0, completion_tokens: int = 0):
+    def __init__(
+        self,
+        prompt_tokens: int = 0,
+        completion_tokens: int = 0,
+        prefill_ms: Optional[float] = None,
+        decode_ms: Optional[float] = None,
+        ttft_ms: Optional[float] = None,
+        tpot_ms: Optional[float] = None,
+    ):
         self.prompt_tokens = prompt_tokens
         self.completion_tokens = completion_tokens
+        self.prefill_ms = prefill_ms
+        self.decode_ms = decode_ms
+        self.ttft_ms = ttft_ms
+        self.tpot_ms = tpot_ms
 
     def set_completion_tokens(self, n: int) -> None:
         self.completion_tokens = n
 
     def set_prompt_tokens(self, n: int) -> None:
         self.prompt_tokens = n
+
+    def set_timings(
+        self,
+        *,
+        prefill_ms: Optional[float] = None,
+        decode_ms: Optional[float] = None,
+        ttft_ms: Optional[float] = None,
+        tpot_ms: Optional[float] = None,
+    ) -> None:
+        if prefill_ms is not None:
+            self.prefill_ms = prefill_ms
+        if decode_ms is not None:
+            self.decode_ms = decode_ms
+        if ttft_ms is not None:
+            self.ttft_ms = ttft_ms
+        if tpot_ms is not None:
+            self.tpot_ms = tpot_ms
