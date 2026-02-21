@@ -22,7 +22,7 @@ Pre-compiled CUDA binaries for **llamatelemetry** - CUDA-first OpenTelemetry Pyt
 
 | Version | File | Size | Target Platform | SHA256 |
 |---------|------|------|-----------------|--------|
-| v1.2.0 | llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz | 1.4 GB | Kaggle 2× Tesla T4, CUDA 12.5 | `31889a86116818be5a42a7bd4a20fde14be25f27348cabf2644259625374b355` |
+| v1.2.0 | llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz | 1.4 GB | Kaggle 2× Tesla T4, CUDA 12.5 | `4af586c4d97c093c1d6e0db5a46b3d472cd1edf4b0d172511be1a4537a288d8c` |
 
 ## 🚀 Auto-Download (Recommended)
 
@@ -39,7 +39,7 @@ On first `import llamatelemetry`, the package will:
 2. Check for cached binaries in `~/.cache/llamatelemetry/`
 3. Download from HuggingFace CDN (this repo - fast, ~2-5 MB/s)
 4. Fallback to GitHub Releases if needed
-5. Verify SHA256 checksum: `31889a86116818be5a42a7bd4a20fde14be25f27348cabf2644259625374b355`
+5. Verify SHA256 checksum: `4af586c4d97c093c1d6e0db5a46b3d472cd1edf4b0d172511be1a4537a288d8c`
 6. Extract 13 binaries + libraries to package directory
 7. Configure environment variables
 
