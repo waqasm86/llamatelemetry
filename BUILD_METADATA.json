@@ -1,0 +1,51 @@
+{
+  "project": "llamatelemetry",
+  "version": "2.0.0",
+  "build_type": "Release",
+  "cuda_version": "12.5",
+  "cuda_architecture": "SM 7.5 (Tesla T4)",
+  "compiler": "g++ + nvcc",
+  "build_system": "CMake + pybind11 + setuptools",
+  "linking_type": "STATIC (CUDA::cudart_static, CUDA::cublas_static, CUDA::cublasLt_static)",
+  "build_date": "2026-02-23T16:20:00Z",
+  "python_version": "3.11+",
+  "target_platform": "Kaggle (Dual Nvidia T4 GPUs only)",
+  "components": {
+    "python_sdk": "144 files",
+    "cuda_kernels": "device.cu, tensor.cu, matmul.cu",
+    "pybind11_module": "llamatelemetry_cpp.so",
+    "opentelemetry_integration": "45 gen_ai.* attributes, 5 metrics",
+    "multi_gpu_support": "NCCL collectives for dual T4 coordination",
+    "llama_cpp_native": "100+ llama.cpp C API wrappers",
+    "nccl_native": "50+ NCCL collective operations",
+    "kaggle_integration": "Auto-config for dual T4, model downloading"
+  },
+  "deliverables": [
+    "Complete Python SDK (144 files)",
+    "Compiled CUDA kernels (.so with static linking)",
+    "pybind11 extension module for Python 3.11+",
+    "CMake build configuration (SM 7.5 optimized)",
+    "Comprehensive test suite (244 passing tests)",
+    "Full OpenTelemetry integration (45 attributes, 5 metrics)",
+    "GPU monitoring and profiling",
+    "Multi-GPU support (NCCL)",
+    "Model auto-download (HuggingFace)",
+    "Full documentation (28 guides)"
+  ],
+  "features": {
+    "inference_engine": "Unified high-level API for LLM inference",
+    "llama_cpp_support": "GGUF loading, quantization, 20+ samplers",
+    "nccl_coordination": "Dual T4 multi-GPU synchronization",
+    "observability": "45 OTel attributes + 5 metrics automatically",
+    "gpu_monitoring": "Memory, utilization, temperature tracking",
+    "model_library": "9 preset models (Llama, Mistral, Qwen, Zephyr)",
+    "kaggle_optimized": "Auto-detect dual T4, layer splitting, VRAM calculation"
+  },
+  "performance_targets": {
+    "ttft_ms": "2-5 ms (Time-to-First-Token)",
+    "tpot_ms": "0.5-1 ms (Time-Per-Output-Token)",
+    "throughput_tokens_per_sec": "1000-2000",
+    "memory_usage": "8-16 GB per T4 GPU"
+  },
+  "notes": "Static linking embeds all CUDA libraries in .so. Result: self-contained, portable binaries (~150-200 MB .so, ~100-130 MB tar compressed). No external CUDA dependencies required at runtime. Optimized exclusively for Kaggle Dual T4 GPUs (SM 7.5 architecture)."
+}

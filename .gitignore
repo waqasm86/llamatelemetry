@@ -1,5 +1,5 @@
 # ============================================================================
-# llamatelemetry v1.2.0 .gitignore
+# llamatelemetry v2.0.0 .gitignore
 # ============================================================================
 # Keep repo lightweight - no binaries, large files, or build artifacts
 # ============================================================================
@@ -104,6 +104,8 @@ notebooks-local/
 
 # Local assets - reference files not for GitHub
 llamatelemetry-assets/
+# Local Kaggle notebooks (not for GitHub)
+kaggle-notebooks-cuda-cmake/
 
 # Environments
 .env
@@ -270,3 +272,4 @@ token.txt
 *_TOKEN*
 *_SECRET*
 HF_TOKEN*
+archive/
