@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.0] - 2026-02-20
+## [2.0.0] - 2026-02-20
 
 ### Added
 - GenAI span helpers and metrics instruments (`otel/gen_ai_utils.py`, `otel/gen_ai_metrics.py`).
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Root span naming + kind follow the GenAI spec: `{gen_ai.operation.name} {gen_ai.request.model}`, `SpanKind.CLIENT`.
 - Early span attributes for sampling: `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request.model`.
 - LlamaCpp and Transformers instrumentation emit GenAI metrics by default.
-- Docs, notebooks, and build scripts updated for v1.2.0.
+- Docs, notebooks, and build scripts updated for v2.0.0.
 
 ### Removed
 - Legacy LLM attributes and dual-emit code paths.

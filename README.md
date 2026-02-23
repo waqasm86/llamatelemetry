@@ -338,7 +338,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 **For v2.0.0 specifically:**
 - Target: Kaggle Dual T4 GPUs only
-- Keep v1.2.0 branch for legacy support (v1.2.0 branch on GitHub)
+- Keep v2.0.0 branch for legacy support (v2.0.0 branch on GitHub)
 - All new features must benefit dual GPU inference
 
 ---

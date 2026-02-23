@@ -1,6 +1,6 @@
-# Installation (v1.2.0)
+# Installation (v2.0.0)
 
-llamatelemetry v1.2.0 targets Kaggle dual Tesla T4 notebooks (CUDA 12, SM 7.5).
+llamatelemetry v2.0.0 targets Kaggle dual Tesla T4 notebooks (CUDA 12, SM 7.5).
 
 ## Requirements
 
@@ -15,7 +15,7 @@ llamatelemetry v1.2.0 targets Kaggle dual Tesla T4 notebooks (CUDA 12, SM 7.5).
 
 ```python
 # Latest stable
-!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v1.2.0
+!pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git@v2.0.0
 
 # Or from default branch
 !pip install -q git+https://github.com/llamatelemetry/llamatelemetry.git
@@ -34,7 +34,7 @@ pip install "llamatelemetry[all]"          # all optional extras
 
 ```python
 import llamatelemetry
-print(llamatelemetry.__version__)          # 1.2.0
+print(llamatelemetry.__version__)          # 2.0.0
 ```
 
 ## CUDA Binary Auto-Download

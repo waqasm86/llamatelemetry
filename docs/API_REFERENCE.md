@@ -1,4 +1,4 @@
-# API Reference (v1.2.0)
+# API Reference (v2.0.0)
 
 Full reference for all public llamatelemetry modules and classes.
 
@@ -14,7 +14,7 @@ llamatelemetry.init(
     otlp_endpoint: str = None,
     enable_gpu: bool = False,
     enable_nccl: bool = False,
-    service_version: str = "1.2.0",
+    service_version: str = "2.0.0",
 )
 
 llamatelemetry.shutdown()

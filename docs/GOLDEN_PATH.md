@@ -1,4 +1,4 @@
-# Golden Path (v1.2.0)
+# Golden Path (v2.0.0)
 
 This page shows the simplest, end-to-end path to get value from llamatelemetry:
 init → create_engine → generate/chat/embeddings → dashboards.

@@ -1,4 +1,4 @@
-# Quick Reference (v1.2.0)
+# Quick Reference (v2.0.0)
 
 ## Module Cheat-Sheet
 

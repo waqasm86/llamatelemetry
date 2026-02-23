@@ -1,4 +1,4 @@
-# Architecture Overview (v1.2.0)
+# Architecture Overview (v2.0.0)
 
 llamatelemetry is a CUDA-first OpenTelemetry Python SDK for LLM inference observability.
 
@@ -115,7 +115,7 @@ span attributes:
 
 On first import in Kaggle:
 1. `llamatelemetry.kaggle.bootstrap` checks for cached binary.
-2. If absent, downloads `llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz` (~1.4 GB) from GitHub Releases.
+2. If absent, downloads `llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz` (~1.4 GB) from GitHub Releases.
 3. SHA256 is verified before extraction.
 4. `LD_LIBRARY_PATH` is set to include extracted llama.cpp and NCCL libraries.
 5. Subsequent imports skip download (cached in `/kaggle/working/.llamatelemetry/`).

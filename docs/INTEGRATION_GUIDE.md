@@ -1,7 +1,7 @@
-# Integration Guide (v1.2.0)
+# Integration Guide (v2.0.0)
 
 This guide explains how to integrate llamatelemetry into your LLM inference workflow using the
-v1.2.0 `gen_ai.*` semantic conventions, `InferenceEngine` protocol, and GenAI metrics.
+v2.0.0 `gen_ai.*` semantic conventions, `InferenceEngine` protocol, and GenAI metrics.
 
 ---
 
@@ -26,7 +26,7 @@ v1.2.0 `gen_ai.*` semantic conventions, `InferenceEngine` protocol, and GenAI me
 
 ## Overview
 
-llamatelemetry v1.2.0 provides CUDA-first LLM observability built on OpenTelemetry:
+llamatelemetry v2.0.0 provides CUDA-first LLM observability built on OpenTelemetry:
 
 ```
 Your Application
@@ -49,7 +49,7 @@ All spans use `gen_ai.*` attributes per OpenTelemetry GenAI semantic conventions
 ## Installation
 
 ```bash
-pip install llamatelemetry==1.2.0
+pip install llamatelemetry==2.0.0
 ```
 
 For GPU features, CUDA 12.x is required:
@@ -72,7 +72,7 @@ llamatelemetry.init(
     otlp_endpoint="http://localhost:4317",
     enable_metrics=True,
     gpu_enrichment=True,         # Attach GPU metrics to every span
-    enable_trace_graphs=True,    # Build Graphistry pipeline graph (v1.2.0)
+    enable_trace_graphs=True,    # Build Graphistry pipeline graph (v2.0.0)
 )
 ```
 
@@ -95,7 +95,7 @@ llamatelemetry.init(config=config)
 
 ## InferenceEngine Protocol
 
-v1.2.0 defines the `InferenceEngine` protocol that all backends implement:
+v2.0.0 defines the `InferenceEngine` protocol that all backends implement:
 
 ```python
 from llamatelemetry.inference import InferenceEngine
@@ -156,7 +156,7 @@ server.start()
 # Create instrumented client
 client = LlamaCppClient(
     base_url=server.url,
-    strict_operation_names=True,  # Validate gen_ai.operation.name (v1.2.0)
+    strict_operation_names=True,  # Validate gen_ai.operation.name (v2.0.0)
 )
 
 # Chat completion — automatically emits gen_ai.* spans + metrics
@@ -189,7 +189,7 @@ response = client.chat.completions.create(
 
 ### Inference Phases
 
-llamatelemetry v1.2.0 captures detailed latency phases on every llama.cpp request:
+llamatelemetry v2.0.0 captures detailed latency phases on every llama.cpp request:
 
 | Phase | Attribute | Description |
 |-------|-----------|-------------|
@@ -209,7 +209,7 @@ from llamatelemetry.transformers import TransformersInstrumentor
 
 instrumentor = TransformersInstrumentor(
     record_events=True,       # Emit span events for each generation step
-    emit_metrics=True,        # Record GenAI histogram metrics (v1.2.0)
+    emit_metrics=True,        # Record GenAI histogram metrics (v2.0.0)
     strict_operation_names=True,  # Validate operation names
 )
 instrumentor.instrument()
@@ -299,7 +299,7 @@ with tracer.pipeline("rag-query") as pipeline_span:
 
 ## GenAI Semantic Conventions
 
-v1.2.0 uses `gen_ai.*` attributes exclusively. Legacy `llm.*` attributes are removed.
+v2.0.0 uses `gen_ai.*` attributes exclusively. Legacy `llm.*` attributes are removed.
 
 ### Standard Span Attributes
 
@@ -338,7 +338,7 @@ normalize_operation("unknown")      # → "text_completion" (default)
 
 ## GenAI Metrics
 
-v1.2.0 records five histogram metrics per request via `otel/gen_ai_metrics.py`:
+v2.0.0 records five histogram metrics per request via `otel/gen_ai_metrics.py`:
 
 ```python
 from llamatelemetry.otel.gen_ai_metrics import GenAIMetrics
@@ -435,7 +435,7 @@ viz.plot_pipeline_graph(
 
 ## Full Example
 
-End-to-end llamatelemetry v1.2.0 integration:
+End-to-end llamatelemetry v2.0.0 integration:
 
 ```python
 import llamatelemetry

@@ -14,7 +14,7 @@ tags:
 library_name: llamatelemetry
 ---
 
-# llamatelemetry Binaries v1.2.0
+# llamatelemetry Binaries v2.0.0
 
 Pre-compiled CUDA binaries for **llamatelemetry** - CUDA-first OpenTelemetry Python SDK for LLM inference observability.
 
@@ -22,7 +22,7 @@ Pre-compiled CUDA binaries for **llamatelemetry** - CUDA-first OpenTelemetry Pyt
 
 | Version | File | Size | Target Platform | SHA256 |
 |---------|------|------|-----------------|--------|
-| v1.2.0 | llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz | 1.4 GB | Kaggle 2× Tesla T4, CUDA 12.5 | `4af586c4d97c093c1d6e0db5a46b3d472cd1edf4b0d172511be1a4537a288d8c` |
+| v2.0.0 | llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz | 1.4 GB | Kaggle 2× Tesla T4, CUDA 12.5 | `4af586c4d97c093c1d6e0db5a46b3d472cd1edf4b0d172511be1a4537a288d8c` |
 
 ## 🚀 Auto-Download (Recommended)
 
@@ -31,7 +31,7 @@ These binaries are automatically downloaded when you install llamatelemetry:
 ```bash
 # Install on Kaggle with GPU T4 × 2
 pip install --no-cache-dir --force-reinstall \
-    git+https://github.com/llamatelemetry/llamatelemetry.git@v1.2.0
+    git+https://github.com/llamatelemetry/llamatelemetry.git@v2.0.0
 ```
 
 On first `import llamatelemetry`, the package will:
@@ -52,7 +52,7 @@ from huggingface_hub import hf_hub_download
 
 binary_path = hf_hub_download(
     repo_id="waqasm86/llamatelemetry-binaries",
-    filename="v1.2.0/llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz",
+    filename="v2.0.0/llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz",
     cache_dir="/kaggle/working/cache"
 )
 
@@ -62,24 +62,24 @@ print(f"Downloaded to: {binary_path}")
 ### Direct Download URL
 
 ```bash
-wget https://huggingface.co/waqasm86/llamatelemetry-binaries/resolve/main/v1.2.0/llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz
+wget https://huggingface.co/waqasm86/llamatelemetry-binaries/resolve/main/v2.0.0/llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz
 ```
 
 ### Verify Checksum
 
 ```bash
 # Download checksum file
-wget https://huggingface.co/waqasm86/llamatelemetry-binaries/resolve/main/v1.2.0/llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz.sha256
+wget https://huggingface.co/waqasm86/llamatelemetry-binaries/resolve/main/v2.0.0/llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz.sha256
 
 # Verify
-sha256sum -c llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz.sha256
+sha256sum -c llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz.sha256
 ```
 
 ## 📊 Build Information
 
 | Property | Value |
 |----------|-------|
-| **Version** | 1.2.0 |
+| **Version** | 2.0.0 |
 | **CUDA Version** | 12.5 |
 | **Compute Capability** | SM 7.5 (Tesla T4) |
 | **llama.cpp Version** | b7760 (commit 388ce82) |
@@ -107,7 +107,7 @@ The binary bundle contains:
 ## 🔗 Links
 
 - **GitHub Repository**: https://github.com/llamatelemetry/llamatelemetry
-- **GitHub Releases**: https://github.com/llamatelemetry/llamatelemetry/releases/tag/v1.2.0
+- **GitHub Releases**: https://github.com/llamatelemetry/llamatelemetry/releases/tag/v2.0.0
 - **Installation Guide**: [KAGGLE_INSTALL_GUIDE.md](https://github.com/llamatelemetry/llamatelemetry/blob/main/docs/guides/KAGGLE_INSTALL_GUIDE.md)
 - **Models Repository**: https://huggingface.co/waqasm86/llamatelemetry-models
 - **Documentation**: https://llamatelemetry.github.io (planned)
@@ -151,13 +151,13 @@ GPU Info: {'gpu_name': 'Tesla T4', 'cuda_version': '12.5', 'compute_capability':
 
 ### Incompatible GPU Error
 
-llamatelemetry v1.2.0 requires Tesla T4 (SM 7.5) or newer. If you see "GPU compute capability < 7.5", you're running on an incompatible GPU.
+llamatelemetry v2.0.0 requires Tesla T4 (SM 7.5) or newer. If you see "GPU compute capability < 7.5", you're running on an incompatible GPU.
 
 **Solution**: Use Kaggle with "GPU T4 × 2" accelerator setting.
 
 ---
 
 **Maintained by**: [waqasm86](https://huggingface.co/waqasm86)  
-**Version**: 1.2.0  
+**Version**: 2.0.0  
 **Last Updated**: 2026-02-03  
 **Status**: Active Development

@@ -1,9 +1,9 @@
 #!/bin/bash
 ################################################################################
-# Build CUDA 12 Binary Bundle for llamatelemetry v1.2.0
+# Build CUDA 12 Binary Bundle for llamatelemetry v2.0.0
 #
 # Target: Kaggle dual Tesla T4 (SM 7.5, CUDA 12)
-# Output: llamatelemetry-v1.2.0-cuda12-kaggle-t4x2.tar.gz
+# Output: llamatelemetry-v2.0.0-cuda12-kaggle-t4x2.tar.gz
 #
 # REQUIREMENTS:
 #   - CUDA 12.x toolkit (nvcc)
@@ -16,8 +16,8 @@
 # a CUDA toolkit (e.g., GeForce 940M dev machine).
 #
 # Usage:
-#   chmod +x scripts/build_v1.2.0_cuda_binary.sh
-#   ./scripts/build_v1.2.0_cuda_binary.sh [LLAMA_CPP_DIR]
+#   chmod +x scripts/build_v2.0.0_cuda_binary.sh
+#   ./scripts/build_v2.0.0_cuda_binary.sh [LLAMA_CPP_DIR]
 #
 # Arguments:
 #   LLAMA_CPP_DIR  Path to llama.cpp source (default: ../llama.cpp)

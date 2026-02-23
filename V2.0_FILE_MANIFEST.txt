@@ -233,7 +233,7 @@ VERIFICATION STATUS
 OVERALL: 6/7 verifications passing (1 is path-local only issue)
 
 ================================================================================
-ARCHIVED FILES (v1.2.0)
+ARCHIVED FILES (v2.0.0)
 ================================================================================
 
 Location: archive/v2.0_migration/
@@ -258,7 +258,7 @@ PROJECT STATISTICS
 Python Files:        18 (v2.0 implementation)
 Documentation:       6 files
 Examples:            4 complete working examples
-Archived Files:      36 (v1.2.0 backward compat)
+Archived Files:      36 (v2.0.0 backward compat)
 
 Lines of Code (v2.0 Python):
   - llama_cpp_native/:    ~1200 lines

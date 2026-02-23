@@ -9,7 +9,7 @@
 
 ## Overview
 
-This guide integrates the proven Kaggle build strategy from the existing notebooks (v0.1.0, v1.2.0, v2.2.0) with LlamaTelemetry v2.0's Python APIs to create complete native C++ bindings.
+This guide integrates the proven Kaggle build strategy from the existing notebooks (v0.1.0, v2.0.0, v2.2.0) with LlamaTelemetry v2.0's Python APIs to create complete native C++ bindings.
 
 **Output**: Native pybind11 shared library (`_llamatelemetry_cpp.so`) + LlamaTelemetry wheel package
 
