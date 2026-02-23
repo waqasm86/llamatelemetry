@@ -39,7 +39,7 @@ classifiers = [
     "Environment :: GPU :: NVIDIA CUDA :: 12",
 ]
 
-# Streamlined core dependencies for v1.2.0
+# Core dependencies for v2.0.0 (Kaggle Dual T4 focus)
 dependencies = [
     "opentelemetry-api>=1.20.0",
     "opentelemetry-sdk>=1.20.0",
